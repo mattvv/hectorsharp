@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp", "HectorSharp\HectorSharp.csproj", "{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

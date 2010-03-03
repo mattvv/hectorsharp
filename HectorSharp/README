@@ -1,0 +1,18 @@
+﻿A high level cassandra C#/.NET client ported from Java
+Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
+Hector is the greatest warrior in the greek mithology, Troy's builder and brother of Cassandra
+http://en.wikipedia.org/wiki/Hector
+http://en.wikipedia.org/wiki/Cassandra
+
+
+This client provides:
+
+ o high level, simple object oriented interface to cassandra
+ o failover behavior on the client side
+ o connection pooling for improved performance and scalability
+ o load balancing
+
+The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different 
+directions since.
+
+The original Java version of this port is available at http://github.com/rantav/hector

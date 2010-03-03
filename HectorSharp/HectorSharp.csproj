@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HectorSharp</RootNamespace>
+    <AssemblyName>HectorSharp</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Dao\Command.cs" />
+    <Compile Include="Dao\ExampleDAO.cs" />
+    <Compile Include="lib\Apache\Cassandra\Cassandra.cs" />
+    <Compile Include="lib\Apache\Cassandra\Column.cs" />
+    <Compile Include="lib\Apache\Cassandra\ColumnOrSuperColumn.cs" />
+    <Compile Include="lib\Apache\Cassandra\ColumnParent.cs" />
+    <Compile Include="lib\Apache\Cassandra\ColumnPath.cs" />
+    <Compile Include="lib\Apache\Cassandra\ConsistencyLevel.cs" />
+    <Compile Include="lib\Apache\Cassandra\Constants.cs" />
+    <Compile Include="lib\Apache\Cassandra\InvalidRequestException.cs" />
+    <Compile Include="lib\Apache\Cassandra\KeySlice.cs" />
+    <Compile Include="lib\Apache\Cassandra\NotFoundException.cs" />
+    <Compile Include="lib\Apache\Cassandra\SlicePredicate.cs" />
+    <Compile Include="lib\Apache\Cassandra\SliceRange.cs" />
+    <Compile Include="lib\Apache\Cassandra\SuperColumn.cs" />
+    <Compile Include="lib\Apache\Cassandra\TimedOutException.cs" />
+    <Compile Include="lib\Apache\Cassandra\UnavailableException.cs" />
+    <Compile Include="lib\InetAddress.cs" />
+    <Compile Include="lib\Thrift\Collections\THashSet.cs" />
+    <Compile Include="lib\Thrift\Protocol\TBase.cs" />
+    <Compile Include="lib\Thrift\Protocol\TBinaryProtocol.cs" />
+    <Compile Include="lib\Thrift\Protocol\TField.cs" />
+    <Compile Include="lib\Thrift\Protocol\TList.cs" />
+    <Compile Include="lib\Thrift\Protocol\TMap.cs" />
+    <Compile Include="lib\Thrift\Protocol\TMessage.cs" />
+    <Compile Include="lib\Thrift\Protocol\TMessageType.cs" />
+    <Compile Include="lib\Thrift\Protocol\TProtocol.cs" />
+    <Compile Include="lib\Thrift\Protocol\TProtocolException.cs" />
+    <Compile Include="lib\Thrift\Protocol\TProtocolFactory.cs" />
+    <Compile Include="lib\Thrift\Protocol\TProtocolUtil.cs" />
+    <Compile Include="lib\Thrift\Protocol\TSet.cs" />
+    <Compile Include="lib\Thrift\Protocol\TStruct.cs" />
+    <Compile Include="lib\Thrift\Protocol\TType.cs" />
+    <Compile Include="lib\Thrift\Server\TServer.cs" />
+    <Compile Include="lib\Thrift\Server\TSimpleServer.cs" />
+    <Compile Include="lib\Thrift\Server\TThreadedServer.cs" />
+    <Compile Include="lib\Thrift\Server\TThreadPoolServer.cs" />
+    <Compile Include="lib\Thrift\TApplicationException.cs" />
+    <Compile Include="lib\Thrift\TProcessor.cs" />
+    <Compile Include="lib\Thrift\Transport\TBufferedTransport.cs" />
+    <Compile Include="lib\Thrift\Transport\TFramedTransport.cs" />
+    <Compile Include="lib\Thrift\Transport\TServerSocket.cs" />
+    <Compile Include="lib\Thrift\Transport\TServerTransport.cs" />
+    <Compile Include="lib\Thrift\Transport\TSocket.cs" />
+    <Compile Include="lib\Thrift\Transport\TStreamTransport.cs" />
+    <Compile Include="lib\Thrift\Transport\TTransport.cs" />
+    <Compile Include="lib\Thrift\Transport\TTransportException.cs" />
+    <Compile Include="lib\Thrift\Transport\TTransportFactory.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\CassandraClient.cs" />
+    <Compile Include="Service\CassandraClientFactory.cs" />
+    <Compile Include="Service\CassandraClientImpl.cs" />
+    <Compile Include="Service\CassandraClientMonitor.cs" />
+    <Compile Include="Service\CassandraClientMonitorMBean.cs" />
+    <Compile Include="Service\CassandraClientPool.cs" />
+    <Compile Include="Service\CassandraClientPoolByHost.cs" />
+    <Compile Include="Service\CassandraClientPoolByHostImpl.cs" />
+    <Compile Include="Service\CassandraClientPoolFactory.cs" />
+    <Compile Include="Service\CassandraClientPoolImpl.cs" />
+    <Compile Include="Service\ExampleClient.cs" />
+    <Compile Include="Service\Keyspace.cs" />
+    <Compile Include="Service\KeyspaceFactory.cs" />
+    <Compile Include="Service\KeyspaceImpl.cs" />
+    <Compile Include="Service\PoolExhaustedException.cs" />
+    <Compile Include="Utils\ConcurrentDictionary.cs" />
+    <Compile Include="Utils\StringUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lib\Thrift\Thrift.csproj" />
+    <Content Include="lib\Thrift\Thrift.sln" />
+    <None Include="LICENSE" />
+    <None Include="README" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
