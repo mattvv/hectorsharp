@@ -177,6 +177,6 @@ namespace HectorSharp.Service
         /**
          * @return The failover policy used by this keyspace.
          */
-        FailoverPolicy getFailoverPolicy();
+        CassandraClient.FailoverPolicy getFailoverPolicy();
     }
 }

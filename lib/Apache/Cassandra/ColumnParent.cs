@@ -15,120 +15,139 @@ using Thrift.Transport;
 namespace Apache.Cassandra
 {
 
-  [Serializable]
-  public partial class ColumnParent : TBase
-  {
-    private string column_family;
-    private byte[] super_column;
-
-    public string Column_family
-    {
-      get
-      {
-        return column_family;
-      }
-      set
-      {
-        __isset.column_family = true;
-        this.column_family = value;
-      }
-    }
-
-    public byte[] Super_column
-    {
-      get
-      {
-        return super_column;
-      }
-      set
-      {
-        __isset.super_column = true;
-        this.super_column = value;
-      }
-    }
-
-
-    public Isset __isset;
     [Serializable]
-    public struct Isset {
-      public bool column_family;
-      public bool super_column;
-    }
-
-    public ColumnParent() {
-    }
-
-    public void Read (TProtocol iprot)
+    public partial class ColumnParent : TBase
     {
-      TField field;
-      iprot.ReadStructBegin();
-      while (true)
-      {
-        field = iprot.ReadFieldBegin();
-        if (field.Type == TType.Stop) { 
-          break;
-        }
-        switch (field.ID)
+        private string column_family;
+        private byte[] super_column;
+
+        public string Column_family
         {
-          case 3:
-            if (field.Type == TType.String) {
-              this.column_family = iprot.ReadString();
-              this.__isset.column_family = true;
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
+            get
+            {
+                return column_family;
             }
-            break;
-          case 4:
-            if (field.Type == TType.String) {
-              this.super_column = iprot.ReadBinary();
-              this.__isset.super_column = true;
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
+            set
+            {
+                __isset.column_family = true;
+                this.column_family = value;
             }
-            break;
-          default: 
-            TProtocolUtil.Skip(iprot, field.Type);
-            break;
         }
-        iprot.ReadFieldEnd();
-      }
-      iprot.ReadStructEnd();
-    }
 
-    public void Write(TProtocol oprot) {
-      TStruct struc = new TStruct("ColumnParent");
-      oprot.WriteStructBegin(struc);
-      TField field = new TField();
-      if (this.column_family != null && __isset.column_family) {
-        field.Name = "column_family";
-        field.Type = TType.String;
-        field.ID = 3;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteString(this.column_family);
-        oprot.WriteFieldEnd();
-      }
-      if (this.super_column != null && __isset.super_column) {
-        field.Name = "super_column";
-        field.Type = TType.String;
-        field.ID = 4;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteBinary(this.super_column);
-        oprot.WriteFieldEnd();
-      }
-      oprot.WriteFieldStop();
-      oprot.WriteStructEnd();
-    }
+        public byte[] Super_column
+        {
+            get
+            {
+                return super_column;
+            }
+            set
+            {
+                __isset.super_column = true;
+                this.super_column = value;
+            }
+        }
 
-    public override string ToString() {
-      StringBuilder sb = new StringBuilder("ColumnParent(");
-      sb.Append("column_family: ");
-      sb.Append(this.column_family);
-      sb.Append(",super_column: ");
-      sb.Append(this.super_column);
-      sb.Append(")");
-      return sb.ToString();
-    }
 
-  }
+        public Isset __isset;
+        [Serializable]
+        public struct Isset
+        {
+            public bool column_family;
+            public bool super_column;
+        }
+
+        public ColumnParent()
+        {
+        }
+
+        public ColumnParent(string column_family, byte[] super_column)
+        {
+            Column_family = column_family;
+            Super_column = super_column;
+        }
+
+        public void Read(TProtocol iprot)
+        {
+            TField field;
+            iprot.ReadStructBegin();
+            while (true)
+            {
+                field = iprot.ReadFieldBegin();
+                if (field.Type == TType.Stop)
+                {
+                    break;
+                }
+                switch (field.ID)
+                {
+                    case 3:
+                        if (field.Type == TType.String)
+                        {
+                            this.column_family = iprot.ReadString();
+                            this.__isset.column_family = true;
+                        }
+                        else
+                        {
+                            TProtocolUtil.Skip(iprot, field.Type);
+                        }
+                        break;
+                    case 4:
+                        if (field.Type == TType.String)
+                        {
+                            this.super_column = iprot.ReadBinary();
+                            this.__isset.super_column = true;
+                        }
+                        else
+                        {
+                            TProtocolUtil.Skip(iprot, field.Type);
+                        }
+                        break;
+                    default:
+                        TProtocolUtil.Skip(iprot, field.Type);
+                        break;
+                }
+                iprot.ReadFieldEnd();
+            }
+            iprot.ReadStructEnd();
+        }
+
+        public void Write(TProtocol oprot)
+        {
+            TStruct struc = new TStruct("ColumnParent");
+            oprot.WriteStructBegin(struc);
+            TField field = new TField();
+            if (this.column_family != null && __isset.column_family)
+            {
+                field.Name = "column_family";
+                field.Type = TType.String;
+                field.ID = 3;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteString(this.column_family);
+                oprot.WriteFieldEnd();
+            }
+            if (this.super_column != null && __isset.super_column)
+            {
+                field.Name = "super_column";
+                field.Type = TType.String;
+                field.ID = 4;
+                oprot.WriteFieldBegin(field);
+                oprot.WriteBinary(this.super_column);
+                oprot.WriteFieldEnd();
+            }
+            oprot.WriteFieldStop();
+            oprot.WriteStructEnd();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder("ColumnParent(");
+            sb.Append("column_family: ");
+            sb.Append(this.column_family);
+            sb.Append(",super_column: ");
+            sb.Append(this.super_column);
+            sb.Append(")");
+            return sb.ToString();
+        }
+
+    }
 
 }

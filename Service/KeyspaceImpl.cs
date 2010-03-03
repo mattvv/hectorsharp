@@ -13,37 +13,28 @@ namespace HectorSharp.Service
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-class KeyspaceImpl : Keyspace {
+
+	class KeyspaceImpl : Keyspace {
  
   //private static sealed Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
  
   CassandraClient client;
- 
-  /** The cassandra thrift proxy */
-  Cassandra.Client cassandra;
- 
-  sealed String keyspaceName;
- 
+  Cassandra.Client cassandra; // The cassandra thrift proxy
   sealed Dictionary<String, Dictionary<String, String>> keyspaceDesc;
- 
   sealed int consistency;
- 
   sealed FailoverPolicy failoverPolicy;
- 
   /** List of all known remote cassandra nodes */
   List<String> knownHosts = new List<String>();
- 
   sealed CassandraClientPool clientPools;
- 
-  sealed CassandraClientMonitor monitor;
- 
-  public KeyspaceImpl(CassandraClient client, String keyspaceName,
+ sealed CassandraClientMonitor monitor;
+
+        public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Dictionary<String, Dictionary<String, String>> keyspaceDesc, int consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor){
     this.client = client;
     this.consistency = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
-    this.keyspaceName = keyspaceName;
+    this.Name = keyspaceName;
     this.cassandra = client.getCassandra();
     this.failoverPolicy = failoverPolicy;
     this.clientPools = clientPools;
@@ -57,7 +48,7 @@ class KeyspaceImpl : Keyspace {
       throw new Exception("columnMap and SuperColumnMap can not be null at same time");
     }
  
-    int size = (columnMap == null ? 0 : columnMap.size()) + (columnMap == null ? 0 : columnMap.size());
+    int size = (columnMap == null ? 0 : columnMap.Count) + (columnMap == null ? 0 : columnMap.Count());
     Dictionary<String, List<ColumnOrSuperColumn>> cfmap = new Dictionary<String, List<ColumnOrSuperColumn>>(size * 2);
  
     if (columnMap != null) {
@@ -72,6 +63,8 @@ class KeyspaceImpl : Keyspace {
       }
     }
  
+	  //todo: fix Operation execute event
+	  /*
     Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL)
     {
       //Override
@@ -80,12 +73,14 @@ class KeyspaceImpl : Keyspace {
         return null;
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(op);*/
   }
  
   //Override
-  public int getCount(final String key, final ColumnParent columnParent)
+  public int getCount(String key, ColumnParent columnParent)
     {
+	  //todo: fix Operation execute event
+	  /*
     Operation<Integer> op = new Operation<Integer>(Counter.READ_FAIL) {
       //Override
       public int execute(Client cassandra) {
@@ -93,297 +88,325 @@ class KeyspaceImpl : Keyspace {
       }
     };
     operateWithFailover(op);
-    return op.getResult();
+    return op.getResult();*/
+	  return 0;
   }
  
   //Override
-  public Map<String, List<Column>> getRangeSlice(sealed ColumnParent columnParent,
-      sealed SlicePredicate predicate, sealed String start, sealed String finish, sealed int count)
+  public Dictionary<String, List<Column>> getRangeSlice(ColumnParent columnParent,
+      SlicePredicate predicate, String start, String finish, int count)
       {
-    Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
-        Counter.READ_FAIL) {
-      @Override
-      public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
-            start, finish, count, consistency);
-        if (keySlices == null || keySlices.isEmpty()) {
-          return Collections.emptyMap();
-        }
-        Map<String, List<Column>> ret = new HashMap<String, List<Column>>(keySlices.size());
-        for (KeySlice keySlice : keySlices) {
-          ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
-        }
-        return ret;
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
+    //Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
+    //    Counter.READ_FAIL) {
+    //  @Override
+    //  public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
+    //      UnavailableException, TException, TimedOutException {
+    //    List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
+    //        start, finish, count, consistency);
+    //    if (keySlices == null || keySlices.isEmpty()) {
+    //      return Collections.emptyMap();
+    //    }
+    //    Map<String, List<Column>> ret = new HashMap<String, List<Column>>(keySlices.size());
+    //    for (KeySlice keySlice : keySlices) {
+    //      ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
+    //    }
+    //    return ret;
+    //  }
+    //};
+    //operateWithFailover(op);
+    //return op.getResult();
+      return new Dictionary<string,List<Column>>();
   }
  
   //Override
-  public Map<String, List<SuperColumn>> getSuperRangeSlice(final ColumnParent columnParent,
-      final SlicePredicate predicate, final String start, final String finish, final int count)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
-        Counter.READ_FAIL) {
-      @Override
-      public Map<String, List<SuperColumn>> execute(Client cassandra)
-          throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
-            start, finish, count, consistency);
-        if (keySlices == null || keySlices.isEmpty()) {
-          return Collections.emptyMap();
-        }
-        Map<String, List<SuperColumn>> ret = new HashMap<String, List<SuperColumn>>(
-            keySlices.size());
-        for (KeySlice keySlice : keySlices) {
-          ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
-        }
-        return ret;
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
+  public Dictionary<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent,
+      SlicePredicate predicate, String start, String finish, int count)
+     // throws InvalidRequestException, UnavailableException, TException, TimedOutException 
+      {
+    //Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
+    //    Counter.READ_FAIL) {
+    //  @Override
+    //  public Map<String, List<SuperColumn>> execute(Client cassandra)
+    //      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    //    List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
+    //        start, finish, count, consistency);
+    //    if (keySlices == null || keySlices.isEmpty()) {
+    //      return Collections.emptyMap();
+    //    }
+    //    Map<String, List<SuperColumn>> ret = new HashMap<String, List<SuperColumn>>(
+    //        keySlices.size());
+    //    for (KeySlice keySlice : keySlices) {
+    //      ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
+    //    }
+    //    return ret;
+    //  }
+    //};
+    //operateWithFailover(op);
+    //return op.getResult();
+      return new Dictionary<string,List<SuperColumn>>();
   }
  
   //Override
-  public List<Column> getSlice(final String key, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
-      UnavailableException, TException, TimedOutException {
-    Operation<List<Column>> op = new Operation<List<Column>>(Counter.READ_FAIL) {
-      @Override
-      public List<Column> execute(Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
-            predicate, consistency);
+  public List<Column> getSlice(String key, ColumnParent columnParent,
+      SlicePredicate predicate) 
+      //throws InvalidRequestException, NotFoundException,
+      //UnavailableException, TException, TimedOutException
+      {
+    //Operation<List<Column>> op = new Operation<List<Column>>(Counter.READ_FAIL) {
+    //  @Override
+    //  public List<Column> execute(Client cassandra) throws InvalidRequestException,
+    //      UnavailableException, TException, TimedOutException {
+    //    List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
+    //        predicate, consistency);
  
-        if (cosclist == null) {
-          return null;
-        }
-        ArrayList<Column> result = new ArrayList<Column>(cosclist.size());
-        for (ColumnOrSuperColumn cosc : cosclist) {
-          result.add(cosc.getColumn());
-        }
-        return result;
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
+    //    if (cosclist == null) {
+    //      return null;
+    //    }
+    //    ArrayList<Column> result = new ArrayList<Column>(cosclist.size());
+    //    for (ColumnOrSuperColumn cosc : cosclist) {
+    //      result.add(cosc.getColumn());
+    //    }
+    //    return result;
+    //  }
+    //};
+    //operateWithFailover(op);
+    //return op.getResult();
+      return new List<Column>();
   }
  
   //Override
   public SuperColumn getSuperColumn(String key, ColumnPath columnPath)
-      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
-      TimedOutException {
-    return getSuperColumn(key, columnPath, false, Integer.MAX_VALUE);
+      //throws InvalidRequestException, NotFoundException, UnavailableException, TException,
+      //TimedOutException 
+      {
+    return getSuperColumn(key, columnPath, false, Int32.MaxValue);
   }
  
   //Override
-  public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath,
-      final boolean reversed, final int size) throws InvalidRequestException, NotFoundException,
-      UnavailableException, TException, TimedOutException {
-    valideSuperColumnPath(columnPath);
-    final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
-    Operation<SuperColumn> op = new Operation<SuperColumn>(Counter.READ_FAIL) {
-      @Override
-      public SuperColumn execute(Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        ColumnParent clp = new ColumnParent(columnPath.getColumn_family(),
-            columnPath.getSuper_column());
-        SlicePredicate sp = new SlicePredicate(null, sliceRange);
-        List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
-            consistency);
-        return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
+  public SuperColumn getSuperColumn(String key, ColumnPath columnPath,
+      bool reversed, int size) 
+      //throws InvalidRequestException, NotFoundException,
+      //UnavailableException, TException, TimedOutException 
+  {
+    //valideSuperColumnPath(columnPath);
+    SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
+
+    //Operation<SuperColumn> op = new Operation<SuperColumn>(Counter.READ_FAIL) {
+    //  @Override
+    //  public SuperColumn execute(Client cassandra) throws InvalidRequestException,
+    //      UnavailableException, TException, TimedOutException {
+    //    ColumnParent clp = new ColumnParent(columnPath.getColumn_family(),
+    //        columnPath.getSuper_column());
+    //    SlicePredicate sp = new SlicePredicate(null, sliceRange);
+    //    List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
+    //        consistency);
+    //    return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
+    //  }
+    //};
+    //operateWithFailover(op);
+    //return op.getResult();
+      return new SuperColumn();
   }
  
   //Override
-  public List<SuperColumn> getSuperSlice(final String key, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
-      UnavailableException, TException, TimedOutException {
-    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(Counter.READ_FAIL) {
-      @Override
-      public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
-            predicate, consistency);
-        if (cosclist == null) {
-          return null;
-        }
-        ArrayList<SuperColumn> result = new ArrayList<SuperColumn>(cosclist.size());
-        for (ColumnOrSuperColumn cosc : cosclist) {
-          result.add(cosc.getSuper_column());
-        }
-        return result;
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
+  public List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
+      SlicePredicate predicate) 
+      //throws InvalidRequestException, NotFoundException,
+      //UnavailableException, TException, TimedOutException 
+  {
+    //Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(Counter.READ_FAIL) {
+    //  @Override
+    //  public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
+    //      UnavailableException, TException, TimedOutException {
+    //    List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
+    //        predicate, consistency);
+    //    if (cosclist == null) {
+    //      return null;
+    //    }
+    //    ArrayList<SuperColumn> result = new ArrayList<SuperColumn>(cosclist.size());
+    //    for (ColumnOrSuperColumn cosc : cosclist) {
+    //      result.add(cosc.getSuper_column());
+    //    }
+    //    return result;
+    //  }
+    //};
+    //operateWithFailover(op);
+    //return op.getResult();
+      return new List<SuperColumn>();
   }
  
   //Override
-  public void insert(final String key, final ColumnPath columnPath, final byte[] value)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    valideColumnPath(columnPath);
-    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
-      @Override
-      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
-          TException, TimedOutException {
-        cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistency);
-        return null;
-      }
-    };
-    operateWithFailover(op);
+  public void insert(String key, ColumnPath columnPath, byte[] value)
+   //   throws InvalidRequestException, UnavailableException, TException, TimedOutException
+  {
+    //valideColumnPath(columnPath);
+    //Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
+    //  @Override
+    //  public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+    //      TException, TimedOutException {
+    //    cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistency);
+    //    return null;
+    //  }
+    //};
+    //operateWithFailover(op);
   }
  
   //Override
-  public Map<String, Column> multigetColumn(final List<String> keys, final ColumnPath columnPath)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    valideColumnPath(columnPath);
+  public Dictionary<String, Column> multigetColumn(List<String> keys, ColumnPath columnPath)
+     // throws InvalidRequestException, UnavailableException, TException, TimedOutException 
+  {
+    //valideColumnPath(columnPath);
  
-    Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(Counter.READ_FAIL) {
-      @Override
-      public Map<String, Column> execute(Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspaceName, keys, columnPath,
-            consistency);
-        if (cfmap == null || cfmap.isEmpty()) {
-          return Collections.emptyMap();
-        }
-        Map<String, Column> result = new HashMap<String, Column>();
-        for (Map.Entry<String, ColumnOrSuperColumn> entry : cfmap.entrySet()) {
-          result.put(entry.getKey(), entry.getValue().getColumn());
-        }
-        return result;
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
+    //Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(Counter.READ_FAIL) {
+    //  @Override
+    //  public Map<String, Column> execute(Client cassandra) throws InvalidRequestException,
+    //      UnavailableException, TException, TimedOutException {
+    //    Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspaceName, keys, columnPath,
+    //        consistency);
+    //    if (cfmap == null || cfmap.isEmpty()) {
+    //      return Collections.emptyMap();
+    //    }
+    //    Map<String, Column> result = new HashMap<String, Column>();
+    //    for (Map.Entry<String, ColumnOrSuperColumn> entry : cfmap.entrySet()) {
+    //      result.put(entry.getKey(), entry.getValue().getColumn());
+    //    }
+    //    return result;
+    //  }
+    //};
+    //operateWithFailover(op);
+    //return op.getResult();
+      return new Dictionary<string,Column>();
   }
  
   //Override
-  public Map<String, List<Column>> multigetSlice(final List<String> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
-        Counter.READ_FAIL) {
-      @Override
-      public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
-            columnParent, predicate, consistency);
+  public Dictionary<String, List<Column>> multigetSlice( List<String> keys,
+       ColumnParent columnParent,  SlicePredicate predicate)
+     // throws InvalidRequestException, UnavailableException, TException, TimedOutException 
+  {
+    //Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
+    //    Counter.READ_FAIL) {
+    //  @Override
+    //  public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
+    //      UnavailableException, TException, TimedOutException {
+    //    Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
+    //        columnParent, predicate, consistency);
  
-        Map<String, List<Column>> result = new HashMap<String, List<Column>>();
-        for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-          result.put(entry.getKey(), getColumnList(entry.getValue()));
-        }
-        return result;
-      }
-    };
-    operateWithFailover(getCount);
-    return getCount.getResult();
+    //    Map<String, List<Column>> result = new HashMap<String, List<Column>>();
+    //    for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+    //      result.put(entry.getKey(), getColumnList(entry.getValue()));
+    //    }
+    //    return result;
+    //  }
+    //};
+    //operateWithFailover(getCount);
+    //return getCount.getResult();
+      return new Dictionary<string,List<Column>>();
  
   }
  
   //Override
-  public Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    return multigetSuperColumn(keys, columnPath, false, Integer.MAX_VALUE);
+  public Dictionary<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath)
+      //throws InvalidRequestException, UnavailableException, TException, TimedOutException 
+  {
+    return multigetSuperColumn(keys, columnPath, false, Int32.MaxValue);
   }
  
   //Override
-  public Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath,
-      boolean reversed, int size) throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException {
-    valideSuperColumnPath(columnPath);
+  public Dictionary<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath,
+      bool reversed, int size)
+      ///throws InvalidRequestException, UnavailableException, TException, TimedOutException 
+   {
+    //valideSuperColumnPath(columnPath);
  
     // only can get supercolumn by multigetSuperSlice
-    ColumnParent clp = new ColumnParent(columnPath.getColumn_family(), columnPath.getSuper_column());
+    ColumnParent clp = new ColumnParent(columnPath.Column_family, columnPath.Super_column);
     SliceRange sr = new SliceRange(new byte[0], new byte[0], reversed, size);
     SlicePredicate sp = new SlicePredicate(null, sr);
-    Map<String, List<SuperColumn>> sclist = multigetSuperSlice(keys, clp, sp);
+    var sclist = multigetSuperSlice(keys, clp, sp);
  
-    if (sclist == null || sclist.isEmpty()) {
-      return Collections.emptyMap();
+    if (sclist == null || sclist.Count == 0) {
+      return new Dictionary<string,SuperColumn>();
     }
  
-    HashMap<String, SuperColumn> result = new HashMap<String, SuperColumn>(keys.size() * 2);
-    for (Map.Entry<String, List<SuperColumn>> entry : sclist.entrySet()) {
-      List<SuperColumn> sclistByKey = entry.getValue();
-      if (sclistByKey.size() > 0) {
-        result.put(entry.getKey(), sclistByKey.get(0));
-      }
+    var result = new Dictionary<String, SuperColumn>();
+    foreach (var entry in sclist) 
+    {
+      var sclistByKey = entry.Value;
+      if (sclistByKey.Count > 0)
+        result.Add(entry.Key, sclistByKey[0]);
     }
     return result;
   }
  
   //Override
-  public Map<String, List<SuperColumn>> multigetSuperSlice(final List<String> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
-        Counter.READ_FAIL) {
-      @Override
-      public Map<String, List<SuperColumn>> execute(Client cassandra)
-          throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
-            columnParent, predicate, consistency);
+  public Dictionary<String, List<SuperColumn>> multigetSuperSlice(List<String> keys,
+      ColumnParent columnParent, SlicePredicate predicate)
+      //throws InvalidRequestException, UnavailableException, TException, TimedOutException 
+  {
+    //Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
+    //    Counter.READ_FAIL) {
+    //  @Override
+    //  public Map<String, List<SuperColumn>> execute(Client cassandra)
+    //      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    //    Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
+    //        columnParent, predicate, consistency);
  
-        // if user not given super column name, the multiget_slice will return
-        // List
-        // filled with
-        // super column, if user given a column name, the return List will
-        // filled
-        // with column,
-        // this is a bad interface design.
-        if (columnParent.getSuper_column() == null) {
-          Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
-          for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-            result.put(entry.getKey(), getSuperColumnList(entry.getValue()));
-          }
-          return result;
-        } else {
-          Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
-          for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-            SuperColumn spc = new SuperColumn(columnParent.getSuper_column(),
-                getColumnList(entry.getValue()));
-            ArrayList<SuperColumn> spclist = new ArrayList<SuperColumn>(1);
-            spclist.add(spc);
-            result.put(entry.getKey(), spclist);
-          }
-          return result;
-        }
-      }
-    };
-    operateWithFailover(getCount);
-    return getCount.getResult();
- 
+    //    // if user not given super column name, the multiget_slice will return
+    //    // List
+    //    // filled with
+    //    // super column, if user given a column name, the return List will
+    //    // filled
+    //    // with column,
+    //    // this is a bad interface design.
+    //    if (columnParent.getSuper_column() == null) {
+    //      Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
+    //      for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+    //        result.put(entry.getKey(), getSuperColumnList(entry.getValue()));
+    //      }
+    //      return result;
+    //    } else {
+    //      Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
+    //      for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+    //        SuperColumn spc = new SuperColumn(columnParent.getSuper_column(),
+    //            getColumnList(entry.getValue()));
+    //        ArrayList<SuperColumn> spclist = new ArrayList<SuperColumn>(1);
+    //        spclist.add(spc);
+    //        result.put(entry.getKey(), spclist);
+    //      }
+    //      return result;
+    //    }
+    //  }
+    //};
+    //operateWithFailover(getCount);
+    //return getCount.getResult();
+    return new Dictionary<string,List<SuperColumn>>();
   }
  
   //Override
-  public void remove(final String key, final ColumnPath columnPath) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
-    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
-      @Override
-      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
-          TException, TimedOutException {
-        cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistency);
-        return null;
-      }
-    };
-    operateWithFailover(op);
+  public void remove(String key, ColumnPath columnPath) 
+      //throws InvalidRequestException,
+      //UnavailableException, TException, TimedOutException 
+  {
+    //Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
+    //  @Override
+    //  public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+    //      TException, TimedOutException {
+    //    cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistency);
+    //    return null;
+    //  }
+    //};
+    //operateWithFailover(op);
  
   }
  
   //Override
   public String getName() {
-    return keyspaceName;
+    return Name;
   }
- 
+  
+  public string Name { get; private set; }
+
+
   //Override
   public Map<String, Map<String, String>> describeKeyspace() throws NotFoundException, TException {
     return keyspaceDesc;
@@ -685,7 +708,8 @@ class KeyspaceImpl : Keyspace {
    *
    *          Oh closures, how I wish you were here...
    */
-  private abstract static class Operation<T> {
+  abstract static class Operation<T> 
+{
  
     /** Counts failed attempts */
     protected final Counter failCounter;

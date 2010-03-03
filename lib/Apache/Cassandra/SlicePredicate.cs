@@ -21,6 +21,17 @@ namespace Apache.Cassandra
     private List<byte[]> column_names;
     private SliceRange slice_range;
 
+    public SlicePredicate()
+    { }
+
+    public SlicePredicate(List<byte[]> column_names, SliceRange slice_range)
+    {
+        if (column_names != null && column_names.Count > 0)
+            Column_names = column_names;
+        if (slice_range != null && slice_range.Count > 0)
+            Slice_range = slice_range;
+    }
+
     public List<byte[]> Column_names
     {
       get
@@ -55,8 +66,7 @@ namespace Apache.Cassandra
       public bool slice_range;
     }
 
-    public SlicePredicate() {
-    }
+
 
     public void Read (TProtocol iprot)
     {
