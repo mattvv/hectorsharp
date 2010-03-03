@@ -1,7 +1,7 @@
-﻿
+﻿﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp", "HectorSharp\HectorSharp.csproj", "{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp", "HectorSharp.csproj", "{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
