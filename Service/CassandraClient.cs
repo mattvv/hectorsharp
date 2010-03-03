@@ -113,7 +113,7 @@ namespace HectorSharp.Service
          *  a possibly cached value.
          * @return  a map from tokens to hosts.
          */
-        Map<String, String> getTokenMap(boolean fresh);
+        Dictionary<String, String> getTokenMap(bool fresh);
 
 
         /**
@@ -139,7 +139,7 @@ namespace HectorSharp.Service
 
         bool isClosed();
 
-        Set<String> getKnownHosts();
+        List<String> getKnownHosts();
 
         String getIp();
 
