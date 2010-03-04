@@ -15,7 +15,7 @@ namespace HectorSharp.Service
  * @author Ran Tavory (ran@outbain.com) [ Original Java version ]
  *
  */
- class CassandraClientPoolImpl : CassandraClientPool {
+ class CassandraClientPoolImpl : ICassandraClientPool {
  
   //private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolImpl.class);
   /**
@@ -31,7 +31,7 @@ namespace HectorSharp.Service
   }
  
   //Override
-  public CassandraClient borrowClient(String url, int port)
+  public ICassandraClient borrowClient(String url, int port)
   {
     return getPool(url, port).borrowClient();
   }
@@ -115,7 +115,7 @@ namespace HectorSharp.Service
   }
  
   //Override
-  public void releaseClient(CassandraClient client) {
+  public void releaseClient(ICassandraClient client) {
     getPool(client).releaseClient(client);
   }
  
@@ -187,26 +187,26 @@ namespace HectorSharp.Service
   }
  
   //Override
-  public void invalidateClient(CassandraClient client) {
+  public void invalidateClient(ICassandraClient client) {
     getPool(client).invalidateClient(client);
  
   }
  
-  void reportDestroyed(CassandraClient client) {
+  void reportDestroyed(ICassandraClient client) {
     ((CassandraClientPoolByHostImpl) getPool(client)).reportDestroyed(client);
   }
  
-  private CassandraClientPoolByHost getPool(CassandraClient c) {
+  private CassandraClientPoolByHost getPool(ICassandraClient c) {
     return getPool(c.getUrl(), c.getPort());
   }
  
   //Override
-  public void releaseKeyspace(Keyspace k) {
+  public void releaseKeyspace(IKeyspace k) {
     releaseClient(k.getClient());
   }
  
   //Override
-  public CassandraClient borrowClient(String urlPort) {
+  public ICassandraClient borrowClient(String urlPort) {
     int delim = urlPort.LastIndexOf(':');
     String url = urlPort.Substring(0, delim);
     String strPort = urlPort.Substring(delim + 1, urlPort.Length);
@@ -215,7 +215,7 @@ namespace HectorSharp.Service
   }
  
   //Override
-  public CassandraClient borrowClient(String[] clientUrls) {
+  public ICassandraClient borrowClient(String[] clientUrls) {
     List<String> clients = new List<String>(clientUrls);
     while(!clients.isEmpty()) {
       Random random = new Random();

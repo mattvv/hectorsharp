@@ -6,7 +6,7 @@
 
 namespace Apache.Cassandra
 {
-  public enum ConsistencyLevel
+  public enum ConsistencyLevel : int
   {
     ZERO = 0,
     ONE = 1,

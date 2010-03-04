@@ -34,7 +34,7 @@ namespace HectorSharp.Dao
          * @return
          * @throws Exception
          */
-        public abstract OUTPUT execute(Keyspace ks);
+        public abstract OUTPUT execute(IKeyspace ks);
 
         /**
          * Call this method to run the code within the {@link #execute(Keyspace)} method.
@@ -47,7 +47,7 @@ namespace HectorSharp.Dao
          */
         public sealed OUTPUT execute(String host, int port, String keyspace)
         {
-            Keyspace ks = getPool().borrowClient(host, port).getKeyspace(keyspace);
+            IKeyspace ks = getPool().borrowClient(host, port).getKeyspace(keyspace);
             try
             {
                 return execute(ks);
@@ -58,7 +58,7 @@ namespace HectorSharp.Dao
             }
         }
 
-        protected CassandraClientPool getPool()
+        protected ICassandraClientPool getPool()
         {
             return CassandraClientPoolFactory.INSTANCE.get();
         }

@@ -15,7 +15,7 @@ namespace HectorSharp.Service
 	 *
 	 */
 
-	class KeyspaceImpl : Keyspace
+	class KeyspaceImpl : IKeyspace
 	{
 		// constants
 		public static String CF_TYPE = "Type";
@@ -24,19 +24,19 @@ namespace HectorSharp.Service
 
 		//private static sealed Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
 
-		CassandraClient client;
+		ICassandraClient client;
 		Cassandra.Client cassandra; // The cassandra thrift proxy
 		sealed Dictionary<String, Dictionary<String, String>> keyspaceDesc;
-		sealed int consistency;
+		sealed ConsistencyLevel consistency;
 		sealed FailoverPolicy failoverPolicy;
 		/** List of all known remote cassandra nodes */
 		List<String> knownHosts = new List<String>();
-		sealed CassandraClientPool clientPools;
+		sealed ICassandraClientPool clientPools;
 		sealed CassandraClientMonitor monitor;
 
-		public KeyspaceImpl(CassandraClient client, String keyspaceName,
-	 Dictionary<String, Dictionary<String, String>> keyspaceDesc, int consistencyLevel,
-	 FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
+		public KeyspaceImpl(ICassandraClient client, String keyspaceName,
+	 Dictionary<String, Dictionary<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
+	 FailoverPolicy failoverPolicy, ICassandraClientPool clientPools, CassandraClientMonitor monitor)
 		{
 			this.client = client;
 			this.consistency = consistencyLevel;
@@ -420,7 +420,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public CassandraClient getClient()
+		public ICassandraClient getClient()
 		{
 			return client;
 		}
@@ -567,9 +567,9 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public CassandraClient.FailoverPolicy getFailoverPolicy()
+		public FailoverPolicy FailoverPolicy
 		{
-			return failoverPolicy;
+			get { return failoverPolicy; }
 		}
 
 		/**
@@ -579,7 +579,7 @@ namespace HectorSharp.Service
 		 */
 		private void initFailover()
 		{
-			if (failoverPolicy == CassandraClient.FailoverPolicy.FAIL_FAST)
+			if (failoverPolicy == FailoverPolicy.FAIL_FAST)
 			{
 				knownHosts.Clear();
 				knownHosts.Add(client.getUrl());
@@ -633,7 +633,7 @@ namespace HectorSharp.Service
 				clientPools.invalidateClient(client);
 				client.removeKeyspace(this);
 			}
-			catch (Exception e)
+			catch// (Exception e)
 			{
 				//log.error("Unable to invalidate client {}. Will continue anyhow.", client);
 			}

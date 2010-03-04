@@ -2,152 +2,243 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Apache.Cassandra;
 using HectorSharp.Service;
+using HectorSharp.Utils;
 using Thrift;
+using Apache.Cassandra;
 
 namespace HectorSharp.Service
 {
-    /**
-     * Client object, a high level handle to the remove cassandra service.
-     * <p>
-     * From a client you can obtain a Keyspace. A keyspace lets you write/read the remote cassandra.
-     * <p>
-     * Thread safely: The client is not thread safe, do not share it between threads!
-     *
-     * @author mattvv
-     * @author rantav (Original Java Version)
-     */
-    public interface CassandraClient
-    {
+	/**
+	 * Implementation of the client interface.
+	 *
+	 * @author Matt Van Veenendaal (m@mattvv.com)
+	 * @author Ran Tavory (rantav@gmail.com)
+	 *
+	 */
+	/*package*/
+	internal class CassandraClient : ICassandraClient
+	{
+		static ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
+		static FailoverPolicy DEFAULT_FAILOVER_POLICY = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+		
+		static String PROP_CLUSTER_NAME = "cluster name";
+		static String PROP_CONFIG_FILE = "config file";
+		static String PROP_TOKEN_MAP = "token map";
+		static String PROP_KEYSPACE = "keyspaces";
+		static String PROP_VERSION = "version";
 
-        static sealed int DEFAULT_CONSISTENCY_LEVEL = (int)ConsistencyLevel.DCQUORUM;
+		//@SuppressWarnings("unused")
+		//private static sealed Logger log = LoggerFactory.getLogger(CassandraClientImpl.class);
 
-        /**
-         * What should the client do if a call to cassandra node fails and we suspect that the node is
-         * down. (e.g. it's a communication error, not an application error).
-         *
-         * {@value #FAIL_FAST} will return the error as is to the user and not try anything smart
-         *
-         * {@value #ON_FAIL_TRY_ONE_NEXT_AVAILABLE} will try one more random server before returning to the
-         * user with an error
-         *
-         * {@value #ON_FAIL_TRY_ALL_AVAILABLE} will try all available servers in the cluster before giving
-         * up and returning the communication error to the user.
-         *
-         */
-        public enum FailoverPolicy
-        {
+		/** Serial number of the client used to track client creation for debug purposes */
+		static Counter serial = new Counter();
+		
+		long mySerial;
 
-            /** On communication failure, just return the error to the client and don't retry */
-            FAIL_FAST,
-            /** On communication error try one more server before giving up */
-            ON_FAIL_TRY_ONE_NEXT_AVAILABLE,
-            /** On communication error try all known servers before giving up */
-            ON_FAIL_TRY_ALL_AVAILABLE
-        }
-        /*
-           private sealed int numRetries;
- 
-           FailoverPolicy(int numRetries) {
-             this.numRetries = numRetries;
-           }
- 
-           public int getNumRetries() {
-             return numRetries;
-           }
-         }*/
+		// The thrift object
+		 Cassandra.Client cassandra;
 
-        static sealed FailoverPolicy DEFAULT_FAILOVER_POLICY = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+		// List of known keyspaces 
+		List<String> keyspaces;
+		ConcurrentDictionary<String, KeyspaceImpl> keyspaceMap = new ConcurrentDictionary<String, KeyspaceImpl>();
+		String clusterName;
+		Dictionary<String, String> tokenMap;
+		String configFile;
+		String serverVersion;
+		KeyspaceFactory keyspaceFactory;
+		int port;
+		String url;
+		String ip;
+		ICassandraClientPool clientPools;
 
-        /**
-         * @return the underline cassandra thrift object, all remote calls will be sent to this client.
-         */
-        Cassandra.Client getCassandra();
+		bool closed = false;
+		bool hasErrors = false;
 
-        /**
-         * Return given key space, if keySpaceName not exist, will throw an exception.
-         * <p>
-         * Thread safety: not safe ;-)
-         * Really, if you require thread safety do it at the application level, this class does not
-         * provide it.
-         * <p>
-         * Uses the default consistency level, {@link #DEFAULT_CONSISTENCY_LEVEL}
-         * <p>
-         * Uses the default failover policy {@link #DEFAULT_FAILOVER_POLICY}
-         */
-        Keyspace getKeyspace(String keyspaceName);
+		public CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, String url, int port, ICassandraClientPool clientPools)
+		{
+			this.mySerial = serial.Increment();
+			cassandra = thriftClient;
+			this.keyspaceFactory = keyspaceFactory;
+			this.port = port;
+			this.url = url;
+			ip = getIpString(url);
+			this.clientPools = clientPools;
+		}
 
+		static String getIpString(String url)
+		{
+			return InetAddress.getByName(url).getHostAddress();
+		}
 
-        /**
-         * Gets s keyspace with the specified consistency level.
-         */
-        Keyspace getKeyspace(String keyspaceName, int consistencyLevel, FailoverPolicy failoverPolicy);
+		public String getClusterName()
+		{
+			if (clusterName == null)
+				clusterName = getStringProperty(PROP_CLUSTER_NAME);
+			return clusterName;
+		}
 
+		public String getConfigFile()
+		{
+			if (configFile == null)
+				configFile = getStringProperty(PROP_CONFIG_FILE);
+			return configFile;
+		}
 
-        /**
-         * Gets a string property from the server, such as:
-         * "cluster name": cluster name;
-         * "config file" : all config file content, if need you can try to explain it.
-         * "token map" :  get the token map from local gossip protocal.
-         */
-        String getStringProperty(String propertyName);
+		public IKeyspace getKeyspace(String keySpaceName)
+		{
+			return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
+		}
 
+		public IKeyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
+			 FailoverPolicy failoverPolicy)
+		{
+			String keyspaceMapKey = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
+			KeyspaceImpl keyspace = keyspaceMap[keyspaceMapKey];
+			if (keyspace == null)
+			{
+				if (getKeyspaces().Contains(keyspaceName))
+				{
+					var keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
+					keyspace = (KeyspaceImpl)keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+						 consistencyLevel, failoverPolicy, clientPools);
+					KeyspaceImpl tmp = null;
+					if (!keyspaceMap.ContainsKey(keyspaceMapKey))
+					{
+						keyspaceMap.Add(keyspaceMapKey, keyspace);
+						tmp = keyspaceMap[keyspaceMapKey];
+					}
+					if (tmp != null)
+					{
+						// There was another put that got here before we did.
+						keyspace = tmp;
+					}
+				}
+				else
+				{
+					throw new Exception(
+						 "Requested key space not exist, keyspaceName=" + keyspaceName);
+				}
+			}
+			return keyspace;
+		}
 
-        /**
-         * @return all keyspaces name of this client.
-         */
-        List<String> getKeyspaces();
+		public List<String> getKeyspaces()
+		{
+			if (keyspaces == null)
+				keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
+			return keyspaces;
+		}
 
+		public String getStringProperty(String propertyName)
+		{
+			return cassandra.get_string_property(propertyName);
+		}
 
-        /**
-         * @return target server cluster name
-         */
-        String getClusterName();
+		public Dictionary<String, String> getTokenMap(boolean fresh)
+		{
+			if (tokenMap == null || fresh)
+			{
+				tokenMap = new Dictionary<String, String>();
+				String strTokens = getStringProperty(PROP_TOKEN_MAP);
+				// Parse the result of the form {"token1":"host1","token2":"host2"}
+				strTokens = trimBothSides(strTokens);
+				String[] tokenPairs = strTokens.Split(',');
+				foreach (string tokenPair in tokenPairs)
+				{
+					String[] keyValue = tokenPair.Split(':');
+					String token = trimBothSides(keyValue[0]);
+					String host = trimBothSides(keyValue[1]);
+					tokenMap[token] = host;
+				}
 
-        /**
-         * Gets the token map with an option to refresh the value from cassandra.
-         * If fresh is false, a local cached value may be returned.
-         *
-         * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
-         *  a possibly cached value.
-         * @return  a map from tokens to hosts.
-         */
-        Dictionary<String, String> getTokenMap(bool fresh);
+			}
+			return tokenMap;
+		}
 
+		public String getServerVersion()
+		{
+			if (serverVersion == null)
+				serverVersion = getStringProperty(PROP_VERSION);
+			return serverVersion;
+		}
 
-        /**
-         * @return config file content.
-         */
-        String getConfigFile();
+		/**
+		 * Creates a unique map name for the keyspace and its consistency level
+		 * @param keyspaceName
+		 * @param consistencyLevel
+		 * @return
+		 */
+		private String BuildKeyspaceMapName(String keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
+		{
+			return String.Format("{0}[{1},{2}]", keyspaceName, consistencyLevel, failoverPolicy);
+		}
 
-        /**
-         * @return Server version
-         */
-        String getServerVersion();
+		public Cassandra.Client Client { get { return cassandra; } }
 
-        public int getPort();
+		/**
+		 * Trims the string, one char from each side.
+		 * For example, this: asdf becomes this: sd
+		 * Useful in those cases:  "asdf" => asdf
+		 * @param str
+		 * @return
+		 */
+		private String trimBothSides(String str)
+		{
+			return str.TrimStart().TrimEnd();
+		}
 
-        public String getUrl();
+		public int Port { get { return port; } }
+		public String Url { get { return url; } }
 
-        /**
-         * Tells all instanciated keyspaces to update their known hosts
-         */
-        void updateKnownHosts();
+		public void updateKnownHosts()
+		{
+			if (closed)
+				return;
+		
+			// Iterate over all keyspaces and ask them to update known hosts
+			foreach (var k in keyspaceMap)
+				k.Value.updateKnownHosts();
+		}
 
-        void markAsClosed();
+		public override string ToString()
+		{
+			return string.Format("CassandraClient<{0}:{1}-{2}>", Url, Port, mySerial);
+		}
 
-        bool isClosed();
+		public void markAsClosed()
+		{
+			closed = true;
+		}
 
-        List<String> getKnownHosts();
+		public bool IsClosed { get { return closed; } }
 
-        String getIp();
+		public List<String> getKnownHosts()
+		{
+			var hosts = new List<String>();
+			if (closed)
+				return hosts;
+			
+			// Iterate over all keyspaces and ask them to update known hosts
+			foreach (var k in keyspaceMap.Values)
+				hosts.AddRange(k.getKnownHosts());
+			
+			return hosts;
+		}
 
-        void markAsError();
+		public String IP { get { return ip; } }
 
-        bool hasErrors();
+		public bool HasErrors { get { return hasErrors; } }
 
-        void removeKeyspace(Keyspace k);
+		public void markAsError()
+		{
+			hasErrors = true;
+		}
 
-    }
+		public void removeKeyspace(IKeyspace k)
+		{
+			String key = BuildKeyspaceMapName(k.Name, k.ConsistencyLevel, k.FailoverPolicy);
+			keyspaceMap.Remove(key);
+		}
+	}
 }

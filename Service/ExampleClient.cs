@@ -17,10 +17,10 @@ namespace HectorSharp.Service
 public class ExampleClient {
  
   public static void main(String[] args) {
-    CassandraClientPool pool = CassandraClientPoolFactory.INSTANCE.get();
-    CassandraClient client = pool.borrowClient("192.168.2.17", 9160);
+    ICassandraClientPool pool = CassandraClientPoolFactory.INSTANCE.get();
+    ICassandraClient client = pool.borrowClient("192.168.2.17", 9160);
     try {
-      Keyspace keyspace = client.getKeyspace("Keyspace1");
+      IKeyspace keyspace = client.getKeyspace("Keyspace1");
       ColumnPath columnPath = new ColumnPath("Standard1", null, StringUtils.bytes("column-name"));
  
       // insert

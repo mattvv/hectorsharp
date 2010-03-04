@@ -2,31 +2,40 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Apache.Cassandra;
 
 namespace HectorSharp.Service
 {
-    /**
-     *
-     * @author Ran Tavory (rantav@gmail.com)
-     *
-     */
-    /*package*/
-    class KeyspaceFactory
-    {
+	/**
+	 *
+	 * @author Ran Tavory (rantav@gmail.com)
+	 *
+	 */
+	class KeyspaceFactory
+	{
+		CassandraClientMonitor clientMonitor;
 
-        private sealed CassandraClientMonitor clientMonitor;
+		public KeyspaceFactory(CassandraClientMonitor clientMonitor)
+		{
+			this.clientMonitor = clientMonitor;
+		}
 
-        public KeyspaceFactory(CassandraClientMonitor clientMonitor)
-        {
-            this.clientMonitor = clientMonitor;
-        }
-
-        public Keyspace create(CassandraClient client, String keyspaceName,
-            Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-            FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
-        {
-            return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
-                failoverPolicy, clientPools, clientMonitor);
-        }
-    }
+		public IKeyspace create(
+			ICassandraClient client,
+			String keyspaceName,
+			Dictionary<String, Dictionary<String, String>> keyspaceDesc, 
+			ConsistencyLevel consistencyLevel,
+			FailoverPolicy failoverPolicy, 
+			ICassandraClientPool clientPools)
+		{
+			return new KeyspaceImpl(
+				client, 
+				keyspaceName, 
+				keyspaceDesc, 
+				consistencyLevel,
+				failoverPolicy, 
+				clientPools, 
+				clientMonitor);
+		}
+	}
 }

@@ -11,7 +11,7 @@ namespace HectorSharp.Service
 	{
 		//private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
 		sealed Dictionary<ClientCounter, Counter> counters;
-		sealed List<CassandraClientPool> pools;
+		sealed List<ICassandraClientPool> pools;
 
 		/// <summary>
 		/// List of available JMX counts
@@ -34,7 +34,7 @@ namespace HectorSharp.Service
 		public CassandraClientMonitor()
 		{
 			// Use a high concurrency map.
-			pools = new List<CassandraClientPool>();
+			pools = new List<ICassandraClientPool>();
 			counters = new Dictionary<ClientCounter, Counter>();
 			foreach (var counter in Enum.GetValues(typeof(ClientCounter)))
 				counters[(ClientCounter)counter] = new Counter();
@@ -170,7 +170,7 @@ namespace HectorSharp.Service
 				 getRecoverableUnavailableCount() + getRecoverableLoadBalancedConnectErrors();
 		}
 
-		public void addPool(CassandraClientPool pool)
+		public void addPool(ICassandraClientPool pool)
 		{
 			pools.Add(pool);
 		}

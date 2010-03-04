@@ -42,7 +42,7 @@ public class ExampleDao {
    */
   public void insert(String key, String value) {
     execute(new Command<Void>(){
-      public Void execute(Keyspace ks) {
+      public Void execute(IKeyspace ks) {
         ks.insert(key, createColumnPath(COLUMN_NAME), bytes(value));
         return null;
       }
