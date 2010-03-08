@@ -28,29 +28,9 @@ namespace HectorSharp.Service
 	 * @author rantav
 	 */
 	/*package*/
-	abstract class CassandraClientPoolByHost 
+	abstract class __CassandraClientPoolByHost
 	{
 
-		public enum ExhaustedPolicy
-		{
-			WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_GROW, WHEN_EXHAUSTED_BLOCK
-		}
-
-		public static ExhaustedPolicy DEFAULT_EXHAUSTED_POLICY = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
-
-		public static int DEFAULT_MAX_ACTIVE = 50;
-
-		/**
-		 * The default max wait time when exhausted happens, default value is negative, which means
-		 * it'll block indefinitely.
-		 */
-		public static long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
-
-		/**
-		 * The default max idle number is 5, so if clients keep idle, the total connection
-		 * number will decrease to 5
-		 */
-		public static int DEFAULT_MAX_IDLE = 5;
 
 		/**
 		 * Obtain a client instance from the pool.

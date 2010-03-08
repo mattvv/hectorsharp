@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Apache.Cassandra;
+using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	/**
-	 *
-	 * @author Ran Tavory (rantav@gmail.com)
-	 *
-	 */
 	class KeyspaceFactory
 	{
 		CassandraClientMonitor clientMonitor;
@@ -25,10 +21,10 @@ namespace HectorSharp.Service
 			String keyspaceName,
 			Dictionary<String, Dictionary<String, String>> keyspaceDesc, 
 			ConsistencyLevel consistencyLevel,
-			FailoverPolicy failoverPolicy, 
-			ICassandraClientPool clientPools)
+			FailoverPolicy failoverPolicy,
+            IObjectPool<CassandraClient> clientPools)
 		{
-			return new KeyspaceImpl(
+			return new Keyspace(
 				client, 
 				keyspaceName, 
 				keyspaceDesc, 

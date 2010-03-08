@@ -6,6 +6,7 @@ using HectorSharp.Service;
 using HectorSharp.Utils;
 using Thrift;
 using Apache.Cassandra;
+using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
@@ -41,29 +42,28 @@ namespace HectorSharp.Service
 
 		// List of known keyspaces 
 		List<String> keyspaces;
-		ConcurrentDictionary<String, KeyspaceImpl> keyspaceMap = new ConcurrentDictionary<String, KeyspaceImpl>();
+		ConcurrentDictionary<String, Keyspace> keyspaceMap = new ConcurrentDictionary<String, Keyspace>();
 		String clusterName;
 		Dictionary<String, String> tokenMap;
 		String configFile;
 		String serverVersion;
 		KeyspaceFactory keyspaceFactory;
 		int port;
-		String url;
+		Endpoint endpoint;
 		String ip;
-		ICassandraClientPool clientPools;
+        IObjectPool<CassandraClient> pool;
 
 		bool closed = false;
 		bool hasErrors = false;
 
-		public CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, String url, int port, ICassandraClientPool clientPools)
+        public CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IObjectPool<CassandraClient> pool)
 		{
 			this.mySerial = serial.Increment();
 			cassandra = thriftClient;
 			this.keyspaceFactory = keyspaceFactory;
-			this.port = port;
-			this.url = url;
-			ip = getIpString(url);
-			this.clientPools = clientPools;
+			this.endpoint = endpoint;
+			ip = getIpString(endpoint.Host);
+			this.pool = pool;
 		}
 
 		static String getIpString(String url)
@@ -94,15 +94,15 @@ namespace HectorSharp.Service
 			 FailoverPolicy failoverPolicy)
 		{
 			String keyspaceMapKey = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
-			KeyspaceImpl keyspace = keyspaceMap[keyspaceMapKey];
+			Keyspace keyspace = keyspaceMap[keyspaceMapKey];
 			if (keyspace == null)
 			{
 				if (getKeyspaces().Contains(keyspaceName))
 				{
 					var keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-					keyspace = (KeyspaceImpl)keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
-						 consistencyLevel, failoverPolicy, clientPools);
-					KeyspaceImpl tmp = null;
+					keyspace = (Keyspace)keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+						 consistencyLevel, failoverPolicy, pool);
+					Keyspace tmp = null;
 					if (!keyspaceMap.ContainsKey(keyspaceMapKey))
 					{
 						keyspaceMap.Add(keyspaceMapKey, keyspace);
@@ -189,7 +189,7 @@ namespace HectorSharp.Service
 		}
 
 		public int Port { get { return port; } }
-		public String Url { get { return url; } }
+		public String Url { get { return endpoint; } }
 
 		public void updateKnownHosts()
 		{

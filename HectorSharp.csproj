@@ -94,6 +94,8 @@
     <Compile Include="lib\Thrift\Transport\TTransportException.cs" />
     <Compile Include="lib\Thrift\Transport\TTransportFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\KeyedCassandraClientPool.cs" />
+    <Compile Include="Service\Endpoint.cs" />
     <Compile Include="Service\ICassandraClient.cs" />
     <Compile Include="Service\CassandraClientFactory.cs" />
     <Compile Include="Service\CassandraClient.cs" />
@@ -107,11 +109,11 @@
     <Compile Include="Service\ExampleClient.cs" />
     <Compile Include="Service\IKeyspace.cs" />
     <Compile Include="Service\KeyspaceFactory.cs" />
-    <Compile Include="Service\KeyspaceImpl.cs" />
+    <Compile Include="Service\Keyspace.cs" />
     <Compile Include="Service\PoolExhaustedException.cs" />
     <Compile Include="Utils\ConcurrentDictionary.cs" />
     <Compile Include="Utils\Counter.cs" />
-    <Compile Include="Utils\ObjectPool\IObjectPool.cs" />
+    <Compile Include="Utils\ObjectPool\Interfaces.cs" />
     <Compile Include="Utils\ObjectPool\ObjectPool.cs" />
     <Compile Include="Utils\StringUtils.cs" />
   </ItemGroup>

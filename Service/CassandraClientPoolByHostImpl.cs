@@ -5,12 +5,21 @@ using System.Text;
 using Thrift;
 using HectorSharp.Utils;
 using System.Collections.ObjectModel;
+using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	/*package*/
-	class CassandraClientPoolByHostImpl : CassandraClientPoolByHost
+	class CassandraClientPoolByHost : ObjectPool<CassandraClient>, IObjectPool<CassandraClient>
 	{
+		public enum WhenExhaustedPolicy { Fail, Grow, Block }
+		public static WhenExhaustedPolicy DefaultExhastedPolicy = WhenExhaustedPolicy.Block;
+		public static int DefaultMaximumActive = 50;
+
+		// The default max wait time when exhausted happens, default value is negative, which means it'll block indefinitely.
+		public static long DefaultMaximumExaustedWaitTime = -1;
+
+		// The default max idle number is 5, so if clients keep idle, the total connection number will decrease to 5
+		public static int DefaultMaximumIdleClients = 5;
 		//private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolByHostImpl.class);
 
 		CassandraClientFactory clientFactory;
@@ -19,9 +28,9 @@ namespace HectorSharp.Service
 		int port;
 		int maxActive;
 		int maxIdle;
-		ExhaustedPolicy exhaustedPolicy;
+		WhenExhaustedPolicy exhaustedPolicy;
 		long maxWaitTimeWhenExhausted;
-		GenericObjectPool pool;
+		//GenericObjectPool pool;
 
 		/**
 		 * Number of currently blocked threads.
@@ -37,21 +46,31 @@ namespace HectorSharp.Service
 		 */
 		List<ICassandraClient> liveClientsFromPool;
 
-		public CassandraClientPoolByHostImpl (String cassandraUrl, int cassandraPort, String name, ICassandraClientPool pools, CassandraClientMonitor clientMonitor) :
-			this(cassandraUrl, cassandraPort, name, pools, clientMonitor, DEFAULT_MAX_ACTIVE,
-				 DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED,
-				 DEFAULT_MAX_IDLE, DEFAULT_EXHAUSTED_POLICY)
+		public CassandraClientPoolByHost (
+			String cassandraUrl, 
+			int cassandraPort, 
+			String name, 
+			ICassandraClientPool pools, 
+			CassandraClientMonitor clientMonitor) :
+			this(cassandraUrl, cassandraPort, name, pools, clientMonitor, DefaultMaximumActive,
+				 DefaultMaximumExaustedWaitTime, DefaultMaximumIdleClients, DefaultExhastedPolicy)
 		{}
 
-		public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name, ICassandraClientPool pools, CassandraClientMonitor clientMonitor, int maxActive, long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy)
+		public CassandraClientPoolByHost(String cassandraUrl, int cassandraPort, String name, ICassandraClientPool pools, CassandraClientMonitor clientMonitor, int maxActive, long maxWait, int maxIdle, WhenExhaustedPolicy exhaustedPolicy)
 		 : this(cassandraUrl, cassandraPort, name, pools, maxActive, maxWait, maxIdle,
 				 exhaustedPolicy, new CassandraClientFactory(pools, cassandraUrl, cassandraPort, clientMonitor))
 		{}
 
-		public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
-			 ICassandraClientPool pools, int maxActive,
-			 long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy,
-			 CassandraClientFactory clientFactory)
+		public CassandraClientPoolByHost(
+			String cassandraUrl, 
+			int cassandraPort, 
+			String name,
+			ICassandraClientPool pools, 
+			int maxActive,
+			long maxWait, 
+			int maxIdle, 
+			WhenExhaustedPolicy exhaustedPolicy,
+			CassandraClientFactory clientFactory)
 		{
 			//log.debug("Creating new connection pool for {}:{}", cassandraUrl, cassandraPort);
 			url = cassandraUrl;
@@ -64,7 +83,7 @@ namespace HectorSharp.Service
 			this.clientFactory = clientFactory;
 			// Create a set implemented as a ConcurrentHashMap for performance and concurrency.
 			liveClientsFromPool = new List<ICassandraClient>();
-			pool = createPool();
+			//pool = createPool();
 		}
 
 		//Override
@@ -128,21 +147,21 @@ namespace HectorSharp.Service
 
 		private GenericObjectPool createPool()
 		{
-			GenericObjectPoolFactory poolFactory = new GenericObjectPoolFactory(clientFactory, maxActive,
-				 getObjectPoolExhaustedAction(exhaustedPolicy),
-				 maxWaitTimeWhenExhausted, maxIdle);
-			return (GenericObjectPool)poolFactory.createPool();
+			//GenericObjectPoolFactory poolFactory = new GenericObjectPoolFactory(clientFactory, maxActive,
+			//    getObjectPoolExhaustedAction(exhaustedPolicy),
+			//    maxWaitTimeWhenExhausted, maxIdle);
+			//return (GenericObjectPool)poolFactory.createPool();
 		}
 
-		public static byte getObjectPoolExhaustedAction(ExhaustedPolicy exhaustedAction)
+		public static byte getObjectPoolExhaustedAction(WhenExhaustedPolicy exhaustedAction)
 		{
 			switch (exhaustedAction)
 			{
-				case WHEN_EXHAUSTED_FAIL:
+				case WhenExhaustedPolicy.Fail:
 					return GenericObjectPool.WHEN_EXHAUSTED_FAIL;
-				case WHEN_EXHAUSTED_BLOCK:
+				case WhenExhaustedPolicy.Block:
 					return GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
-				case WHEN_EXHAUSTED_GROW:
+				case WhenExhaustedPolicy.Grow:
 					return GenericObjectPool.WHEN_EXHAUSTED_GROW;
 				default:
 					return GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
@@ -171,8 +190,8 @@ namespace HectorSharp.Service
 		public boolean isExhausted()
 		{
 			return getNumBeforeExhausted() <= 0 &&
-				 (exhaustedPolicy.equals(ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK) ||
-				  exhaustedPolicy.equals(ExhaustedPolicy.WHEN_EXHAUSTED_FAIL));
+				 (exhaustedPolicy.equals(WhenExhaustedPolicy.Block) ||
+				  exhaustedPolicy.equals(WhenExhaustedPolicy.Fail));
 		}
 
 		//Override
@@ -250,5 +269,49 @@ namespace HectorSharp.Service
 			liveClientsFromPool.Remove(client);
 		}
 
-	}
+	
+#region IObjectPool<CassandraClient> Members
+
+int  IObjectPool<CassandraClient>.Active
+{
+	get { throw new NotImplementedException(); }
+}
+
+int  IObjectPool<CassandraClient>.Idle
+{
+	get { throw new NotImplementedException(); }
+}
+
+CassandraClient  IObjectPool<CassandraClient>.Borrow()
+{
+ 	throw new NotImplementedException();
+}
+
+void  IObjectPool<CassandraClient>.Return(CassandraClient obj)
+{
+ 	throw new NotImplementedException();
+}
+
+void  IObjectPool<CassandraClient>.Add()
+{
+ 	throw new NotImplementedException();
+}
+
+void  IObjectPool<CassandraClient>.Clear()
+{
+ 	throw new NotImplementedException();
+}
+
+void  IObjectPool<CassandraClient>.Close()
+{
+ 	throw new NotImplementedException();
+}
+
+void  IObjectPool<CassandraClient>.SetFactory(IPoolableObjectFactory<CassandraClient> factory)
+{
+ 	throw new NotImplementedException();
+}
+
+#endregion
+}
 }

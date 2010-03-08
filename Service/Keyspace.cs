@@ -5,17 +5,11 @@ using System.Text;
 using Apache.Cassandra;
 using Thrift;
 using Thrift.Transport;
+using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	/**
-	 * Implamentation of a keyspace
-	 *
-	 * @author Ran Tavory (rantav@gmail.com)
-	 *
-	 */
-
-	class KeyspaceImpl : IKeyspace
+	class Keyspace : IKeyspace
 	{
 		// constants
 		public static String CF_TYPE = "Type";
@@ -31,12 +25,17 @@ namespace HectorSharp.Service
 		sealed FailoverPolicy failoverPolicy;
 		/** List of all known remote cassandra nodes */
 		List<String> knownHosts = new List<String>();
-		sealed ICassandraClientPool clientPools;
+        sealed IObjectPool<CassandraClient> pool;
 		sealed CassandraClientMonitor monitor;
 
-		public KeyspaceImpl(ICassandraClient client, String keyspaceName,
-	 Dictionary<String, Dictionary<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
-	 FailoverPolicy failoverPolicy, ICassandraClientPool clientPools, CassandraClientMonitor monitor)
+		public Keyspace(
+			ICassandraClient client, 
+			String keyspaceName,
+			Dictionary<String, Dictionary<String, String>> keyspaceDesc, 
+			ConsistencyLevel consistencyLevel,
+			FailoverPolicy failoverPolicy,
+            IObjectPool<CassandraClient> pool, 
+			CassandraClientMonitor monitor)
 		{
 			this.client = client;
 			this.consistency = consistencyLevel;
@@ -44,7 +43,7 @@ namespace HectorSharp.Service
 			this.Name = keyspaceName;
 			this.cassandra = client.getCassandra();
 			this.failoverPolicy = failoverPolicy;
-			this.clientPools = clientPools;
+			this.pool = pool;
 			this.monitor = monitor;
 			initFailover();
 		}
@@ -630,7 +629,7 @@ namespace HectorSharp.Service
 			//log.info("Skipping to next host. Current host is: {}", client.getUrl());
 			try
 			{
-				clientPools.invalidateClient(client);
+				pool.invalidateClient(client);
 				client.removeKeyspace(this);
 			}
 			catch// (Exception e)
@@ -645,7 +644,7 @@ namespace HectorSharp.Service
 				throw new Exception("Unable to failover to next host");
 			}
 			// assume they use the same port
-			client = clientPools.borrowClient(nextHost, client.getPort());
+			client = pool.borrowClient(nextHost, client.getPort());
 			cassandra = client.getCassandra();
 			monitor.incCounter(CassandraClientMonitor.ClientCounter.SKIP_HOST_SUCCESS);
 			//log.info("Skipped host. New host is: {}", client.getUrl());
