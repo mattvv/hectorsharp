@@ -12,7 +12,21 @@ This client provides:
  o connection pooling for improved performance and scalability
  o load balancing
 
+Current TO DOs:
+
+ o Get it to compile
+ o Refactor interfaces to conform to .net conventions
+ o Evaluate high-level API interface - optimize for usability
+	o Make connection pooling transparent to user api
+ o Provide configuration system
+ o Convert client monitor to perf counters?
+ o Port legacy java unit tests
+ o write some docs on how to get cassandra working on Windows
+
+If you are interested in contributing, let us know.
+
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different 
 directions since.
 
 The original Java version of this port is available at http://github.com/rantav/hector
+
