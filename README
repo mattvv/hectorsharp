@@ -1,9 +1,9 @@
 ﻿A high level cassandra C#/.NET client ported from Java
+
 Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
 Hector is the greatest warrior in the greek mithology, Troy's builder and brother of Cassandra
 http://en.wikipedia.org/wiki/Hector
 http://en.wikipedia.org/wiki/Cassandra
-
 
 This client provides:
 

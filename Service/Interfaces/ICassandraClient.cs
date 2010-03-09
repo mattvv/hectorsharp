@@ -10,7 +10,6 @@ namespace HectorSharp.Service
 {
 	public enum FailoverPolicy
 	{
-
 		// On communication failure, just return the error to the client and don't retry
 		FAIL_FAST,
 		// On communication error try one more server before giving up

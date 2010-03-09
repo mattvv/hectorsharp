@@ -9,90 +9,99 @@ using Apache.Cassandra;
 
 namespace HectorSharp.Service
 {
-    class KeyedCassandraClientPool : IKeyedObjectPool<Endpoint, CassandraClient>
-    {
-        Dictionary<Endpoint, HostPool> pools = new Dictionary<Endpoint,HostPool>();
+	class KeyedCassandraClientPool : IKeyedObjectPool<Endpoint, CassandraClient>
+	{
+		Dictionary<Endpoint, HostPool> pools = new Dictionary<Endpoint, HostPool>();
 
-        class HostPool
-        {
-            public HostPool(Endpoint endpoint)
-            {
-                Endpoint = endpoint;
-                Pool = new ObjectPool<CassandraClient>(null, new ObjectPool<CassandraClient>.Configuration
-                {
-                    MaxSize = 20,
-                    MinSize = 4,
-                    Timeout = 15,
-                });
-                var fac = new CassandraClientFactory(Pool, endpoint, new CassandraClientMonitor());
-                Pool.SetFactory(fac);
-            }
-            public Endpoint Endpoint { get; private set; }
-            public ObjectPool<CassandraClient> Pool { get; private set; }
-            public int ActiveCount { get { return Pool.Active; } }
-            public int BorrowCount { get { return Pool.BorrowCount; } }
-        }
+		class HostPool
+		{
+			public HostPool(Endpoint endpoint, KeyedCassandraClientFactory factory)
+			{
+				Endpoint = endpoint;
+				Pool = new ObjectPool<CassandraClient>(null, new ObjectPool<CassandraClient>.Configuration
+				{
+					MaxSize = 20,
+					MinSize = 4,
+					Timeout = 15,
+				});
+				var fac = new CassandraClientFactory(Pool, endpoint, new CassandraClientMonitor());
+				Pool.SetFactory(fac);
+			}
+			public Endpoint Endpoint { get; private set; }
+			public ObjectPool<CassandraClient> Pool { get; private set; }
+			public int ActiveCount { get { return Pool.Active; } }
+			public int BorrowCount { get { return Pool.BorrowCount; } }
+		}
 
-        #region IKeyedObjectPool<string,CassandraClient> Members
+		public ObjectPool<CassandraClient> GetPoolByEndpoint(Endpoint key)
+		{
+			if (key == null || !pools.ContainsKey(key))
+				return null;
 
-        public int GetActiveCount()
-        {
-            return pools.Sum(p => p.Value.ActiveCount);
-        }
+			return pools[key].Pool;
+		}
 
-        public int GetActiveCount(Endpoint key)
-        {
-            return pools[key].ActiveCount;
-        }
+		#region IKeyedObjectPool<string,CassandraClient> Members
 
-        public int GetIdleCount()
-        {
-            return pools.Sum(p => p.Value.Pool.Idle);
-        }
+		public int GetActiveCount()
+		{
+			return pools.Sum(p => p.Value.ActiveCount);
+		}
 
-        public int GetIdleCount(Endpoint key)
-        {
-            return pools[key].Pool.Idle;
-        }
+		public int GetActiveCount(Endpoint key)
+		{
+			return pools[key].ActiveCount;
+		}
 
-        public CassandraClient Borrow(Endpoint key)
-        {
-            return pools[key].Pool.Borrow();
-        }
+		public int GetIdleCount()
+		{
+			return pools.Sum(p => p.Value.Pool.Idle);
+		}
 
-        public void Return(Endpoint key, CassandraClient obj)
-        {
-            pools[key].Pool.Return(obj);
-        }
+		public int GetIdleCount(Endpoint key)
+		{
+			return pools[key].Pool.Idle;
+		}
 
-        public void Add(Endpoint key)
-        {
-            pools.Add(key, new HostPool(key));
-        }
+		public CassandraClient Borrow(Endpoint key)
+		{
+			return pools[key].Pool.Borrow();
+		}
 
-        public void Clear()
-        {
-            foreach (var pool in pools)
-                pool.Value.Pool.Clear();
-        }
+		public void Return(Endpoint key, CassandraClient obj)
+		{
+			pools[key].Pool.Return(obj);
+		}
 
-        public void Clear(Endpoint key)
-        {
-            if (pools.ContainsKey(key))
-                pools[key].Pool.Clear();
-        }
+		public void Add(Endpoint key)
+		{
+			if (!pools.ContainsKey(key))
+				pools.Add(key, new HostPool(key));
+		}
 
-        public void Close()
-        {
-            foreach (var pool in pools)
-                pool.Value.Pool.Close();
-        }
+		public void Clear()
+		{
+			foreach (var pool in pools)
+				pool.Value.Pool.Clear();
+		}
 
-        public void SetFactory(IPoolableObjectFactory<CassandraClient> factory)
-        {
-            /* no-op */
-        }
+		public void Clear(Endpoint key)
+		{
+			if (pools.ContainsKey(key))
+				pools[key].Pool.Clear();
+		}
 
-        #endregion
-    }
+		public void Close()
+		{
+			foreach (var pool in pools)
+				pool.Value.Pool.Close();
+		}
+
+		public void SetFactory(IKeyedPoolableObjectFactory<Endpoint, CassandraClient> factory)
+		{
+			/* no-op */
+		}
+
+		#endregion
+	}
 }
