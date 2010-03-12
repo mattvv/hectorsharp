@@ -10,97 +10,106 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	/**
-	 * Implementation of the client interface.
-	 *
-	 * @author Matt Van Veenendaal (m@mattvv.com)
-	 * @author Ran Tavory (rantav@gmail.com)
-	 *
-	 */
-	/*package*/
-	internal class CassandraClient : ICassandraClient
+	/// <summary>
+	/// Implementation of the client interface.
+	/// </summary>
+	public class CassandraClient : ICassandraClient
 	{
-		static ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
-		static FailoverPolicy DEFAULT_FAILOVER_POLICY = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-		
-		static String PROP_CLUSTER_NAME = "cluster name";
-		static String PROP_CONFIG_FILE = "config file";
-		static String PROP_TOKEN_MAP = "token map";
-		static String PROP_KEYSPACE = "keyspaces";
-		static String PROP_VERSION = "version";
+		static Nullable<int> port = null;
 
-		//@SuppressWarnings("unused")
+
+		static ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
+		static FailoverStrategy DEFAULT_FAILOVER_STRATEGY = FailoverStrategy.ON_FAIL_TRY_ALL_AVAILABLE;
+
+		static string PROP_CLUSTER_NAME = "cluster name";
+		static string PROP_CONFIG_FILE = "config file";
+		static string PROP_TOKEN_MAP = "token map";
+		static string PROP_KEYSPACE = "keyspaces";
+		static string PROP_VERSION = "version";
+
 		//private static sealed Logger log = LoggerFactory.getLogger(CassandraClientImpl.class);
 
-		/** Serial number of the client used to track client creation for debug purposes */
+		// Serial number of the client used to track client creation for debug purposes
 		static Counter serial = new Counter();
-		
 		long mySerial;
 
-		// The thrift object
-		 Cassandra.Client cassandra;
+		Cassandra.Client cassandra; // The thrift object
 
 		// List of known keyspaces 
-		List<String> keyspaces;
-		ConcurrentDictionary<String, Keyspace> keyspaceMap = new ConcurrentDictionary<String, Keyspace>();
-		String clusterName;
-		Dictionary<String, String> tokenMap;
-		String configFile;
-		String serverVersion;
+		List<string> keyspaces;
+		ConcurrentDictionary<string, Keyspace> keyspaceMap = new ConcurrentDictionary<string, Keyspace>();
+		string clusterName;
+		Dictionary<string, string> tokenMap;
+		string configFile;
+		string serverVersion;
 		KeyspaceFactory keyspaceFactory;
-		int port;
-		Endpoint endpoint;
-		String ip;
-        IObjectPool<CassandraClient> pool;
+		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
 
 		bool closed = false;
 		bool hasErrors = false;
 
-        public CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IObjectPool<CassandraClient> pool)
+		public int Port { get { return port.HasValue ? port.Value : -1; } }
+		
+		#region ctor
+		internal CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 		{
 			this.mySerial = serial.Increment();
 			cassandra = thriftClient;
 			this.keyspaceFactory = keyspaceFactory;
-			this.endpoint = endpoint;
-			ip = getIpString(endpoint.Host);
+
+			if (endpoint == null)
+				throw new ArgumentNullException("endpoint");
+
+			if (!port.HasValue)
+				port = endpoint.Port;
+
+			if (port.Value != endpoint.Port)
+			{
+				if (this.pool != null)
+					this.pool.Clear();
+				port = endpoint.Port;
+			}
+
+			this.Endpoint = endpoint;
 			this.pool = pool;
+		} 
+		#endregion
+
+		public string ClusterName
+		{
+			get
+			{
+				if (clusterName == null)
+					clusterName = GetStringProperty(PROP_CLUSTER_NAME);
+				return clusterName;
+			}
 		}
 
-		static String getIpString(String url)
+		public string ConfigFile
 		{
-			return InetAddress.getByName(url).getHostAddress();
+			get
+			{
+				if (configFile == null)
+					configFile = GetStringProperty(PROP_CONFIG_FILE);
+				return configFile;
+			}
 		}
 
-		public String getClusterName()
+		public IKeyspace GetKeyspace(string keySpaceName)
 		{
-			if (clusterName == null)
-				clusterName = getStringProperty(PROP_CLUSTER_NAME);
-			return clusterName;
+			return GetKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_STRATEGY);
 		}
 
-		public String getConfigFile()
+		public IKeyspace GetKeyspace(string keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
 		{
-			if (configFile == null)
-				configFile = getStringProperty(PROP_CONFIG_FILE);
-			return configFile;
-		}
-
-		public IKeyspace getKeyspace(String keySpaceName)
-		{
-			return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
-		}
-
-		public IKeyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
-			 FailoverPolicy failoverPolicy)
-		{
-			String keyspaceMapKey = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
-			Keyspace keyspace = keyspaceMap[keyspaceMapKey];
+			var keyspaceMapKey = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
+			var keyspace = keyspaceMap[keyspaceMapKey];
 			if (keyspace == null)
 			{
-				if (getKeyspaces().Contains(keyspaceName))
+				if (Keyspaces.Contains(keyspaceName))
 				{
 					var keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-					keyspace = (Keyspace)keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+					keyspace = (Keyspace)keyspaceFactory.Create(this, keyspaceName, keyspaceDesc,
 						 consistencyLevel, failoverPolicy, pool);
 					Keyspace tmp = null;
 					if (!keyspaceMap.ContainsKey(keyspaceMapKey))
@@ -116,39 +125,41 @@ namespace HectorSharp.Service
 				}
 				else
 				{
-					throw new Exception(
-						 "Requested key space not exist, keyspaceName=" + keyspaceName);
+					throw new Exception("Requested key space not exist, keyspaceName=" + keyspaceName);
 				}
 			}
 			return keyspace;
 		}
 
-		public List<String> getKeyspaces()
+		public IList<string> Keyspaces
 		{
-			if (keyspaces == null)
-				keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
-			return keyspaces;
+			get
+			{
+				if (keyspaces == null)
+					keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
+				return keyspaces;
+			}
 		}
 
-		public String getStringProperty(String propertyName)
+		public string GetStringProperty(string propertyName)
 		{
 			return cassandra.get_string_property(propertyName);
 		}
 
-		public Dictionary<String, String> getTokenMap(boolean fresh)
+		public Dictionary<string, string> GetTokenMap(bool fresh)
 		{
 			if (tokenMap == null || fresh)
 			{
-				tokenMap = new Dictionary<String, String>();
-				String strTokens = getStringProperty(PROP_TOKEN_MAP);
+				tokenMap = new Dictionary<string, string>();
+				string strTokens = GetStringProperty(PROP_TOKEN_MAP);
 				// Parse the result of the form {"token1":"host1","token2":"host2"}
-				strTokens = trimBothSides(strTokens);
-				String[] tokenPairs = strTokens.Split(',');
+				strTokens = strTokens.Trim();
+				string[] tokenPairs = strTokens.Split(',');
 				foreach (string tokenPair in tokenPairs)
 				{
-					String[] keyValue = tokenPair.Split(':');
-					String token = trimBothSides(keyValue[0]);
-					String host = trimBothSides(keyValue[1]);
+					string[] keyValue = tokenPair.Split(':');
+					string token = keyValue[0].Trim();
+					string host = keyValue[1].Trim();
 					tokenMap[token] = host;
 				}
 
@@ -156,88 +167,78 @@ namespace HectorSharp.Service
 			return tokenMap;
 		}
 
-		public String getServerVersion()
+		public string ServerVersion
 		{
-			if (serverVersion == null)
-				serverVersion = getStringProperty(PROP_VERSION);
-			return serverVersion;
+			get
+			{
+				if (serverVersion == null) serverVersion = GetStringProperty(PROP_VERSION);
+				return serverVersion;
+			}
 		}
-
-		/**
-		 * Creates a unique map name for the keyspace and its consistency level
-		 * @param keyspaceName
-		 * @param consistencyLevel
-		 * @return
-		 */
-		private String BuildKeyspaceMapName(String keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
+		/// <summary>
+		/// Creates a unique map name for the keyspace and its consistency level
+		/// </summary>
+		/// <param name="keyspaceName"></param>
+		/// <param name="consistencyLevel"></param>
+		/// <param name="failoverPolicy"></param>
+		/// <returns></returns>
+		string BuildKeyspaceMapName(string keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
 		{
-			return String.Format("{0}[{1},{2}]", keyspaceName, consistencyLevel, failoverPolicy);
+			return string.Format("{0}[{1},{2}]", keyspaceName, consistencyLevel, failoverPolicy);
 		}
 
 		public Cassandra.Client Client { get { return cassandra; } }
 
-		/**
-		 * Trims the string, one char from each side.
-		 * For example, this: asdf becomes this: sd
-		 * Useful in those cases:  "asdf" => asdf
-		 * @param str
-		 * @return
-		 */
-		private String trimBothSides(String str)
-		{
-			return str.TrimStart().TrimEnd();
-		}
+		public Endpoint Endpoint { get; private set; }
 
-		public int Port { get { return port; } }
-		public String Url { get { return endpoint; } }
-
-		public void updateKnownHosts()
+		public void UpdateKnownEndpoints()
 		{
 			if (closed)
 				return;
-		
+
 			// Iterate over all keyspaces and ask them to update known hosts
 			foreach (var k in keyspaceMap)
-				k.Value.updateKnownHosts();
+				k.Value.UpdateKnownHosts();
 		}
 
 		public override string ToString()
 		{
-			return string.Format("CassandraClient<{0}:{1}-{2}>", Url, Port, mySerial);
+			return string.Format("CassandraClient<{0}:{1}-{2}>", Endpoint.Host, Endpoint.Port, mySerial);
 		}
 
-		public void markAsClosed()
+		public void MarkAsClosed()
 		{
 			closed = true;
 		}
 
 		public bool IsClosed { get { return closed; } }
 
-		public List<String> getKnownHosts()
+		public IList<Endpoint> KnownEndpoints
 		{
-			var hosts = new List<String>();
-			if (closed)
-				return hosts;
-			
-			// Iterate over all keyspaces and ask them to update known hosts
-			foreach (var k in keyspaceMap.Values)
-				hosts.AddRange(k.getKnownHosts());
-			
-			return hosts;
-		}
+			get
+			{
+				var endpoints = new List<Endpoint>();
+				return endpoints;
+				/*
+				if (closed) return endpoints;
 
-		public String IP { get { return ip; } }
+				foreach (var keyspace in keyspaceMap.Values)
+					endpoints.AddRange(keyspace.KnownEndpoints);
+
+				return endpoints;*/
+			}
+		}
 
 		public bool HasErrors { get { return hasErrors; } }
 
-		public void markAsError()
+		public void MarkAsError()
 		{
 			hasErrors = true;
 		}
 
-		public void removeKeyspace(IKeyspace k)
+		public void RemoveKeyspace(IKeyspace k)
 		{
-			String key = BuildKeyspaceMapName(k.Name, k.ConsistencyLevel, k.FailoverPolicy);
+			string key = BuildKeyspaceMapName(k.Name, k.ConsistencyLevel, k.FailoverPolicy);
 			keyspaceMap.Remove(key);
 		}
 	}

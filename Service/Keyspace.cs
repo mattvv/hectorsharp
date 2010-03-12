@@ -6,6 +6,7 @@ using Apache.Cassandra;
 using Thrift;
 using Thrift.Transport;
 using HectorSharp.Utils.ObjectPool;
+using HectorSharp.Utils;
 
 namespace HectorSharp.Service
 {
@@ -18,38 +19,36 @@ namespace HectorSharp.Service
 
 		//private static sealed Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
 
-		ICassandraClient client;
 		Cassandra.Client cassandra; // The cassandra thrift proxy
-		sealed Dictionary<String, Dictionary<String, String>> keyspaceDesc;
-		sealed ConsistencyLevel consistency;
-		sealed FailoverPolicy failoverPolicy;
+		Dictionary<String, Dictionary<String, String>> keyspaceDesc;
+		FailoverPolicy failoverPolicy;
 		/** List of all known remote cassandra nodes */
-		List<String> knownHosts = new List<String>();
-        sealed IObjectPool<CassandraClient> pool;
-		sealed CassandraClientMonitor monitor;
+		List<string> knownHosts = new List<string>();
+		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
+		CassandraClientMonitor monitor;
 
 		public Keyspace(
-			ICassandraClient client, 
+			ICassandraClient client,
 			String keyspaceName,
-			Dictionary<String, Dictionary<String, String>> keyspaceDesc, 
+			Dictionary<String, Dictionary<String, String>> keyspaceDesc,
 			ConsistencyLevel consistencyLevel,
 			FailoverPolicy failoverPolicy,
-            IObjectPool<CassandraClient> pool, 
-			CassandraClientMonitor monitor)
+			IKeyedObjectPool<Endpoint, ICassandraClient> pool
+			/*CassandraClientMonitor monitor*/)
 		{
-			this.client = client;
-			this.consistency = consistencyLevel;
+			this.Client = client;
+			this.ConsistencyLevel = consistencyLevel;
 			this.keyspaceDesc = keyspaceDesc;
 			this.Name = keyspaceName;
-			this.cassandra = client.getCassandra();
+			this.cassandra = client.Client;
 			this.failoverPolicy = failoverPolicy;
 			this.pool = pool;
-			this.monitor = monitor;
-			initFailover();
+			//this.monitor = monitor;
+			InitFailover();
 		}
 
 		//Override
-		public void batchInsert(String key, Dictionary<String, List<Column>> columnMap, Dictionary<String, List<SuperColumn>> superColumnMap)
+		public void BatchInsert(String key, Dictionary<String, List<Column>> columnMap, Dictionary<String, List<SuperColumn>> superColumnMap)
 		{
 			if (columnMap == null && superColumnMap == null)
 				throw new Exception("columnMap and SuperColumnMap can not be null at same time");
@@ -79,7 +78,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public int getCount(String key, ColumnParent columnParent)
+		public int GetCount(String key, ColumnParent columnParent)
 		{
 			//todo: fix Operation execute event
 			/*
@@ -95,7 +94,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public Dictionary<String, List<Column>> getRangeSlice(ColumnParent columnParent,
+		public Dictionary<String, List<Column>> GetRangeSlice(ColumnParent columnParent,
 			 SlicePredicate predicate, String start, String finish, int count)
 		{
 			//Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
@@ -121,7 +120,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public Dictionary<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent,
+		public Dictionary<String, List<SuperColumn>> GetSuperRangeSlice(ColumnParent columnParent,
 			 SlicePredicate predicate, String start, String finish, int count)
 		// throws InvalidRequestException, UnavailableException, TException, TimedOutException 
 		{
@@ -148,44 +147,17 @@ namespace HectorSharp.Service
 			return new Dictionary<string, List<SuperColumn>>();
 		}
 
-		//Override
-		public List<Column> getSlice(String key, ColumnParent columnParent,
-			 SlicePredicate predicate)
-		//throws InvalidRequestException, NotFoundException,
-		//UnavailableException, TException, TimedOutException
-		{
-			//Operation<List<Column>> op = new Operation<List<Column>>(Counter.READ_FAIL) {
-			//  @Override
-			//  public List<Column> execute(Client cassandra) throws InvalidRequestException,
-			//      UnavailableException, TException, TimedOutException {
-			//    List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
-			//        predicate, consistency);
-
-			//    if (cosclist == null) {
-			//      return null;
-			//    }
-			//    ArrayList<Column> result = new ArrayList<Column>(cosclist.size());
-			//    for (ColumnOrSuperColumn cosc : cosclist) {
-			//      result.add(cosc.getColumn());
-			//    }
-			//    return result;
-			//  }
-			//};
-			//operateWithFailover(op);
-			//return op.getResult();
-			return new List<Column>();
-		}
 
 		//Override
-		public SuperColumn getSuperColumn(String key, ColumnPath columnPath)
+		public SuperColumn GetSuperColumn(String key, ColumnPath columnPath)
 		//throws InvalidRequestException, NotFoundException, UnavailableException, TException,
 		//TimedOutException 
 		{
-			return getSuperColumn(key, columnPath, false, Int32.MaxValue);
+			return GetSuperColumn(key, columnPath, false, Int32.MaxValue);
 		}
 
 		//Override
-		public SuperColumn getSuperColumn(String key, ColumnPath columnPath,
+		public SuperColumn GetSuperColumn(String key, ColumnPath columnPath,
 			 bool reversed, int size)
 		//throws InvalidRequestException, NotFoundException,
 		//UnavailableException, TException, TimedOutException 
@@ -210,35 +182,9 @@ namespace HectorSharp.Service
 			return new SuperColumn();
 		}
 
-		//Override
-		public List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
-			 SlicePredicate predicate)
-		//throws InvalidRequestException, NotFoundException,
-		//UnavailableException, TException, TimedOutException 
-		{
-			//Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(Counter.READ_FAIL) {
-			//  @Override
-			//  public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
-			//      UnavailableException, TException, TimedOutException {
-			//    List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
-			//        predicate, consistency);
-			//    if (cosclist == null) {
-			//      return null;
-			//    }
-			//    ArrayList<SuperColumn> result = new ArrayList<SuperColumn>(cosclist.size());
-			//    for (ColumnOrSuperColumn cosc : cosclist) {
-			//      result.add(cosc.getSuper_column());
-			//    }
-			//    return result;
-			//  }
-			//};
-			//operateWithFailover(op);
-			//return op.getResult();
-			return new List<SuperColumn>();
-		}
 
 		//Override
-		public void insert(String key, ColumnPath columnPath, byte[] value)
+		public void Insert(String key, ColumnPath columnPath, byte[] value)
 		//   throws InvalidRequestException, UnavailableException, TException, TimedOutException
 		{
 			//valideColumnPath(columnPath);
@@ -254,7 +200,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public Dictionary<String, Column> multigetColumn(List<String> keys, ColumnPath columnPath)
+		public Dictionary<String, Column> MultigetColumn(List<String> keys, ColumnPath columnPath)
 		// throws InvalidRequestException, UnavailableException, TException, TimedOutException 
 		{
 			//valideColumnPath(columnPath);
@@ -281,7 +227,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public Dictionary<String, List<Column>> multigetSlice(List<String> keys,
+		public Dictionary<String, List<Column>> MultigetSlice(List<String> keys,
 			  ColumnParent columnParent, SlicePredicate predicate)
 		// throws InvalidRequestException, UnavailableException, TException, TimedOutException 
 		{
@@ -307,14 +253,14 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public Dictionary<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath)
+		public Dictionary<String, SuperColumn> MultigetSuperColumn(List<String> keys, ColumnPath columnPath)
 		//throws InvalidRequestException, UnavailableException, TException, TimedOutException 
 		{
-			return multigetSuperColumn(keys, columnPath, false, Int32.MaxValue);
+			return MultigetSuperColumn(keys, columnPath, false, Int32.MaxValue);
 		}
 
 		//Override
-		public Dictionary<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath,
+		public Dictionary<String, SuperColumn> MultigetSuperColumn(List<String> keys, ColumnPath columnPath,
 			 bool reversed, int size)
 		///throws InvalidRequestException, UnavailableException, TException, TimedOutException 
 		{
@@ -324,7 +270,7 @@ namespace HectorSharp.Service
 			ColumnParent clp = new ColumnParent(columnPath.Column_family, columnPath.Super_column);
 			SliceRange sr = new SliceRange(new byte[0], new byte[0], reversed, size);
 			SlicePredicate sp = new SlicePredicate(null, sr);
-			var sclist = multigetSuperSlice(keys, clp, sp);
+			var sclist = MultigetSuperSlice(keys, clp, sp);
 
 			if (sclist == null || sclist.Count == 0)
 			{
@@ -342,7 +288,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public Dictionary<String, List<SuperColumn>> multigetSuperSlice(List<String> keys,
+		public Dictionary<String, List<SuperColumn>> MultigetSuperSlice(List<String> keys,
 			 ColumnParent columnParent, SlicePredicate predicate)
 		//throws InvalidRequestException, UnavailableException, TException, TimedOutException 
 		{
@@ -386,7 +332,7 @@ namespace HectorSharp.Service
 		}
 
 		//Override
-		public void remove(String key, ColumnPath columnPath)
+		public void Remove(String key, ColumnPath columnPath)
 		//throws InvalidRequestException,
 		//UnavailableException, TException, TimedOutException 
 		{
@@ -402,30 +348,20 @@ namespace HectorSharp.Service
 
 		}
 
-		//Override
-		public String getName()
-		{
-			return Name;
-		}
-
 		public string Name { get; private set; }
 
 
 		//Override
-		public Dictionary<String, Dictionary<String, String>> describeKeyspace()
+		public Dictionary<string, Dictionary<string, string>> DescribeKeyspace()
 		//throws NotFoundException, TException 
 		{
 			return keyspaceDesc;
 		}
 
-		//Override
-		public ICassandraClient getClient()
-		{
-			return client;
-		}
+		public ICassandraClient Client { get; private set; }
 
 		//Override
-		public Column getColumn(String key, ColumnPath columnPath)
+		public Column GetColumn(String key, ColumnPath columnPath)
 		//      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
 		//      TimedOutException 
 		{
@@ -455,11 +391,7 @@ namespace HectorSharp.Service
 			return new Column();
 		}
 
-		//Override
-		public int getConsistencyLevel()
-		{
-			return consistency;
-		}
+		public ConsistencyLevel ConsistencyLevel { get; private set; }
 
 		static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 		static long CurrentTimeMillis()
@@ -576,16 +508,16 @@ namespace HectorSharp.Service
 		 *
 		 * @throws TException
 		 */
-		private void initFailover()
+		void InitFailover()
 		{
 			if (failoverPolicy == FailoverPolicy.FAIL_FAST)
 			{
 				knownHosts.Clear();
-				knownHosts.Add(client.getUrl());
+				knownHosts.Add(Client.Endpoint.Host);
 				return;
 			}
 			// learn about other cassandra hosts in the ring
-			updateKnownHosts();
+			UpdateKnownHosts();
 		}
 
 		/**
@@ -593,22 +525,20 @@ namespace HectorSharp.Service
 		 *
 		 * @throws TException
 		 */
-		public void updateKnownHosts()
+		public void UpdateKnownHosts()
 		{
 			// When update starts we only know of this client, nothing else
 			knownHosts.Clear();
-			knownHosts.Add(getClient().getUrl());
+			knownHosts.Add(Client.Endpoint.Host);
 
 			// Now query for more hosts. If the query fails, then even this client is
 			// now "known"
 			try
 			{
-				var map = getClient().getTokenMap(true);
+				var map = Client.GetTokenMap(true);
 				knownHosts.Clear();
 				foreach (var entry in map)
-				{
 					knownHosts.Add(entry.Value);
-				}
 			}
 			catch// (TException e) 
 			{
@@ -617,47 +547,46 @@ namespace HectorSharp.Service
 			}
 		}
 
-		/**
-		 * Updates the client member and cassandra member to the next host in the
-		 * ring.
-		 *
-		 * Returns the current client to the pool and retreives a new client from the
-		 * next pool.
-		 */
-		private void skipToNextHost()
+		/// <summary>
+		/// Updates the client member and cassandra member to the next host in the ring.
+		/// Returns the current client to the pool and retreives a new client from the
+		/// next pool.
+		/// </summary>
+		void SkipToNextHost()
 		{
 			//log.info("Skipping to next host. Current host is: {}", client.getUrl());
 			try
 			{
-				pool.invalidateClient(client);
-				client.removeKeyspace(this);
+				Client.MarkAsError();
+				pool.Return(Client.Endpoint, Client);
+				Client.RemoveKeyspace(this);
 			}
 			catch// (Exception e)
 			{
 				//log.error("Unable to invalidate client {}. Will continue anyhow.", client);
 			}
 
-			String nextHost = getNextHost(client.getUrl(), client.getIp());
+			String nextHost = GetNextHost(Client.Endpoint.Host, Client.Endpoint.IP);
 			if (nextHost == null)
 			{
 				//log.error("Unable to find next host to skip to at {}", toString());
 				throw new Exception("Unable to failover to next host");
 			}
 			// assume they use the same port
-			client = pool.borrowClient(nextHost, client.getPort());
-			cassandra = client.getCassandra();
-			monitor.incCounter(CassandraClientMonitor.ClientCounter.SKIP_HOST_SUCCESS);
+			Client = pool.Borrow(new Endpoint(nextHost, Client.Port));
+			cassandra = Client.Client;
+			monitor.IncrementCounter(CassandraClientMonitor.ClientCounter.SKIP_HOST_SUCCESS);
 			//log.info("Skipped host. New host is: {}", client.getUrl());
 		}
 
-		/**
-		 * Finds the next host in the knownHosts. Next is the one after the given url
-		 * (modulo the number of elemens in the list)
-		 *
-		 * @return URL of the next presumably available host. null if none can be
-		 *         found.
-		 */
-		String getNextHost(String url, String ip)
+		/// <summary>
+		/// Finds the next host in the knownHosts. Next is the one after the given url
+		/// (modulo the number of elemens in the list)
+		/// </summary>
+		/// <param name="url"></param>
+		/// <param name="ip"></param>
+		/// <returns>URL of the next presumably available host. null if none can be found.</returns>
+		String GetNextHost(String url, String ip)
 		{
 			int size = knownHosts.Count;
 			if (size < 1)
@@ -681,8 +610,7 @@ namespace HectorSharp.Service
 		 * retries, and there are enough hosts to try and the error was
 		 * {@link TimedOutException}.
 		 */
-		//@SuppressWarnings("unchecked")
-		void operateWithFailover(Operation op)
+		void OperateWithFailover<T>(Operation<T> op) where T : class
 		{
 			int retries = Math.Min(failoverPolicy.getNumRetries() + 1, knownHosts.Count);
 			try
@@ -694,7 +622,7 @@ namespace HectorSharp.Service
 					try
 					{
 						// Perform operation and save its result value
-						op.executeAndSetResult(cassandra);
+						op.ExecuteAndSetResult(cassandra);
 						// hmmm don't count success, there are too many...
 						// monitor.incCounter(op.successCounter);
 						//   log.debug("Operation succeeded on {}", client.getUrl());
@@ -709,8 +637,8 @@ namespace HectorSharp.Service
 						}
 						else
 						{
-							skipToNextHost();
-							monitor.incCounter(CassandraClientMonitor.ClientCounter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
+							SkipToNextHost();
+							monitor.IncrementCounter(CassandraClientMonitor.ClientCounter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
 						}
 					}
 					catch (UnavailableException e)
@@ -723,8 +651,8 @@ namespace HectorSharp.Service
 						}
 						else
 						{
-							skipToNextHost();
-							monitor.incCounter(CassandraClientMonitor.ClientCounter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
+							SkipToNextHost();
+							monitor.IncrementCounter(CassandraClientMonitor.ClientCounter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
 						}
 					}
 					catch (TTransportException e)
@@ -737,20 +665,20 @@ namespace HectorSharp.Service
 						}
 						else
 						{
-							skipToNextHost();
-							monitor.incCounter(CassandraClientMonitor.ClientCounter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
+							SkipToNextHost();
+							monitor.IncrementCounter(CassandraClientMonitor.ClientCounter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
 						}
 					}
 				}
 			}
 			catch (InvalidRequestException e)
 			{
-				monitor.incCounter(op.failCounter);
+				monitor.IncrementCounter(op.failCounter);
 				throw e;
 			}
 			catch (UnavailableException e)
 			{
-				monitor.incCounter(op.failCounter);
+				monitor.IncrementCounter(op.failCounter);
 				throw e;
 			} /*catch (TException e) {
       monitor.incCounter(op.failCounter);
@@ -758,14 +686,14 @@ namespace HectorSharp.Service
     } */
 			catch (TimedOutException e)
 			{
-				monitor.incCounter(op.failCounter);
+				monitor.IncrementCounter(op.failCounter);
 				throw e;
 			}
 			catch (PoolExhaustedException e)
 			{
 				//log.warn("Pool is exhausted", e);
-				monitor.incCounter(op.failCounter);
-				monitor.incCounter(CassandraClientMonitor.ClientCounter.POOL_EXHAUSTED);
+				monitor.IncrementCounter(op.failCounter);
+				monitor.IncrementCounter(CassandraClientMonitor.ClientCounter.POOL_EXHAUSTED);
 				throw new UnavailableException();
 			} /*catch (IllegalStateException e) {
       //log.error("Client Pool is already closed, cannot obtain new clients.", e);
@@ -775,28 +703,115 @@ namespace HectorSharp.Service
 			catch (Exception)
 			{
 				//log.error("Cannot retry failover, got an Exception", e);
-				monitor.incCounter(op.failCounter);
+				monitor.IncrementCounter(op.failCounter);
 				throw new UnavailableException();
 			}
 		}
 
-		public Set<String> getKnownHosts()
+		public List<String> getKnownHosts()
 		{
-			List<String> hosts = new List<String>();
-			hosts.AddRange(knownHosts);
+			var hosts = new List<String>();
+			//hosts.AddRange(knownHosts);
 			return hosts;
 		}
 
-		//@Override
-		public String toString()
+		public override string ToString()
 		{
-			StringBuilder b = new StringBuilder();
-			b.Append("KeyspaceImpl<");
-			b.Append(getClient());
-			b.Append(">");
-			return b.ToString();
+			return string.Format("KeyspaceImpl<{0}>", Client.ToString());
 		}
 
+		
+
+		#region IKeyspace Members
+
+		public IList<Column> GetSlice(string key, ColumnParent columnParent, SlicePredicate predicate)
+		{
+			var op = new Operation<IList<Column>>(CassandraClientMonitor.ClientCounter.READ_FAIL,
+				delegate(Cassandra.Client client)
+				{
+					var cosclist = cassandra.get_slice(Name, key, columnParent, predicate, ConsistencyLevel);
+
+					if (cosclist == null) return null;
+
+					var result = new List<Column>();
+
+					foreach (var cosc in cosclist)
+						result.Add(cosc.Column);
+
+					return result;
+				});
+
+			OperateWithFailover<IList<Column>>(op);
+			return op.Result;
+		}
+
+		public IList<SuperColumn> GetSuperSlice(string key, ColumnParent columnParent, SlicePredicate predicate)
+		{
+			var op = new Operation<IList<SuperColumn>>(CassandraClientMonitor.ClientCounter.READ_FAIL,
+				delegate(Cassandra.Client client)
+				{
+					var cosclist = cassandra.get_slice(Name, key, columnParent, predicate, ConsistencyLevel);
+					if (cosclist == null) return null;
+
+
+					var result = new List<SuperColumn>();
+					foreach (var cosc in cosclist)
+						result.Add(cosc.Super_column);
+					return result;
+				});
+
+			OperateWithFailover<IList<SuperColumn>>(op);
+			return op.Result;
+		}
+
+		public IDictionary<string, Column> MultigetColumn(IList<string> keys, ColumnPath columnPath)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IDictionary<string, SuperColumn> MultigetSuperColumn(IList<string> keys, ColumnPath columnPath)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IDictionary<string, SuperColumn> MultigetSuperColumn(IList<string> keys, ColumnPath columnPath, bool reversed, int size)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IDictionary<string, IList<Column>> MultigetSlice(IList<string> keys, ColumnParent columnParent, SlicePredicate predicate)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IDictionary<string, IList<SuperColumn>> MultigetSuperSlice(IList<string> keys, ColumnParent columnParent, SlicePredicate predicate)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void BatchInsert(string key, Dictionary<string, IList<Column>> cfmap, Dictionary<string, IList<SuperColumn>> superColumnMap)
+		{
+			throw new NotImplementedException();
+		}
+
+		IDictionary<string, IDictionary<string, string>> IKeyspace.DescribeKeyspace()
+		{
+			throw new NotImplementedException();
+		}
+
+		IDictionary<string, IList<Column>> IKeyspace.GetRangeSlice(ColumnParent columnParent, SlicePredicate predicate, string start, string finish, int count)
+		{
+			throw new NotImplementedException();
+		}
+
+		IDictionary<string, IList<SuperColumn>> IKeyspace.GetSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate, string start, string finish, int count)
+		{
+			throw new NotImplementedException();
+		}
+
+		#endregion
+
+		#region Operation<T>
 		delegate T OperationExecuteHandler<T>(Cassandra.Client cassandra);
 
 		/// <summary>
@@ -808,15 +823,14 @@ namespace HectorSharp.Service
 		/// </typeparam>
 		class Operation<T> where T : class
 		{
-			/** Counts failed attempts */
-			static Counter failCounter;
+			internal CassandraClientMonitor.ClientCounter failCounter;
 
 			OperationExecuteHandler<T> executeHandler;
 			NotFoundException exception;
 
 			public Operation(CassandraClientMonitor.ClientCounter failedCounter, OperationExecuteHandler<T> executeHandler)
 			{
-				Operation<T>.failCounter = failedCounter;
+				this.failCounter = failedCounter;
 				this.executeHandler = executeHandler;
 			}
 
@@ -841,13 +855,12 @@ namespace HectorSharp.Service
 			}
 
 			public bool HasError { get { return exception != null; } }
-			public NotFoundException Error 
-			{ 
+			public NotFoundException Error
+			{
 				get { return exception; }
 				set { exception = value; }
 			}
-		}
-
-
+		} 
+		#endregion
 	}
 }

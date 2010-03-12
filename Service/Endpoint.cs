@@ -5,44 +5,60 @@ using System.Text;
 
 namespace HectorSharp.Service
 {
-    public class Endpoint : IComparable<string>, IComparable
-    {
-        string key;
+	public class Endpoint : IComparable<Endpoint>, IComparable<string>, IComparable
+	{
+		string key;
 
-        public Endpoint(string host, int port)
-        {
-            if (string.IsNullOrEmpty(host)) throw new ArgumentNullException(host);
-            if (port == 0) throw new ArgumentOutOfRangeException("port");
+		public Endpoint(string host, int port)
+		{
+			if (string.IsNullOrEmpty(host)) throw new ArgumentNullException(host);
+			if (port == 0) throw new ArgumentOutOfRangeException("port");
 
-            Host = host;
-            Port = port;
-            key = String.Format("{0}:{1}", Host, Port);
-        }
+			Host = host;
+			Port = port;
+			IP = Endpoint.GetIpString(host);
+			key = String.Format("{0}:{1}", Host, Port);
+		}
 
-        public string Host { get; private set; }
-        public int Port { get; private set; }
+		public string Host { get; private set; }
+		public string IP { get; private set; }
+		public int Port { get; private set; }
 
-        public override string ToString()
-        {
-            return key;
-        }
+		static String GetIpString(String host)
+		{
+			return InetAddress.GetByHostName(host).GetHostAddress();
+		}
 
-        #region IComparable<string> Members
+		public override string ToString()
+		{
+			return key;
+		}
 
-        public int CompareTo(string other)
-        {
-            return string.Compare(key, other.ToString());
-        }
+		#region IComparable<string> Members
 
-        #endregion
+		public int CompareTo(string other)
+		{
+			return string.Compare(key, other.ToString());
+		}
 
-        #region IComparable Members
+		#endregion
 
-        public int CompareTo(object obj)
-        {
-            return CompareTo(obj as string);
-        }
+		#region IComparable Members
 
-        #endregion
-    }
+		public int CompareTo(object obj)
+		{
+			return CompareTo(obj as string);
+		}
+
+		#endregion
+
+		#region IComparable<Endpoint> Members
+
+		public int CompareTo(Endpoint other)
+		{
+			return string.Compare(key, other.key);
+		}
+
+		#endregion
+	}
 }

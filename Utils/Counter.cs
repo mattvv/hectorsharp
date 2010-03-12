@@ -10,6 +10,14 @@ namespace HectorSharp.Utils
 	{
 		long count = 0;
 
+		public Counter()
+		{ }
+
+		public Counter(long initialCount)
+		{
+			count = initialCount;
+		}
+
 		public long Increment()
 		{
 			return Interlocked.Increment(ref count);

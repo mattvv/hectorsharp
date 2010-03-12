@@ -45,8 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dao\Command.cs" />
-    <Compile Include="Dao\ExampleDAO.cs" />
+    <None Include="Dao\Command.cs" />
+    <None Include="Dao\ExampleDAO.cs" />
     <Compile Include="lib\Apache\Cassandra\Cassandra.cs" />
     <Compile Include="lib\Apache\Cassandra\Column.cs" />
     <Compile Include="lib\Apache\Cassandra\ColumnOrSuperColumn.cs" />
@@ -94,26 +94,30 @@
     <Compile Include="lib\Thrift\Transport\TTransportException.cs" />
     <Compile Include="lib\Thrift\Transport\TTransportFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\KeyedCassandraClientPool.cs" />
+    <Compile Include="Service\CassandraClientConfig.cs" />
+    <Compile Include="Service\CassandraClientPoolFactory.cs" />
+    <Compile Include="Service\Enums.cs" />
     <Compile Include="Service\Endpoint.cs" />
-    <Compile Include="Service\ICassandraClient.cs" />
+    <Compile Include="Service\FailoverPolicy.cs" />
+    <Compile Include="Service\Interfaces\ICassandraClient.cs" />
     <Compile Include="Service\CassandraClientFactory.cs" />
     <Compile Include="Service\CassandraClient.cs" />
-    <Compile Include="Service\CassandraClientMonitor.cs" />
-    <Compile Include="Service\CassandraClientMonitorMBean.cs" />
-    <Compile Include="Service\CassandraClientPool.cs" />
-    <Compile Include="Service\CassandraClientPoolByHost.cs" />
-    <Compile Include="Service\CassandraClientPoolByHostImpl.cs" />
-    <Compile Include="Service\CassandraClientPoolFactory.cs" />
-    <Compile Include="Service\CassandraClientPoolImpl.cs" />
-    <Compile Include="Service\ExampleClient.cs" />
-    <Compile Include="Service\IKeyspace.cs" />
+    <Compile Include="Service\Legacy\CassandraClientMonitor.cs" />
+    <Compile Include="Service\Interfaces\ICassandraClientMonitor.cs" />
+    <None Include="Service\Legacy\CassandraClientPool.cs" />
+    <None Include="Service\Legacy\CassandraClientPoolByHost.cs" />
+    <None Include="Service\Legacy\CassandraClientPoolByHostImpl.cs" />
+    <None Include="Service\Legacy\CassandraClientPoolFactory.cs" />
+    <None Include="Service\Legacy\CassandraClientPoolImpl.cs" />
+    <None Include="Service\Legacy\ExampleClient.cs" />
+    <Compile Include="Service\Interfaces\IKeyspace.cs" />
     <Compile Include="Service\KeyspaceFactory.cs" />
     <Compile Include="Service\Keyspace.cs" />
     <Compile Include="Service\PoolExhaustedException.cs" />
     <Compile Include="Utils\ConcurrentDictionary.cs" />
     <Compile Include="Utils\Counter.cs" />
     <Compile Include="Utils\ObjectPool\Interfaces.cs" />
+    <Compile Include="Utils\ObjectPool\KeyedObjectPool.cs" />
     <Compile Include="Utils\ObjectPool\ObjectPool.cs" />
     <Compile Include="Utils\StringUtils.cs" />
   </ItemGroup>

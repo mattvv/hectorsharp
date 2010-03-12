@@ -7,31 +7,32 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	class KeyspaceFactory
+	internal class KeyspaceFactory
 	{
-		CassandraClientMonitor clientMonitor;
+		//CassandraClientMonitor clientMonitor;
 
-		public KeyspaceFactory(CassandraClientMonitor clientMonitor)
+		public KeyspaceFactory(/*CassandraClientMonitor clientMonitor*/)
 		{
-			this.clientMonitor = clientMonitor;
+			//this.clientMonitor = clientMonitor;
 		}
 
-		public IKeyspace create(
+		public IKeyspace Create(
 			ICassandraClient client,
-			String keyspaceName,
-			Dictionary<String, Dictionary<String, String>> keyspaceDesc, 
+			string keyspaceName,
+			Dictionary<string, Dictionary<string, string>> keyspaceDesc,
 			ConsistencyLevel consistencyLevel,
 			FailoverPolicy failoverPolicy,
-            IObjectPool<CassandraClient> clientPools)
+			IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 		{
 			return new Keyspace(
-				client, 
-				keyspaceName, 
-				keyspaceDesc, 
+				client,
+				keyspaceName,
+				keyspaceDesc,
 				consistencyLevel,
-				failoverPolicy, 
-				clientPools, 
-				clientMonitor);
+				failoverPolicy,
+				pool//, 
+				//clientMonitor
+				);
 		}
 	}
 }

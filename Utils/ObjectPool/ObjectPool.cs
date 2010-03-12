@@ -262,7 +262,11 @@ namespace HectorSharp.Utils.ObjectPool
 				{
 					obj = idlePool.Dequeue();
 
-					if (!factory.Activate(obj))
+					try
+					{
+						factory.Activate(obj);
+					}
+					catch
 					{
 						Interlocked.Increment(ref failedActivateIdleCount);
 						continue;
@@ -288,7 +292,11 @@ namespace HectorSharp.Utils.ObjectPool
 				if (obj == null)
 					return null;
 
-				if (!factory.Activate(obj))
+				try 
+				{
+					factory.Activate(obj);
+				}
+				catch
 				{
 					Interlocked.Increment(ref failedActivateNewCount);
 					return null;
@@ -341,8 +349,14 @@ namespace HectorSharp.Utils.ObjectPool
 			if (obj == null)
 				return;
 
-			if (!factory.Destroy(obj))
+			try
+			{
+				factory.Destroy(obj);
+			}
+			catch
+			{
 				Interlocked.Increment(ref failedDestroyCount);
+			}
 		}
 
 		private void AssertOpen()

@@ -10,26 +10,32 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	class KeyedCassandraClientFactory : IKeyedPoolableObjectFactory<Endpoint, CassandraClient>
+	class KeyedCassandraClientFactory : IKeyedPoolableObjectFactory<Endpoint, ICassandraClient>
 	{
-		CassandraClientMonitor monitor;
-		KeyedCassandraClientPool keyedPool;
+//		CassandraClientMonitor monitor;
+		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
+		Config config;
+		int timeout = 10;
 
-		int Timeout { get { return 10; } }
-
-		public KeyedCassandraClientFactory(CassandraClientMonitor monitor, KeyedCassandraClientPool keyedPool)
+		public class Config
 		{
-			this.monitor = monitor;
-			this.keyedPool = keyedPool;
+			public int Timeout { get; set; }
+		}
+
+		public KeyedCassandraClientFactory(IKeyedObjectPool<Endpoint, ICassandraClient> pool, Config config)
+		{
+			this.pool = pool;
+			if(config != null)
+				this.timeout = config.Timeout;
 		}
 
 		#region IKeyedPoolableObjectFactory<Endpoint,CassandraClient> Members
 
-		public CassandraClient Make(Endpoint key)
+		public ICassandraClient Make(Endpoint key)
 		{
 			if (key == null) throw new ArgumentNullException("key");
 
-			var transport = new TSocket(key.Host, key.Port, Timeout);
+			var transport = new TSocket(key.Host, key.Port, timeout);
 			var protocol = new TBinaryProtocol(transport);
 			var thriftClient = new Cassandra.Client(protocol);
 
@@ -44,102 +50,30 @@ namespace HectorSharp.Service
 				throw new Exception("Unable to open transport to " + key.ToString() + " , ", e);
 			}
 
-			return new CassandraClient(thriftClient, new KeyspaceFactory(monitor), key, keyedPool.GetPoolByEndpoint(key));
+			return new CassandraClient(thriftClient, new KeyspaceFactory(), key, pool);
 		}
 
-		public void Destroy(Endpoint key, CassandraClient obj)
+		public void Destroy(Endpoint key, ICassandraClient obj)
 		{
 			// ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
 			var thriftClient = obj.Client;
 			thriftClient.InputProtocol.Transport.Close();
 			thriftClient.OutputProtocol.Transport.Close();
-			obj.markAsClosed();
+			obj.MarkAsClosed();
 		}
 
-		public void Activate(Endpoint key, CassandraClient obj)
+		public void Activate(Endpoint key, ICassandraClient obj)
 		{
-			/* no-op */
 		}
 
-		public bool Passivate(Endpoint key, CassandraClient obj)
+		public bool Passivate(Endpoint key, ICassandraClient obj)
 		{
 			return true;
 		}
 
-		public bool Validate(Endpoint key, CassandraClient obj)
+		public bool Validate(Endpoint key, ICassandraClient obj)
 		{
 			return !obj.IsClosed && !obj.HasErrors;
-		}
-
-		#endregion
-	}
-
-
-	class CassandraClientFactory : IPoolableObjectFactory<CassandraClient>
-	{
-		CassandraClientMonitor monitor;
-
-		IObjectPool<CassandraClient> pool;
-		Endpoint endpoint;
-
-		int Timeout { get { return 10; } }
-
-		public CassandraClientFactory(IObjectPool<CassandraClient> pool, Endpoint endpoint, CassandraClientMonitor monitor)
-		{
-			this.pool = pool;
-			this.endpoint = endpoint;
-			this.monitor = monitor;
-		}
-
-		#region IPoolableObjectFactory<CassandraClient> Members
-
-		public CassandraClient Make()
-		{
-			TTransport transport = new TSocket(endpoint.Host, endpoint.Port, Timeout);
-			TProtocol protocol = new TBinaryProtocol(transport);
-			Cassandra.Client thriftClient = new Cassandra.Client(protocol);
-
-			try
-			{
-				transport.Open();
-			}
-			catch (TTransportException e)
-			{
-				// Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
-				// add details to it.
-				throw new Exception("Unable to open transport to " + endpoint.ToString() + " , ", e);
-			}
-
-			return new CassandraClient(thriftClient,
-				 new KeyspaceFactory(monitor), endpoint, pool);
-		}
-
-		public bool Destroy(CassandraClient client)
-		{
-			// ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
-			try
-			{
-				Cassandra.Client thriftClient = client.Client;
-				thriftClient.InputProtocol.Transport.Close();
-				thriftClient.OutputProtocol.Transport.Close();
-				client.markAsClosed();
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		public void Activate(CassandraClient obj)
-		{ /* no-op */ }
-
-		public void Passivate(CassandraClient obj)
-		{ /* no-op */ }
-
-		public bool Validate(CassandraClient client)
-		{
-			return !client.IsClosed && !client.HasErrors;
 		}
 
 		#endregion

@@ -5,10 +5,10 @@ using System.Text;
 
 namespace HectorSharp.Utils.ObjectPool
 {
-    // Object Pool interfaces 
+	// Object Pool interfaces 
 
- 	public interface IObjectPool<T> 
-        where T : class
+	public interface IObjectPool<T>
+		  where T : class
 	{
 		int Active { get; }
 		int Idle { get; }
@@ -21,44 +21,47 @@ namespace HectorSharp.Utils.ObjectPool
 		void SetFactory(IPoolableObjectFactory<T> factory);
 	}
 
-    public interface IKeyedObjectPool<K, V>
-        where K : IComparable
-        where V : class
-    {
-        int GetActiveCount();
-        int GetActiveCount(K key);
-        int GetIdleCount();
-        int GetIdleCount(K key);
+	public interface IKeyedObjectPool<K, V>
+		where K : IComparable
+		where V : class
+	{
+		IEnumerable<K> Keys { get; }
+		bool HasMaxSize { get; }
 
-        V Borrow(K key);
-        void Return(K key, V obj);
-        void Add(K key);
-        void Clear();
-        void Clear(K key);
-        void Close();
+		int GetActiveCount();
+		int GetActiveCount(K key);
+		int GetIdleCount();
+		int GetIdleCount(K key);
 
-        void SetFactory(IKeyedPoolableObjectFactory<K, V> factory);
-    }
+		V Borrow(K key);
+		void Return(K key, V obj);
+		void Add(K key);
+		void Clear();
+		void Clear(K key);
+		void Close();
 
-    // Object pool factory interfaces
+		void SetFactory(IKeyedPoolableObjectFactory<K, V> factory);
+	}
 
-    public interface IObjectPoolFactory<TPoolable> 
-        where TPoolable : class
-    {
-        IObjectPool<TPoolable> CreatePool();
-    }
+	// Object pool factory interfaces
 
-    public interface IKeyedObjectPoolFactory<K, V>
-        where K : IComparable
-        where V : class
-    {
-        IKeyedObjectPool<K, V> CreatePool();
-    }
+	public interface IObjectPoolFactory<T>
+		 where T : class
+	{
+		IObjectPool<T> Create();
+	}
 
-    // Poolable object factory interfaces
+	public interface IKeyedObjectPoolFactory<K, V>
+		where K : IComparable
+		where V : class
+	{
+		IKeyedObjectPool<K, V> Create();
+	}
 
-	public interface IPoolableObjectFactory<T> 
-        where T : class
+	// Poolable object factory interfaces
+
+	public interface IPoolableObjectFactory<T>
+		  where T : class
 	{
 		T Make();
 		void Destroy(T obj);
@@ -67,14 +70,14 @@ namespace HectorSharp.Utils.ObjectPool
 		bool Validate(T obj);
 	}
 
-    public interface IKeyedPoolableObjectFactory<K, V>
-        where K : IComparable
-        where V : class
-    {
-        V Make(K key);
-        void Destroy(K key, V obj);
-        void Activate(K key, V obj);
-        bool Passivate(K key, V obj);
-        bool Validate(K key, V obj);
-    }
+	public interface IKeyedPoolableObjectFactory<K, V>
+		where K : IComparable
+		where V : class
+	{
+		V Make(K key);
+		void Destroy(K key, V obj);
+		void Activate(K key, V obj);
+		bool Passivate(K key, V obj);
+		bool Validate(K key, V obj);
+	}
 }
