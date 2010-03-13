@@ -14,6 +14,7 @@ namespace HectorSharp.Service
 	public interface IKeyspace
 	{
 		string Name { get; }
+		IDictionary<string, IDictionary<string, string>> Description { get; }
 
 		/// <summary>
 		/// The cassandra client object used to obtain this KeySpace.
@@ -71,7 +72,7 @@ namespace HectorSharp.Service
 		/// Either a ColumnFamily name or a ColumnFamily/SuperColumn specified by the given predicate. 
 		/// If no matching values are found, an empty list
 		/// </returns>
-		IList<Column> GetSlice(string key, ColumnParent columnParent, SlicePredicate predicate);
+		IEnumerable<Column> GetSlice(string key, ColumnParent columnParent, SlicePredicate predicate);
 
 		/// <summary>
 		/// Get the group of superColumn contained by columnParent.
@@ -80,7 +81,7 @@ namespace HectorSharp.Service
 		/// <param name="columnParent"></param>
 		/// <param name="predicate"></param>
 		/// <returns></returns>
-		IList<SuperColumn> GetSuperSlice(string key, ColumnParent columnParent, SlicePredicate predicate);
+		IEnumerable<SuperColumn> GetSuperSlice(string key, ColumnParent columnParent, SlicePredicate predicate);
 
 		/// <summary>
 		/// Performs a get for columnPath in parallel on the given list of keys.
@@ -155,7 +156,7 @@ namespace HectorSharp.Service
 		/// <param name="key"></param>
 		/// <param name="cfmap"></param>
 		/// <param name="superColumnMap"></param>
-		void BatchInsert(string key, Dictionary<string, IList<Column>> cfmap, Dictionary<string, IList<SuperColumn>> superColumnMap);
+		void BatchInsert(string key, IDictionary<string, IList<Column>> cfmap, IDictionary<string, IList<SuperColumn>> superColumnMap);
 
 		/// <summary>
 		/// Remove data from the row specified by key at the columnPath.

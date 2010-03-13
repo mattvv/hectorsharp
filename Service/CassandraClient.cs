@@ -19,7 +19,7 @@ namespace HectorSharp.Service
 
 
 		static ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
-		static FailoverStrategy DEFAULT_FAILOVER_STRATEGY = FailoverStrategy.ON_FAIL_TRY_ALL_AVAILABLE;
+		static FailoverPolicy DEFAULT_FAILOVER_POLICY = new FailoverPolicy(0) { Strategy = FailoverStrategy.ON_FAIL_TRY_ALL_AVAILABLE };
 
 		static string PROP_CLUSTER_NAME = "cluster name";
 		static string PROP_CONFIG_FILE = "config file";
@@ -97,7 +97,7 @@ namespace HectorSharp.Service
 
 		public IKeyspace GetKeyspace(string keySpaceName)
 		{
-			return GetKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_STRATEGY);
+			return GetKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
 		}
 
 		public IKeyspace GetKeyspace(string keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)

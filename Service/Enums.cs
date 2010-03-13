@@ -19,4 +19,22 @@ namespace HectorSharp.Service
 	{
 		RoundRobin, LeastUtilized
 	}
+
+	/// <summary>
+	/// available client event counters
+	/// </summary>
+	public enum ClientCounter
+	{
+		RECOVERABLE_TIMED_OUT_EXCEPTIONS,
+		RECOVERABLE_UNAVAILABLE_EXCEPTIONS,
+		RECOVERABLE_TRANSPORT_EXCEPTIONS,
+		SKIP_HOST_SUCCESS,
+		WRITE_SUCCESS,
+		WRITE_FAIL,
+		READ_SUCCESS,
+		READ_FAIL,
+		POOL_EXHAUSTED,
+		/** Load balance connection errors */
+		RECOVERABLE_LB_CONNECT_ERRORS,
+	}
 }

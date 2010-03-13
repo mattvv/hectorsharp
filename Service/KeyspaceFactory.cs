@@ -19,7 +19,7 @@ namespace HectorSharp.Service
 		public IKeyspace Create(
 			ICassandraClient client,
 			string keyspaceName,
-			Dictionary<string, Dictionary<string, string>> keyspaceDesc,
+			IDictionary<string, IDictionary<string, string>> keyspaceDesc,
 			ConsistencyLevel consistencyLevel,
 			FailoverPolicy failoverPolicy,
 			IKeyedObjectPool<Endpoint, ICassandraClient> pool)

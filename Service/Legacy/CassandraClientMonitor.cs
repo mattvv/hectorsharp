@@ -8,29 +8,15 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
+
+
 	class CassandraClientMonitor : ICassandraClientMonitor
 	{
 		//private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
 		Dictionary<ClientCounter, Counter> counters;
 		IKeyedObjectPool<Endpoint, CassandraClient> pool;
 
-		/// <summary>
-		/// List of available JMX counts
-		/// </summary>
-		public enum ClientCounter
-		{
-			RECOVERABLE_TIMED_OUT_EXCEPTIONS,
-			RECOVERABLE_UNAVAILABLE_EXCEPTIONS,
-			RECOVERABLE_TRANSPORT_EXCEPTIONS,
-			SKIP_HOST_SUCCESS,
-			WRITE_SUCCESS,
-			WRITE_FAIL,
-			READ_SUCCESS,
-			READ_FAIL,
-			POOL_EXHAUSTED,
-			/** Load balance connection errors */
-			RECOVERABLE_LB_CONNECT_ERRORS,
-		}
+
 
 		public CassandraClientMonitor()
 		{

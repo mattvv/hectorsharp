@@ -150,13 +150,13 @@ namespace Apache.Cassandra
         throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "get_slice failed: unknown result");
       }
 
-      public Dictionary<string, ColumnOrSuperColumn> multiget(string keyspace, List<string> keys, ColumnPath column_path, ConsistencyLevel consistency_level)
+      public Dictionary<string, ColumnOrSuperColumn> multiget(string keyspace, IList<string> keys, ColumnPath column_path, ConsistencyLevel consistency_level)
       {
         send_multiget(keyspace, keys, column_path, consistency_level);
         return recv_multiget();
       }
 
-      public void send_multiget(string keyspace, List<string> keys, ColumnPath column_path, ConsistencyLevel consistency_level)
+      public void send_multiget(string keyspace, IList<string> keys, ColumnPath column_path, ConsistencyLevel consistency_level)
       {
         oprot_.WriteMessageBegin(new TMessage("multiget", TMessageType.Call, seqid_));
         multiget_args args = new multiget_args();
@@ -195,13 +195,13 @@ namespace Apache.Cassandra
         throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "multiget failed: unknown result");
       }
 
-      public Dictionary<string, List<ColumnOrSuperColumn>> multiget_slice(string keyspace, List<string> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level)
+      public Dictionary<string, List<ColumnOrSuperColumn>> multiget_slice(string keyspace, IList<string> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level)
       {
         send_multiget_slice(keyspace, keys, column_parent, predicate, consistency_level);
         return recv_multiget_slice();
       }
 
-      public void send_multiget_slice(string keyspace, List<string> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level)
+      public void send_multiget_slice(string keyspace, IList<string> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level)
       {
         oprot_.WriteMessageBegin(new TMessage("multiget_slice", TMessageType.Call, seqid_));
         multiget_slice_args args = new multiget_slice_args();
@@ -1766,7 +1766,7 @@ namespace Apache.Cassandra
     public partial class multiget_args : TBase
     {
       private string keyspace;
-      private List<string> keys;
+      private IList<string> keys;
       private ColumnPath column_path;
       private ConsistencyLevel consistency_level;
 
@@ -1783,7 +1783,7 @@ namespace Apache.Cassandra
         }
       }
 
-      public List<string> Keys
+      public IList<string> Keys
       {
         get
         {
@@ -2181,7 +2181,7 @@ namespace Apache.Cassandra
     public partial class multiget_slice_args : TBase
     {
       private string keyspace;
-      private List<string> keys;
+      private IList<string> keys;
       private ColumnParent column_parent;
       private SlicePredicate predicate;
       private ConsistencyLevel consistency_level;
@@ -2199,7 +2199,7 @@ namespace Apache.Cassandra
         }
       }
 
-      public List<string> Keys
+      public IList<string> Keys
       {
         get
         {
