@@ -18,8 +18,8 @@ namespace Apache.Cassandra
     public interface Iface {
       ColumnOrSuperColumn get(string keyspace, string key, ColumnPath column_path, ConsistencyLevel consistency_level);
       List<ColumnOrSuperColumn> get_slice(string keyspace, string key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level);
-      Dictionary<string, ColumnOrSuperColumn> multiget(string keyspace, List<string> keys, ColumnPath column_path, ConsistencyLevel consistency_level);
-      Dictionary<string, List<ColumnOrSuperColumn>> multiget_slice(string keyspace, List<string> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level);
+      Dictionary<string, ColumnOrSuperColumn> multiget(string keyspace, IList<string> keys, ColumnPath column_path, ConsistencyLevel consistency_level);
+      Dictionary<string, List<ColumnOrSuperColumn>> multiget_slice(string keyspace, IList<string> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level);
       int get_count(string keyspace, string key, ColumnParent column_parent, ConsistencyLevel consistency_level);
       List<string> get_key_range(string keyspace, string column_family, string start, string finish, int count, ConsistencyLevel consistency_level);
       List<KeySlice> get_range_slice(string keyspace, ColumnParent column_parent, SlicePredicate predicate, string start_key, string finish_key, int row_count, ConsistencyLevel consistency_level);
@@ -28,7 +28,7 @@ namespace Apache.Cassandra
       void remove(string keyspace, string key, ColumnPath column_path, long timestamp, ConsistencyLevel consistency_level);
       string get_string_property(string property);
       List<string> get_string_list_property(string property);
-      Dictionary<string, Dictionary<string, string>> describe_keyspace(string keyspace);
+      IDictionary<string, IDictionary<string, string>> describe_keyspace(string keyspace);
     }
 
     public class Client : Iface {
@@ -576,7 +576,7 @@ namespace Apache.Cassandra
         throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "get_string_list_property failed: unknown result");
       }
 
-      public Dictionary<string, Dictionary<string, string>> describe_keyspace(string keyspace)
+      public IDictionary<string, IDictionary<string, string>> describe_keyspace(string keyspace)
       {
         send_describe_keyspace(keyspace);
         return recv_describe_keyspace();
@@ -592,7 +592,7 @@ namespace Apache.Cassandra
         oprot_.Transport.Flush();
       }
 
-      public Dictionary<string, Dictionary<string, string>> recv_describe_keyspace()
+      public IDictionary<string, IDictionary<string, string>> recv_describe_keyspace()
       {
         TMessage msg = iprot_.ReadMessageBegin();
         if (msg.Type == TMessageType.Exception) {
@@ -5589,10 +5589,10 @@ namespace Apache.Cassandra
     [Serializable]
     public partial class describe_keyspace_result : TBase
     {
-      private Dictionary<string, Dictionary<string, string>> success;
+      private IDictionary<string, IDictionary<string, string>> success;
       private NotFoundException nfe;
 
-      public Dictionary<string, Dictionary<string, string>> Success
+      public IDictionary<string, IDictionary<string, string>> Success
       {
         get
         {
@@ -5644,7 +5644,7 @@ namespace Apache.Cassandra
             case 0:
               if (field.Type == TType.Map) {
                 {
-                  this.success = new Dictionary<string, Dictionary<string, string>>();
+                  this.success = new Dictionary<string, IDictionary<string, string>>();
                   TMap _map59 = iprot.ReadMapBegin();
                   for( int _i60 = 0; _i60 < _map59.Count; ++_i60)
                   {

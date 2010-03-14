@@ -6,7 +6,6 @@ using Apache.Cassandra;
 
 namespace HectorSharp.Service
 {
-
 	/// <summary>
 	/// The keyspace is a high level handle to all read/write operations to cassandra.
 	/// A Keyspace object is not thread safe. Use one keyspace per thread please!
@@ -15,10 +14,8 @@ namespace HectorSharp.Service
 	{
 		string Name { get; }
 		IDictionary<string, IDictionary<string, string>> Description { get; }
-
-		/// <summary>
-		/// The cassandra client object used to obtain this KeySpace.
-		/// </summary>
+		ConsistencyLevel ConsistencyLevel { get; }
+		FailoverPolicy FailoverPolicy { get; }
 		ICassandraClient Client { get; }
 
 		/// <summary>
@@ -45,8 +42,7 @@ namespace HectorSharp.Service
 		/// <param name="columnPath"></param>
 		/// <returns></returns>
 		SuperColumn GetSuperColumn(string key, ColumnPath columnPath);
-
-
+		
 		/// <summary>
 		/// Get the SuperColumn at the given columnPath.
 		/// If no value is present, NotFoundException is thrown.
@@ -60,8 +56,7 @@ namespace HectorSharp.Service
 		/// <param name="size">column size</param>
 		/// <returns></returns>
 		SuperColumn GetSuperColumn(string key, ColumnPath columnPath, bool reversed, int size);
-
-
+		
 		/// <summary>
 		/// Get the group of columns contained by columnParent.
 		/// </summary>
@@ -171,12 +166,6 @@ namespace HectorSharp.Service
 		void Remove(string key, ColumnPath columnPath);
 
 		/// <summary>
-		/// get a description of the specified keyspace
-		/// </summary>
-		/// <returns></returns>
-		IDictionary<string, IDictionary<string, string>> DescribeKeyspace();
-
-		/// <summary>
 		/// Counts the columns present in columnParent.
 		/// </summary>
 		/// <param name="key"></param>
@@ -211,15 +200,5 @@ namespace HectorSharp.Service
 			ColumnParent columnParent, 
 			SlicePredicate predicate,
 			string start, string finish, int count);
-
-		/// <summary>
-		/// The consistency level held by this keyspace instance.
-		/// </summary>
-		ConsistencyLevel ConsistencyLevel { get; }
-
-		/// <summary>
-		/// The failover policy used by this keyspace.
-		/// </summary>
-		FailoverPolicy FailoverPolicy { get; }
 	}
 }

@@ -21,6 +21,18 @@ namespace Apache.Cassandra
     private byte[] name;
     private List<Column> columns;
 
+	 public SuperColumn(byte[] name, IList<Column> columns)
+	 {
+		 if (name.Length == 0 || columns == null || columns.Count == 0)
+			 throw new ArgumentOutOfRangeException("name or columns missing");
+		 
+		 Name = name;
+		 if (columns is List<Column>)
+			 Columns = (List<Column>)columns;
+		 else
+			Columns = new List<Column>(columns);
+	 }
+
     public byte[] Name
     {
       get

@@ -126,6 +126,8 @@
     <Content Include="lib\Thrift\Thrift.sln" />
     <None Include="LICENSE" />
     <None Include="README" />
+    <Compile Include="Service\Keyspace.Operation.cs" />
+    <Compile Include="Service\Keyspace.IKeyspace.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

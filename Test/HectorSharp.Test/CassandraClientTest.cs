@@ -12,7 +12,7 @@ namespace HectorSharp.Test
 	[TestClass]
 	public class CassandraClientTest
 	{
-		private CassandraClientPool pool;
+		//private CassandraClientPool pool;
 
 
 		public TestContext TestContext { get; set; }
