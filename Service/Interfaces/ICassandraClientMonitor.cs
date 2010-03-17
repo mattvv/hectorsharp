@@ -7,6 +7,7 @@ namespace HectorSharp.Service
 {
 	public interface ICassandraClientMonitor
 	{
+		long IncrementCounter(ClientCounter counter);
 		/// <summary>
 		/// Number of failed (and not-recovered) writes
 		/// </summary>

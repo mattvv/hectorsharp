@@ -10,9 +10,9 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-	class KeyedCassandraClientFactory : IKeyedPoolableObjectFactory<Endpoint, ICassandraClient>
+	public class KeyedCassandraClientFactory : IKeyedPoolableObjectFactory<Endpoint, ICassandraClient>
 	{
-//		CassandraClientMonitor monitor;
+		static ICassandraClientMonitor monitor;
 		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
 		Config config;
 		int timeout = 10;
@@ -24,6 +24,7 @@ namespace HectorSharp.Service
 
 		public KeyedCassandraClientFactory(IKeyedObjectPool<Endpoint, ICassandraClient> pool, Config config)
 		{
+			KeyedCassandraClientFactory.monitor = new CassandraClientMonitor();
 			this.pool = pool;
 			if(config != null)
 				this.timeout = config.Timeout;
@@ -50,7 +51,7 @@ namespace HectorSharp.Service
 				throw new Exception("Unable to open transport to " + key.ToString() + " , ", e);
 			}
 
-			return new CassandraClient(thriftClient, new KeyspaceFactory(), key, pool);
+			return new CassandraClient(thriftClient, new KeyspaceFactory(monitor), key, pool);
 		}
 
 		public void Destroy(Endpoint key, ICassandraClient obj)

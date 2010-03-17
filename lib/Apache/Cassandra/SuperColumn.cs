@@ -12,153 +12,178 @@ using Thrift;
 using Thrift.Collections;
 using Thrift.Protocol;
 using Thrift.Transport;
+using HectorSharp.Utils;
+
 namespace Apache.Cassandra
 {
 
-  [Serializable]
-  public partial class SuperColumn : TBase
-  {
-    private byte[] name;
-    private List<Column> columns;
+	[Serializable]
+	public partial class SuperColumn : TBase
+	{
+		private byte[] name;
+		private List<Column> columns;
 
-	 public SuperColumn(byte[] name, IList<Column> columns)
-	 {
-		 if (name.Length == 0 || columns == null || columns.Count == 0)
-			 throw new ArgumentOutOfRangeException("name or columns missing");
-		 
-		 Name = name;
-		 if (columns is List<Column>)
-			 Columns = (List<Column>)columns;
-		 else
-			Columns = new List<Column>(columns);
-	 }
+		public SuperColumn(string name, IList<Column> columns)
+			: this(name.UTF(), columns)
+		{ }
 
-    public byte[] Name
-    {
-      get
-      {
-        return name;
-      }
-      set
-      {
-        __isset.name = true;
-        this.name = value;
-      }
-    }
+		public SuperColumn(byte[] name, IList<Column> columns)
+		{
+			if (name.Length == 0 || columns == null || columns.Count == 0)
+				throw new ArgumentOutOfRangeException("name or columns missing");
 
-    public List<Column> Columns
-    {
-      get
-      {
-        return columns;
-      }
-      set
-      {
-        __isset.columns = true;
-        this.columns = value;
-      }
-    }
+			Name = name;
+			if (columns is List<Column>)
+				Columns = (List<Column>)columns;
+			else
+				Columns = new List<Column>(columns);
+		}
+
+		public byte[] Name
+		{
+			get
+			{
+				return name;
+			}
+			set
+			{
+				if (value.Length > 0)
+				{
+					__isset.name = true;
+					this.name = value;
+				}
+			}
+		}
+
+		public List<Column> Columns
+		{
+			get
+			{
+				return columns;
+			}
+			set
+			{
+
+				if (value.Count > 0)
+				{
+					__isset.columns = true;
+					this.columns = value;
+				}
+			}
+		}
 
 
-    public Isset __isset;
-    [Serializable]
-    public struct Isset {
-      public bool name;
-      public bool columns;
-    }
+		public Isset __isset;
+		[Serializable]
+		public struct Isset
+		{
+			public bool name;
+			public bool columns;
+		}
 
-    public SuperColumn() {
-    }
+		public SuperColumn()
+		{
+		}
 
-    public void Read (TProtocol iprot)
-    {
-      TField field;
-      iprot.ReadStructBegin();
-      while (true)
-      {
-        field = iprot.ReadFieldBegin();
-        if (field.Type == TType.Stop) { 
-          break;
-        }
-        switch (field.ID)
-        {
-          case 1:
-            if (field.Type == TType.String) {
-              this.name = iprot.ReadBinary();
-              this.__isset.name = true;
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
-            }
-            break;
-          case 2:
-            if (field.Type == TType.List) {
-              {
-                this.columns = new List<Column>();
-                TList _list0 = iprot.ReadListBegin();
-                for( int _i1 = 0; _i1 < _list0.Count; ++_i1)
-                {
-                  Column _elem2 = new Column();
-                  _elem2 = new Column();
-                  _elem2.Read(iprot);
-                  this.columns.Add(_elem2);
-                }
-                iprot.ReadListEnd();
-              }
-              this.__isset.columns = true;
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
-            }
-            break;
-          default: 
-            TProtocolUtil.Skip(iprot, field.Type);
-            break;
-        }
-        iprot.ReadFieldEnd();
-      }
-      iprot.ReadStructEnd();
-    }
+		public void Read(TProtocol iprot)
+		{
+			TField field;
+			iprot.ReadStructBegin();
+			while (true)
+			{
+				field = iprot.ReadFieldBegin();
+				if (field.Type == TType.Stop)
+				{
+					break;
+				}
+				switch (field.ID)
+				{
+					case 1:
+						if (field.Type == TType.String)
+						{
+							this.name = iprot.ReadBinary();
+							this.__isset.name = true;
+						}
+						else
+						{
+							TProtocolUtil.Skip(iprot, field.Type);
+						}
+						break;
+					case 2:
+						if (field.Type == TType.List)
+						{
+							{
+								this.columns = new List<Column>();
+								TList _list0 = iprot.ReadListBegin();
+								for (int _i1 = 0; _i1 < _list0.Count; ++_i1)
+								{
+									Column _elem2 = new Column();
+									_elem2 = new Column();
+									_elem2.Read(iprot);
+									this.columns.Add(_elem2);
+								}
+								iprot.ReadListEnd();
+							}
+							this.__isset.columns = true;
+						}
+						else
+						{
+							TProtocolUtil.Skip(iprot, field.Type);
+						}
+						break;
+					default:
+						TProtocolUtil.Skip(iprot, field.Type);
+						break;
+				}
+				iprot.ReadFieldEnd();
+			}
+			iprot.ReadStructEnd();
+		}
 
-    public void Write(TProtocol oprot) {
-      TStruct struc = new TStruct("SuperColumn");
-      oprot.WriteStructBegin(struc);
-      TField field = new TField();
-      if (this.name != null && __isset.name) {
-        field.Name = "name";
-        field.Type = TType.String;
-        field.ID = 1;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteBinary(this.name);
-        oprot.WriteFieldEnd();
-      }
-      if (this.columns != null && __isset.columns) {
-        field.Name = "columns";
-        field.Type = TType.List;
-        field.ID = 2;
-        oprot.WriteFieldBegin(field);
-        {
-          oprot.WriteListBegin(new TList(TType.Struct, this.columns.Count));
-          foreach (Column _iter3 in this.columns)
-          {
-            _iter3.Write(oprot);
-            oprot.WriteListEnd();
-          }
-        }
-        oprot.WriteFieldEnd();
-      }
-      oprot.WriteFieldStop();
-      oprot.WriteStructEnd();
-    }
+		public void Write(TProtocol oprot)
+		{
+			TStruct struc = new TStruct("SuperColumn");
+			oprot.WriteStructBegin(struc);
+			TField field = new TField();
+			if (this.name != null && __isset.name)
+			{
+				field.Name = "name";
+				field.Type = TType.String;
+				field.ID = 1;
+				oprot.WriteFieldBegin(field);
+				oprot.WriteBinary(this.name);
+				oprot.WriteFieldEnd();
+			}
+			if (this.columns != null && __isset.columns)
+			{
+				field.Name = "columns";
+				field.Type = TType.List;
+				field.ID = 2;
+				oprot.WriteFieldBegin(field);
+				{
+					oprot.WriteListBegin(new TList(TType.Struct, this.columns.Count));
+					foreach (Column _iter3 in this.columns)
+					{
+						_iter3.Write(oprot);
+						oprot.WriteListEnd();
+					}
+				}
+				oprot.WriteFieldEnd();
+			}
+			oprot.WriteFieldStop();
+			oprot.WriteStructEnd();
+		}
 
-    public override string ToString() {
-      StringBuilder sb = new StringBuilder("SuperColumn(");
-      sb.Append("name: ");
-      sb.Append(this.name);
-      sb.Append(",columns: ");
-      sb.Append(this.columns);
-      sb.Append(")");
-      return sb.ToString();
-    }
-
-  }
+		public override string ToString()
+		{
+			StringBuilder sb = new StringBuilder("SuperColumn(");
+			sb.Append("name: ");
+			sb.Append(this.name);
+			sb.Append(",columns: ");
+			sb.Append(this.columns);
+			sb.Append(")");
+			return sb.ToString();
+		}
+	}
 
 }

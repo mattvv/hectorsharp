@@ -48,7 +48,7 @@ namespace HectorSharp.Service
 			/// <returns>null if no execute handler</returns>
 			public void Execute(Cassandra.Client cassandra)
 			{
-				if (Handler != null)
+				if (Handler == null)
 					throw new ApplicationException("Execution Handler was null");
 
 				Result = Handler(cassandra);
@@ -85,7 +85,7 @@ namespace HectorSharp.Service
 			/// <param name="cassandra">client</param>
 			public void Execute(Cassandra.Client client)
 			{
-				if (Handler != null)
+				if (Handler == null)
 					throw new ApplicationException("Execution Handler was null");
 
 				Handler(client);

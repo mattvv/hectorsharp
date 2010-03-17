@@ -19,6 +19,7 @@ namespace HectorSharp.Service
 	{
 		int Port { get; }
 
+		ICassandraClientMonitor Monitor { get; }
 
 		/**
 		 * @return the underline cassandra thrift object, all remote calls will be sent to this client.

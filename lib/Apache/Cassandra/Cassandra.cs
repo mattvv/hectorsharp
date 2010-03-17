@@ -24,7 +24,7 @@ namespace Apache.Cassandra
       List<string> get_key_range(string keyspace, string column_family, string start, string finish, int count, ConsistencyLevel consistency_level);
       List<KeySlice> get_range_slice(string keyspace, ColumnParent column_parent, SlicePredicate predicate, string start_key, string finish_key, int row_count, ConsistencyLevel consistency_level);
       void insert(string keyspace, string key, ColumnPath column_path, byte[] value, long timestamp, ConsistencyLevel consistency_level);
-      void batch_insert(string keyspace, string key, Dictionary<string, List<ColumnOrSuperColumn>> cfmap, ConsistencyLevel consistency_level);
+      void batch_insert(string keyspace, string key, IDictionary<string, IList<ColumnOrSuperColumn>> cfmap, ConsistencyLevel consistency_level);
       void remove(string keyspace, string key, ColumnPath column_path, long timestamp, ConsistencyLevel consistency_level);
       string get_string_property(string property);
       List<string> get_string_list_property(string property);
@@ -425,13 +425,13 @@ namespace Apache.Cassandra
         return;
       }
 
-      public void batch_insert(string keyspace, string key, Dictionary<string, List<ColumnOrSuperColumn>> cfmap, ConsistencyLevel consistency_level)
+      public void batch_insert(string keyspace, string key, IDictionary<string, IList<ColumnOrSuperColumn>> cfmap, ConsistencyLevel consistency_level)
       {
         send_batch_insert(keyspace, key, cfmap, consistency_level);
         recv_batch_insert();
       }
 
-      public void send_batch_insert(string keyspace, string key, Dictionary<string, List<ColumnOrSuperColumn>> cfmap, ConsistencyLevel consistency_level)
+      public void send_batch_insert(string keyspace, string key, IDictionary<string, IList<ColumnOrSuperColumn>> cfmap, ConsistencyLevel consistency_level)
       {
         oprot_.WriteMessageBegin(new TMessage("batch_insert", TMessageType.Call, seqid_));
         batch_insert_args args = new batch_insert_args();
@@ -4392,7 +4392,7 @@ namespace Apache.Cassandra
     {
       private string keyspace;
       private string key;
-      private Dictionary<string, List<ColumnOrSuperColumn>> cfmap;
+      private IDictionary<string, IList<ColumnOrSuperColumn>> cfmap;
       private ConsistencyLevel consistency_level;
 
       public string Keyspace
@@ -4421,7 +4421,7 @@ namespace Apache.Cassandra
         }
       }
 
-      public Dictionary<string, List<ColumnOrSuperColumn>> Cfmap
+      public IDictionary<string, IList<ColumnOrSuperColumn>> Cfmap
       {
         get
         {
@@ -4492,7 +4492,7 @@ namespace Apache.Cassandra
             case 3:
               if (field.Type == TType.Map) {
                 {
-                  this.cfmap = new Dictionary<string, List<ColumnOrSuperColumn>>();
+                  this.cfmap = new Dictionary<string, IList<ColumnOrSuperColumn>>();
                   TMap _map46 = iprot.ReadMapBegin();
                   for( int _i47 = 0; _i47 < _map46.Count; ++_i47)
                   {

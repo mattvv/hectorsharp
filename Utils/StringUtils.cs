@@ -5,16 +5,11 @@ using System.Text;
 
 namespace HectorSharp.Utils
 {
-	/**
-	 * Encoding and decoding utilities.
-	 *
-	 * @author Matt Van Veenendaal (m@mattvv.com)
-	 * @author Ran Tavory (rantav@gmail.com) Original Java Author
-	 *
-	 */
+	/// <summary>
+	/// Encoding and decoding utilities.
+	/// </summary>
 	public static class StringUtils
 	{
-
 		//private static sealed Logger log = LoggerFactory.getLogger(StringUtils.class);
 
 		static ASCIIEncoding ascii = new ASCIIEncoding();
@@ -36,6 +31,11 @@ namespace HectorSharp.Utils
 			return ascii.GetString(instance);
 		}
 
+		public static byte[] UTF(this string instance)
+		{
+			return instance.ToUtf8Bytes();
+		}
+
 		public static byte[] ToUtf8Bytes(this string instance)
 		{
 			if (String.IsNullOrEmpty(instance))
@@ -48,7 +48,7 @@ namespace HectorSharp.Utils
 		{
 			if (instance.Length == 0)
 				return string.Empty;
-			
+
 			return utf8.GetString(instance);
 		}
 

@@ -7,7 +7,7 @@ using Thrift.Transport;
 
 namespace HectorSharp.Service
 {
-	partial class Keyspace 
+	internal partial class Keyspace
 	{
 		// constants
 		public static string CF_TYPE = "Type";
@@ -20,7 +20,7 @@ namespace HectorSharp.Service
 		/** List of all known remote cassandra nodes */
 		List<string> knownHosts = new List<string>();
 		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
-		CassandraClientMonitor monitor;
+		ICassandraClientMonitor monitor;
 
 		public Keyspace(
 			ICassandraClient client,
@@ -28,8 +28,8 @@ namespace HectorSharp.Service
 			IDictionary<string, IDictionary<string, string>> description,
 			ConsistencyLevel consistencyLevel,
 			FailoverPolicy failoverPolicy,
-			IKeyedObjectPool<Endpoint, ICassandraClient> pool
-			/*CassandraClientMonitor monitor*/)
+			IKeyedObjectPool<Endpoint, ICassandraClient> pool,
+			ICassandraClientMonitor monitor)
 		{
 			this.Client = client;
 			this.ConsistencyLevel = consistencyLevel;
@@ -38,58 +38,36 @@ namespace HectorSharp.Service
 			this.cassandra = client.Client;
 			this.FailoverPolicy = failoverPolicy;
 			this.pool = pool;
-			//this.monitor = monitor;
+			this.monitor = monitor;
 			InitFailover();
 		}
 
-		static readonly DateTime Epoch = new DateTime(1970, 1, 1);
-		static long CurrentTimeMillis()
-		{
-			return (long)(DateTime.UtcNow - Epoch).TotalMilliseconds;
-		}
-
-		static long createTimeStamp()
-		{
-			return CurrentTimeMillis();
-		}
-
-		/**
-		 * Make sure that if the given column path was a Column. Throws an
-		 * InvalidRequestException if not.
-		 *
-		 * @param columnPath
-		 * @throws InvalidRequestException
-		 *           if either the column family does not exist or that it's type does
-		 *           not match (super)..
-		 */
-		private void valideColumnPath(ColumnPath columnPath)
+		/// <summary>
+		/// Make sure that if the given column path was a Column. Throws an InvalidRequestException if not.
+		/// </summary>
+		/// <param name="columnPath">if either the column family does not exist or that it's type does not match (super)..</param>
+		void AssertColumnPath(ColumnPath columnPath)
 		//throws InvalidRequestException 
 		{
 			string cf = columnPath.Column_family;
 			IDictionary<string, string> cfdefine;
-			if ((cfdefine = Description[cf]) != null)
-			{
-				if (cfdefine[CF_TYPE].Equals(CF_TYPE_STANDARD) && columnPath.Column != null)
-				{
-					// if the column family is a standard column
-					return;
-				}
-				else if (cfdefine[CF_TYPE].Equals(CF_TYPE_SUPER)
-					 && columnPath.Super_column != null && columnPath.Column != null)
-				{
-					// if the column family is a super column and also give the super_column
-					// name
-					return;
-				}
-			}
-			throw new InvalidRequestException("The specified column family does not exist: " + cf);
+			if (!Description.ContainsKey(cf))
+				throw new InvalidRequestException("The specified column family does not exist: " + cf);
+
+			cfdefine = Description[cf];
+
+			if (cfdefine[CF_TYPE].Equals(CF_TYPE_STANDARD) && columnPath.Column != null)
+				return; // if the column family is a standard column
+			else if (cfdefine[CF_TYPE].Equals(CF_TYPE_SUPER) && columnPath.Super_column != null && columnPath.Column != null)
+				// if the column family is a super column and also give the super_column name
+				return;
 		}
 
 		/// <summary>
 		///Make sure that the given column path is a SuperColumn in the DB, Throws an exception if it's not.
 		/// </summary>
 		/// <param name="columnPath"></param>
-		void valideSuperColumnPath(ColumnPath columnPath)
+		void AssertSuperColumnPath(ColumnPath columnPath)
 		//throws InvalidRequestException 
 		{
 			var cf = columnPath.Column_family;
@@ -248,35 +226,35 @@ namespace HectorSharp.Service
 						//   log.debug("Operation succeeded on {}", client.getUrl());
 						return;
 					}
-					catch (TimedOutException e)
+					catch (TimedOutException)
 					{
 						//   log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
 						if (retries == 0)
-							throw e;
+							throw;
 						else
 						{
 							SkipToNextHost();
 							monitor.IncrementCounter(ClientCounter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
 						}
 					}
-					catch (UnavailableException e)
+					catch (UnavailableException)
 					{
 						//  log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
 						//      retries);
 						if (retries == 0)
-							throw e;
+							throw;
 						else
 						{
 							SkipToNextHost();
 							monitor.IncrementCounter(ClientCounter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
 						}
 					}
-					catch (TTransportException e)
+					catch (TTransportException)
 					{
 						//   log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
 						//       retries);
 						if (retries == 0)
-							throw e;
+							throw;
 						else
 						{
 							SkipToNextHost();
@@ -285,25 +263,25 @@ namespace HectorSharp.Service
 					}
 				}
 			}
-			catch (InvalidRequestException e)
+			catch (InvalidRequestException)
 			{
 				monitor.IncrementCounter(op.FailCounter);
-				throw e;
+				throw;
 			}
-			catch (UnavailableException e)
+			catch (UnavailableException)
 			{
 				monitor.IncrementCounter(op.FailCounter);
-				throw e;
+				throw;
 			} /*catch (TException e) {
       monitor.incCounter(op.failCounter);
       throw e;
     } */
-			catch (TimedOutException e)
+			catch (TimedOutException)
 			{
 				monitor.IncrementCounter(op.FailCounter);
-				throw e;
+				throw;
 			}
-			catch (PoolExhaustedException e)
+			catch (PoolExhaustedException)
 			{
 				//log.warn("Pool is exhausted", e);
 				monitor.IncrementCounter(op.FailCounter);

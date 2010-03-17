@@ -9,11 +9,11 @@ namespace HectorSharp.Service
 {
 	internal class KeyspaceFactory
 	{
-		//CassandraClientMonitor clientMonitor;
+		ICassandraClientMonitor monitor;
 
-		public KeyspaceFactory(/*CassandraClientMonitor clientMonitor*/)
+		public KeyspaceFactory(ICassandraClientMonitor monitor)
 		{
-			//this.clientMonitor = clientMonitor;
+			this.monitor = monitor;
 		}
 
 		public IKeyspace Create(
@@ -30,8 +30,8 @@ namespace HectorSharp.Service
 				keyspaceDesc,
 				consistencyLevel,
 				failoverPolicy,
-				pool//, 
-				//clientMonitor
+				pool, 
+				monitor
 				);
 		}
 	}

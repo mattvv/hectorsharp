@@ -8,15 +8,11 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
-
-
-	class CassandraClientMonitor : ICassandraClientMonitor
+	public class CassandraClientMonitor : ICassandraClientMonitor
 	{
 		//private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
 		Dictionary<ClientCounter, Counter> counters;
 		IKeyedObjectPool<Endpoint, CassandraClient> pool;
-
-
 
 		public CassandraClientMonitor()
 		{
@@ -27,9 +23,9 @@ namespace HectorSharp.Service
 				counters[(ClientCounter)counter] = new Counter();
 		}
 
-		public void IncrementCounter(ClientCounter counter)
+		public long IncrementCounter(ClientCounter counter)
 		{
-			counters[counter].Increment();
+			return counters[counter].Increment();
 		}
 
 		public long getWriteSuccess()

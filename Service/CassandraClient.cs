@@ -13,11 +13,9 @@ namespace HectorSharp.Service
 	/// <summary>
 	/// Implementation of the client interface.
 	/// </summary>
-	public class CassandraClient : ICassandraClient
+	public partial class CassandraClient : ICassandraClient
 	{
 		static Nullable<int> port = null;
-
-
 		static ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
 		static FailoverPolicy DEFAULT_FAILOVER_POLICY = new FailoverPolicy(0) { Strategy = FailoverStrategy.ON_FAIL_TRY_ALL_AVAILABLE };
 
@@ -49,6 +47,7 @@ namespace HectorSharp.Service
 		bool hasErrors = false;
 
 		public int Port { get { return port.HasValue ? port.Value : -1; } }
+		public ICassandraClientMonitor Monitor { get; private set; }
 		
 		#region ctor
 		internal CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
@@ -56,7 +55,7 @@ namespace HectorSharp.Service
 			this.mySerial = serial.Increment();
 			cassandra = thriftClient;
 			this.keyspaceFactory = keyspaceFactory;
-
+			
 			if (endpoint == null)
 				throw new ArgumentNullException("endpoint");
 
@@ -102,9 +101,13 @@ namespace HectorSharp.Service
 
 		public IKeyspace GetKeyspace(string keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
 		{
-			var keyspaceMapKey = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
-			var keyspace = keyspaceMap[keyspaceMapKey];
-			if (keyspace == null)
+			var key = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
+			
+			Keyspace keyspace;
+
+			if (keyspaceMap.ContainsKey(key))
+				keyspace = keyspaceMap[key];
+			else
 			{
 				if (Keyspaces.Contains(keyspaceName))
 				{
@@ -112,21 +115,17 @@ namespace HectorSharp.Service
 					keyspace = (Keyspace)keyspaceFactory.Create(this, keyspaceName, keyspaceDesc,
 						 consistencyLevel, failoverPolicy, pool);
 					Keyspace tmp = null;
-					if (!keyspaceMap.ContainsKey(keyspaceMapKey))
+					if (!keyspaceMap.ContainsKey(key))
 					{
-						keyspaceMap.Add(keyspaceMapKey, keyspace);
-						tmp = keyspaceMap[keyspaceMapKey];
+						keyspaceMap.Add(key, keyspace);
+						tmp = keyspaceMap[key];
 					}
 					if (tmp != null)
-					{
 						// There was another put that got here before we did.
 						keyspace = tmp;
-					}
 				}
 				else
-				{
 					throw new Exception("Requested key space not exist, keyspaceName=" + keyspaceName);
-				}
 			}
 			return keyspace;
 		}

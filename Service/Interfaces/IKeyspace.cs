@@ -144,6 +144,7 @@ namespace HectorSharp.Service
 		/// <param name="columnPath"></param>
 		/// <param name="value"></param>
 		void Insert(string key, ColumnPath columnPath, byte[] value);
+		void Insert(string key, ColumnPath columnPath, string value);
 
 		/// <summary>
 		/// Insert Columns or SuperColumns across different Column Families for the same row key.

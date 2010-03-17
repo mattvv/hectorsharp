@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Apache.Cassandra;
+using HectorSharp.Utils;
 
 namespace HectorSharp.Service
 {
@@ -15,7 +16,7 @@ namespace HectorSharp.Service
 
 		public Column GetColumn(string key, ColumnPath columnPath)
 		{
-			valideColumnPath(columnPath);
+			AssertColumnPath(columnPath);
 
 			var op = new Operation<Column>(ClientCounter.READ_FAIL);
 			op.Handler = client =>
@@ -47,7 +48,7 @@ namespace HectorSharp.Service
 		//Override
 		public SuperColumn GetSuperColumn(string key, ColumnPath columnPath, bool reversed, int size)
 		{
-			valideSuperColumnPath(columnPath);
+			AssertSuperColumnPath(columnPath);
 
 			var sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
 
@@ -95,7 +96,7 @@ namespace HectorSharp.Service
 
 		public IDictionary<string, Column> MultigetColumn(IList<string> keys, ColumnPath columnPath)
 		{
-			valideColumnPath(columnPath);
+			AssertColumnPath(columnPath);
 
 			var op = new Operation<IDictionary<string, Column>>(ClientCounter.READ_FAIL,
 				client =>
@@ -120,7 +121,7 @@ namespace HectorSharp.Service
 
 		public IDictionary<string, SuperColumn> MultigetSuperColumn(IList<string> keys, ColumnPath columnPath, bool reversed, int size)
 		{
-			valideSuperColumnPath(columnPath);
+			AssertSuperColumnPath(columnPath);
 
 			var result = new Dictionary<string, SuperColumn>();
 
@@ -231,14 +232,19 @@ namespace HectorSharp.Service
 
 		public void Insert(string key, ColumnPath columnPath, byte[] value)
 		{
-			valideColumnPath(columnPath);
+			AssertColumnPath(columnPath);
 
 			var op = new VoidOperation(ClientCounter.WRITE_FAIL,
 				client =>
 				{
-					client.insert(Name, key, columnPath, value, createTimeStamp(), ConsistencyLevel);
+					client.insert(Name, key, columnPath, value, Util.UnixTimestamp, ConsistencyLevel);
 				});
 			OperateWithFailover(op);
+		}
+
+		public void Insert(string key, ColumnPath columnPath, string value)
+		{
+			Insert(key, columnPath, value.UTF());
 		}
 
 		public void BatchInsert(string key, IDictionary<string, IList<Column>> columnMap, IDictionary<string, IList<SuperColumn>> superColumnMap)
@@ -246,13 +252,15 @@ namespace HectorSharp.Service
 			if (columnMap == null && superColumnMap == null)
 				throw new Exception("columnMap and SuperColumnMap can not be null at same time");
 
-			var cfmap = new Dictionary<string, List<ColumnOrSuperColumn>>();
+			var cfmap = new Dictionary<string, IList<ColumnOrSuperColumn>>();
 
-			foreach (var map in columnMap)
-				cfmap.Add(map.Key, GetSoscList(map.Value));
+			if (columnMap != null)
+				foreach (var map in columnMap)
+					cfmap.Add(map.Key, GetSoscList(map.Value));
 
-			foreach (var map in superColumnMap)
-				cfmap.Add(map.Key, GetSoscSuperList(map.Value));
+			if (superColumnMap != null)
+				foreach (var map in superColumnMap)
+					cfmap.Add(map.Key, GetSoscSuperList(map.Value));
 
 			var op = new VoidOperation(ClientCounter.WRITE_FAIL,
 				client => client.batch_insert(Name, key, cfmap, ConsistencyLevel)
@@ -266,7 +274,7 @@ namespace HectorSharp.Service
 			var op = new VoidOperation(ClientCounter.WRITE_FAIL,
 				client =>
 				{
-					client.remove(Name, key, columnPath, createTimeStamp(), ConsistencyLevel);
+					client.remove(Name, key, columnPath, Util.UnixTimestamp, ConsistencyLevel);
 				}
 			);
 			OperateWithFailover(op);

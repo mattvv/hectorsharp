@@ -102,7 +102,7 @@
     <Compile Include="Service\Interfaces\ICassandraClient.cs" />
     <Compile Include="Service\CassandraClientFactory.cs" />
     <Compile Include="Service\CassandraClient.cs" />
-    <Compile Include="Service\Legacy\CassandraClientMonitor.cs" />
+    <Compile Include="Service\CassandraClientMonitor.cs" />
     <Compile Include="Service\Interfaces\ICassandraClientMonitor.cs" />
     <None Include="Service\Legacy\CassandraClientPool.cs" />
     <None Include="Service\Legacy\CassandraClientPoolByHost.cs" />
@@ -128,6 +128,7 @@
     <None Include="README" />
     <Compile Include="Service\Keyspace.Operation.cs" />
     <Compile Include="Service\Keyspace.IKeyspace.cs" />
+    <Compile Include="Utils\Util.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
