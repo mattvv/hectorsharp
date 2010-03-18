@@ -186,6 +186,33 @@ namespace HectorSharp.Test
 			Keyspace.Remove("GetSuperSlice", new ColumnPath("Super1"));
 		}
 
+		[Fact]
+		public void MultigetColumn()
+		{
+			// insert
+			var columnPath = new ColumnPath("Standard1", null, "MultigetColumn");
+			var keys = new List<string>();
+			for (int i = 0; i < 100; i++)
+			{
+				var key = "MultigetColumn." + i;
+				Keyspace.Insert(key, columnPath, "MultigetColumn.value." + i);
+				keys.Add(key);
+			}
+
+			// get
+			var ms = Keyspace.MultigetColumn(keys, columnPath);
+			for (int i = 0; i < 100; i++)
+			{
+				var column = ms[keys[i]];
+				Assert.NotNull(column);
+				Assert.Equal("MultigetColumn.value." + i, column.Value);
+			}
+
+			// remove
+			for (int i = 0; i < 100; i++)
+				Keyspace.Remove("MultigetColumn." + i, columnPath);
+		}
+
 
 		#region IUseFixture<CassandraTestFixture> Members
 
