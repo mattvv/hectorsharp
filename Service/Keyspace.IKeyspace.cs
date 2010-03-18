@@ -55,10 +55,10 @@ namespace HectorSharp.Service
 			var op = new Operation<SuperColumn>(ClientCounter.READ_FAIL,
 				client =>
 				{
-					var columnParent = new ColumnParent(columnPath.Column_family, columnPath.Super_column);
+					var columnParent = new ColumnParent(columnPath.ColumnFamily, columnPath.SuperColumn);
 					var predicate = new SlicePredicate(null, sliceRange);
 					var data = client.get_slice(Name, key, columnParent, predicate, ConsistencyLevel);
-					return new SuperColumn(columnPath.Super_column, GetColumnList(data));
+					return new SuperColumn(columnPath.SuperColumn, GetColumnList(data));
 				});
 
 			OperateWithFailover(op);
@@ -126,7 +126,7 @@ namespace HectorSharp.Service
 			var result = new Dictionary<string, SuperColumn>();
 
 			// only can get supercolumn by multigetSuperSlice
-			var clp = new ColumnParent(columnPath.Column_family, columnPath.Super_column);
+			var clp = new ColumnParent(columnPath.ColumnFamily, columnPath.SuperColumn);
 			var sr = new SliceRange(new byte[0], new byte[0], reversed, size);
 			var sp = new SlicePredicate(null, sr);
 			var sclist = MultigetSuperSlice(keys, clp, sp);

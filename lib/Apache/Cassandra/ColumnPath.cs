@@ -19,89 +19,30 @@ namespace Apache.Cassandra
 {
 
 	[Serializable]
-	[DebuggerDisplay("Family: {column_family}, Super Column: {SC}, Column: {C}")]
 	public partial class ColumnPath : TBase
 	{
-		private string column_family;
-		private byte[] super_column;
-		private byte[] column;
+		public string ColumnFamily { get; private set; }
+		public string SuperColumn { get; private set; }
+		public string Column { get; private set; }
 
-		public ColumnPath(string column_family, byte[] super_column, byte[] column)
+		public ColumnPath(string columnFamily)
 		{
-			Column_family = column_family;
-			Super_column = super_column;
-			Column = column;
+			if (String.IsNullOrEmpty(columnFamily))
+				throw new ArgumentNullException("columnFamily");
+			ColumnFamily = columnFamily;
 		}
 
-		public ColumnPath(string column_family, string super_column, string column)
-			: this(column_family, super_column.UTF(), column.UTF())
-		{ }
-
-		string SC { get { return super_column.DecodeUtf8String(); } }
-		string C { get { return column.DecodeUtf8String(); } }
-
-		public string Column_family
+		public ColumnPath(string columnFamily, string superColumn, string column)
+			: this (columnFamily)
 		{
-			get
-			{
-				return column_family;
-			}
-			set
-			{
-				var v = value.Trim();
-				if (v.Length > 0)
-				{
-					__isset.column_family = true;
-					this.column_family = v;
-				}
-			}
-		}
-
-		public byte[] Super_column
-		{
-			get
-			{
-				return super_column;
-			}
-			set
-			{
-				if (value.Length > 0)
-				{
-					__isset.super_column = true;
-					this.super_column = value;
-				}
-			}
-		}
-
-		public byte[] Column
-		{
-			get
-			{
-				return column;
-			}
-			set
-			{
-				if (value.Length > 0)
-				{
-					__isset.column = true;
-					this.column = value;
-				}
-			}
-		}
-
-
-		public Isset __isset;
-		[Serializable]
-		public struct Isset
-		{
-			public bool column_family;
-			public bool super_column;
-			public bool column;
+			if (!String.IsNullOrEmpty(superColumn))
+				SuperColumn = superColumn;
+			if (!String.IsNullOrEmpty(column))
+				Column = column;
 		}
 
 		public ColumnPath()
-		{
-		}
+		{ }
 
 		public void Read(TProtocol iprot)
 		{
@@ -111,44 +52,39 @@ namespace Apache.Cassandra
 			{
 				field = iprot.ReadFieldBegin();
 				if (field.Type == TType.Stop)
-				{
 					break;
-				}
+				
 				switch (field.ID)
 				{
 					case 3:
 						if (field.Type == TType.String)
-						{
-							this.column_family = iprot.ReadString();
-							this.__isset.column_family = true;
-						}
+							ColumnFamily = iprot.ReadString();
 						else
-						{
 							TProtocolUtil.Skip(iprot, field.Type);
-						}
 						break;
+
 					case 4:
 						if (field.Type == TType.String)
 						{
-							this.super_column = iprot.ReadBinary();
-							this.__isset.super_column = true;
+							var value = iprot.ReadBinary();
+							if (value.Length > 0)
+								SuperColumn = value.DecodeUtf8String();
 						}
 						else
-						{
 							TProtocolUtil.Skip(iprot, field.Type);
-						}
 						break;
+
 					case 5:
 						if (field.Type == TType.String)
 						{
-							this.column = iprot.ReadBinary();
-							this.__isset.column = true;
+							var value = iprot.ReadBinary();
+							if (value.Length > 0)
+								Column = value.DecodeUtf8String();
 						}
 						else
-						{
 							TProtocolUtil.Skip(iprot, field.Type);
-						}
 						break;
+
 					default:
 						TProtocolUtil.Skip(iprot, field.Type);
 						break;
@@ -163,31 +99,31 @@ namespace Apache.Cassandra
 			TStruct struc = new TStruct("ColumnPath");
 			oprot.WriteStructBegin(struc);
 			TField field = new TField();
-			if (this.column_family != null && __isset.column_family)
+			if (!String.IsNullOrEmpty(ColumnFamily)) 
 			{
 				field.Name = "column_family";
 				field.Type = TType.String;
 				field.ID = 3;
 				oprot.WriteFieldBegin(field);
-				oprot.WriteString(this.column_family);
+				oprot.WriteString(ColumnFamily);
 				oprot.WriteFieldEnd();
 			}
-			if (this.super_column != null && __isset.super_column)
+			if (!String.IsNullOrEmpty(SuperColumn)) 
 			{
 				field.Name = "super_column";
 				field.Type = TType.String;
 				field.ID = 4;
 				oprot.WriteFieldBegin(field);
-				oprot.WriteBinary(this.super_column);
+				oprot.WriteBinary(SuperColumn.UTF());
 				oprot.WriteFieldEnd();
 			}
-			if (this.column != null && __isset.column)
+			if (!String.IsNullOrEmpty(Column))
 			{
 				field.Name = "column";
 				field.Type = TType.String;
 				field.ID = 5;
 				oprot.WriteFieldBegin(field);
-				oprot.WriteBinary(this.column);
+				oprot.WriteBinary(Column.UTF());
 				oprot.WriteFieldEnd();
 			}
 			oprot.WriteFieldStop();
@@ -196,17 +132,10 @@ namespace Apache.Cassandra
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder("ColumnPath(");
-			sb.Append("column_family: ");
-			sb.Append(this.column_family);
-			sb.Append(",super_column: ");
-			sb.Append(this.super_column);
-			sb.Append(",column: ");
-			sb.Append(this.column);
-			sb.Append(")");
-			return sb.ToString();
+			return string.Format("ColumnPath(column_family: {0}, super_column: {1}, column: {2})",
+				!String.IsNullOrEmpty(ColumnFamily) ? ColumnFamily : "(null)",
+				!String.IsNullOrEmpty(SuperColumn) ? SuperColumn : "(null)",
+				!String.IsNullOrEmpty(Column) ? Column : "(null)");
 		}
-
 	}
-
 }

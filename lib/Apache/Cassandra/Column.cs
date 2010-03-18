@@ -16,80 +16,50 @@ using HectorSharp.Utils;
 
 namespace Apache.Cassandra
 {
-
 	[Serializable]
 	public partial class Column : TBase
 	{
-		private byte[] name;
-		private byte[] value;
-		private long timestamp;
+		//byte[] name;
+		//byte[] value;
+		long? timestamp;
+
+		public Column()
+		{ }
 
 		public Column(byte[] name, byte[] value, long timestamp)
 		{
-			Name = name;
-			Value = value;
-			Timestamp = timestamp;
+			if(name != null && name.Length > 0)
+				Name = name.DecodeUtf8String();
+			if (value != null && value.Length > 0)
+				Value = value.DecodeUtf8String();
+			if(timestamp > 0)
+				this.timestamp = timestamp;
 		}
 
 		public Column(string name, string value, long timestamp)
-			: this(name.UTF(), value.UTF(), timestamp)
-		{ }
+		{
+			if(!String.IsNullOrEmpty(name))
+				Name = name;
+			if (!String.IsNullOrEmpty(value))
+				Value = value;
+			if (timestamp > 0)
+				this.timestamp = timestamp;
+		}
 
 		public Column(string name, string value)
 			: this(name, value, Util.UnixTimestamp)
 		{ }
 
-		public byte[] Name
-		{
-			get
-			{
-				return name;
-			}
-			set
-			{
-				__isset.name = true;
-				this.name = value;
-			}
-		}
-
-		public byte[] Value
-		{
-			get
-			{
-				return value;
-			}
-			set
-			{
-				__isset.value = true;
-				this.value = value;
-			}
-		}
-
+		public string Name { get; set; }
+		public string Value { get; set; }
 		public long Timestamp
 		{
 			get
 			{
-				return timestamp;
+				if (timestamp.HasValue)
+					return timestamp.Value;
+				return 0;
 			}
-			set
-			{
-				__isset.timestamp = true;
-				this.timestamp = value;
-			}
-		}
-
-
-		public Isset __isset;
-		[Serializable]
-		public struct Isset
-		{
-			public bool name;
-			public bool value;
-			public bool timestamp;
-		}
-
-		public Column()
-		{
 		}
 
 		public void Read(TProtocol iprot)
@@ -108,8 +78,10 @@ namespace Apache.Cassandra
 					case 1:
 						if (field.Type == TType.String)
 						{
-							this.name = iprot.ReadBinary();
-							this.__isset.name = true;
+							var name = iprot.ReadBinary();
+							if (name.Length > 0)
+								Name = name.DecodeUtf8String();
+							//this.__isset.name = true;
 						}
 						else
 						{
@@ -119,8 +91,9 @@ namespace Apache.Cassandra
 					case 2:
 						if (field.Type == TType.String)
 						{
-							this.value = iprot.ReadBinary();
-							this.__isset.value = true;
+							var value = iprot.ReadBinary();
+							if (value.Length > 0) Value = value.DecodeUtf8String();
+							//this.__isset.value = true;
 						}
 						else
 						{
@@ -131,7 +104,7 @@ namespace Apache.Cassandra
 						if (field.Type == TType.I64)
 						{
 							this.timestamp = iprot.ReadI64();
-							this.__isset.timestamp = true;
+							//this.__isset.timestamp = true;
 						}
 						else
 						{
@@ -152,31 +125,31 @@ namespace Apache.Cassandra
 			TStruct struc = new TStruct("Column");
 			oprot.WriteStructBegin(struc);
 			TField field = new TField();
-			if (this.name != null && __isset.name)
+			if (!String.IsNullOrEmpty(Name)) // this.name != null && __isset.name)
 			{
 				field.Name = "name";
 				field.Type = TType.String;
 				field.ID = 1;
 				oprot.WriteFieldBegin(field);
-				oprot.WriteBinary(this.name);
+				oprot.WriteBinary(Name.UTF());
 				oprot.WriteFieldEnd();
 			}
-			if (this.value != null && __isset.value)
+			if (!String.IsNullOrEmpty(Value)) // this.value != null && __isset.value)
 			{
 				field.Name = "value";
 				field.Type = TType.String;
 				field.ID = 2;
 				oprot.WriteFieldBegin(field);
-				oprot.WriteBinary(this.value);
+				oprot.WriteBinary(Value.UTF());
 				oprot.WriteFieldEnd();
 			}
-			if (__isset.timestamp)
+			if (timestamp.HasValue) //  __isset.timestamp)
 			{
 				field.Name = "timestamp";
 				field.Type = TType.I64;
 				field.ID = 3;
 				oprot.WriteFieldBegin(field);
-				oprot.WriteI64(this.timestamp);
+				oprot.WriteI64(timestamp.Value);
 				oprot.WriteFieldEnd();
 			}
 			oprot.WriteFieldStop();
@@ -185,15 +158,10 @@ namespace Apache.Cassandra
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder("Column(");
-			sb.Append("name: ");
-			sb.Append(this.name);
-			sb.Append(",value: ");
-			sb.Append(this.value);
-			sb.Append(",timestamp: ");
-			sb.Append(this.timestamp);
-			sb.Append(")");
-			return sb.ToString();
+			return String.Format("Column(name: {0}, value: {1}, timestamp: {2})",
+				!String.IsNullOrEmpty(Name) ? Name : "(null)",
+				!String.IsNullOrEmpty(Value) ? Value : "(null)",
+				timestamp.HasValue ? timestamp.Value.ToString() : "(null)");
 		}
 
 	}

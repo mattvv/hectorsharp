@@ -20,10 +20,8 @@ namespace HectorSharp.Service
 
 		/// <summary>
 		/// Get the Column at the given columnPath.
-		/// If no value is present, NotFoundException is thrown.
-		/// @throws NotFoundException
-		///	if no value exists for the column
 		/// </summary>
+		/// <exception cref="NotFoundException">If no value is present</exception>
 		/// <param name="key"></param>
 		/// <param name="columnPath"></param>
 		/// <returns></returns>
@@ -31,13 +29,10 @@ namespace HectorSharp.Service
 
 		/// <summary>
 		/// Get the SuperColumn at the given columnPath.
-		/// If no value is present, NotFoundException is thrown.
 		/// by default will return column with native order and the size of the list is
 		/// unlimited (so be careful...)
-		/// 
-		/// @throws NotFoundException
-		///	when a supercolumn is not found
 		/// </summary>
+		/// <exception cref="NotFoundException">If no value is present</exception>
 		/// <param name="key"></param>
 		/// <param name="columnPath"></param>
 		/// <returns></returns>
@@ -45,11 +40,9 @@ namespace HectorSharp.Service
 		
 		/// <summary>
 		/// Get the SuperColumn at the given columnPath.
-		/// If no value is present, NotFoundException is thrown.
-		/// 		@throws NotFoundException
-		/// 		when a supercolumn is not found
 		/// </summary>
 		/// <remarks>by default will return column with native order and the size of the list is unlimited (so be careful...)</remarks>
+		/// <exception cref="NotFoundException">If no value is present</exception>
 		/// <param name="key"></param>
 		/// <param name="columnPath"></param>
 		/// <param name="reversed">reverse column sort order</param>

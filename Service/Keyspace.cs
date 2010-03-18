@@ -49,7 +49,7 @@ namespace HectorSharp.Service
 		void AssertColumnPath(ColumnPath columnPath)
 		//throws InvalidRequestException 
 		{
-			string cf = columnPath.Column_family;
+			string cf = columnPath.ColumnFamily;
 			IDictionary<string, string> cfdefine;
 			if (!Description.ContainsKey(cf))
 				throw new InvalidRequestException("The specified column family does not exist: " + cf);
@@ -58,7 +58,7 @@ namespace HectorSharp.Service
 
 			if (cfdefine[CF_TYPE].Equals(CF_TYPE_STANDARD) && columnPath.Column != null)
 				return; // if the column family is a standard column
-			else if (cfdefine[CF_TYPE].Equals(CF_TYPE_SUPER) && columnPath.Super_column != null && columnPath.Column != null)
+			else if (cfdefine[CF_TYPE].Equals(CF_TYPE_SUPER) && columnPath.SuperColumn != null && columnPath.Column != null)
 				// if the column family is a super column and also give the super_column name
 				return;
 		}
@@ -70,10 +70,10 @@ namespace HectorSharp.Service
 		void AssertSuperColumnPath(ColumnPath columnPath)
 		//throws InvalidRequestException 
 		{
-			var cf = columnPath.Column_family;
+			var cf = columnPath.ColumnFamily;
 			IDictionary<string, string> cfdefine;
 			if ((cfdefine = Description[cf]) != null && cfdefine[CF_TYPE].Equals(CF_TYPE_SUPER)
-				 && columnPath.Super_column != null)
+				 && columnPath.SuperColumn != null)
 			{
 				return;
 			}
@@ -206,7 +206,6 @@ namespace HectorSharp.Service
 		/// <summary>
 		/// Performs the operation and retries in in case the class is configured for
 		/// retries, and there are enough hosts to try and the error was 
-		/// {@link TimedOutException}.
 		/// </summary>
 		/// <param name="op"></param>
 		void OperateWithFailover(IOperation op)
@@ -249,7 +248,7 @@ namespace HectorSharp.Service
 							monitor.IncrementCounter(ClientCounter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
 						}
 					}
-					catch (TTransportException)
+					catch (TTransportException ex)
 					{
 						//   log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
 						//       retries);
@@ -292,7 +291,7 @@ namespace HectorSharp.Service
       monitor.incCounter(op.failCounter);
       throw new UnavailableException();
     } */
-			catch (Exception)
+			catch (Exception ex)
 			{
 				//log.error("Cannot retry failover, got an Exception", e);
 				monitor.IncrementCounter(op.FailCounter);
