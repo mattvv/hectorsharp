@@ -32,6 +32,11 @@ namespace Apache.Cassandra
 			ColumnFamily = columnFamily;
 		}
 
+		public ColumnPath(string columnFamily, string superColumn)
+			: this(columnFamily, superColumn, null)
+		{ }
+
+
 		public ColumnPath(string columnFamily, string superColumn, string column)
 			: this (columnFamily)
 		{

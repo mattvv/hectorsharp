@@ -9,16 +9,21 @@ namespace HectorSharp.Service
 	{
 		string key;
 
-		public Endpoint(string host, int port)
+		public Endpoint(string host, int port, string ip)
 		{
 			if (string.IsNullOrEmpty(host)) throw new ArgumentNullException(host);
 			if (port == 0) throw new ArgumentOutOfRangeException("port");
 
 			Host = host;
 			Port = port;
-			IP = Endpoint.GetIpString(host);
+			IP = ip;
 			key = String.Format("{0}:{1}", Host, Port);
 		}
+
+
+		public Endpoint(string host, int port)
+			: this(host, port, Endpoint.GetIpString(host))
+		{}
 
 		public string Host { get; private set; }
 		public string IP { get; private set; }
