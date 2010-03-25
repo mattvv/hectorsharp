@@ -5,6 +5,23 @@ using System.Text;
 
 namespace HectorSharp.Service
 {
+	public enum CassandraVersion
+	{
+		v0_5_1, 
+		v0_6_0_beta_3,
+	}
+
+	public enum ConsistencyLevel
+	{
+		ZERO = 0,
+		ONE = 1,
+		QUORUM = 2,
+		DCQUORUM = 3,
+		DCQUORUMSYNC = 4,
+		ALL = 5,
+		ANY = 6,
+	}
+
 	public enum FailoverStrategy
 	{
 		// On communication failure, just return the error to the client and don't retry

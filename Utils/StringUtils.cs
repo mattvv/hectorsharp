@@ -39,7 +39,7 @@ namespace HectorSharp.Utils
 		public static byte[] ToUtf8Bytes(this string instance)
 		{
 			if (String.IsNullOrEmpty(instance))
-				return new byte[0];
+				return null; // new byte[0];
 
 			return utf8.GetBytes(instance);
 		}
@@ -52,48 +52,9 @@ namespace HectorSharp.Utils
 			return utf8.GetString(instance);
 		}
 
-
-		/**
-		 * Gets UTF-8 bytes from the string.
-		 *
-		 * @param s
-		 * @return
-		 */
-		public static byte[] bytes(String s)
+		public static string UTFDecode(this byte[] instance)
 		{
-			try
-			{
-
-				return ascii.GetBytes(s);
-			}
-			catch (Exception e)
-			{
-				//log.error("UnsupportedEncodingException ", e);
-				throw new Exception(e.Message);
-			}
+			return instance.DecodeUtf8String();
 		}
-
-		/**
-		 * Utility for converting bytes to strings. UTF-8 is assumed.
-		 * @param bytes
-		 * @return
-		 */
-		public static String toString(byte[] bytes)
-		{
-			if (bytes == null)
-			{
-				return null;
-			}
-			try
-			{
-				return bytes.ToString();
-			}
-			catch (Exception e)
-			{
-				//log.error("UnsupportedEncodingException ", e);
-				throw new Exception(e.Message);
-			}
-		}
-
 	}
 }

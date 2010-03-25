@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Apache.Cassandra;
+using HectorSharp.Model;
 
 namespace HectorSharp.Service
 {
@@ -13,11 +13,12 @@ namespace HectorSharp.Service
 	public interface IKeyspace
 	{
 		string Name { get; }
-		IDictionary<string, IDictionary<string, string>> Description { get; }
+		IDictionary<string, Dictionary<string, string>> Description { get; }
 		ConsistencyLevel ConsistencyLevel { get; }
 		FailoverPolicy FailoverPolicy { get; }
 		ICassandraClient Client { get; }
-
+		// update token maps for each endpoint
+		void UpdateKnownHosts();
 		/// <summary>
 		/// Get the Column at the given columnPath.
 		/// </summary>

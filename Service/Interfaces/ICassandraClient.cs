@@ -5,6 +5,7 @@ using System.Text;
 using Apache.Cassandra;
 using HectorSharp.Service;
 using Thrift;
+using HectorSharp.Model;
 
 namespace HectorSharp.Service
 {
@@ -20,11 +21,12 @@ namespace HectorSharp.Service
 		int Port { get; }
 
 		ICassandraClientMonitor Monitor { get; }
+		CassandraVersion Version { get; }
 
 		/**
 		 * @return the underline cassandra thrift object, all remote calls will be sent to this client.
 		 */
-		Cassandra.Client Client { get; }
+		Object Client { get; }
 		/// <summary>
 		/// Return given key space, if keySpaceName not exist, will throw an exception.
 		/// Thread safety: not safe ;-)
@@ -64,7 +66,7 @@ namespace HectorSharp.Service
 		/// a possibly cached value.
 		/// </param>
 		/// <returns></returns>
-		Dictionary<string, string> GetTokenMap(bool fresh);
+		IDictionary<string, string> GetTokenMap(bool fresh);
 		string ConfigFile { get; }
 		string ServerVersion { get; }
 		/// <summary>

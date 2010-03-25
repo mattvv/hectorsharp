@@ -47,72 +47,20 @@
   <ItemGroup>
     <None Include="Dao\Command.cs" />
     <None Include="Dao\ExampleDAO.cs" />
-    <Compile Include="lib\Apache\Cassandra\Cassandra.cs" />
-    <Compile Include="lib\Apache\Cassandra\Column.cs" />
-    <Compile Include="lib\Apache\Cassandra\ColumnOrSuperColumn.cs" />
-    <Compile Include="lib\Apache\Cassandra\ColumnParent.cs" />
-    <Compile Include="lib\Apache\Cassandra\ColumnPath.cs" />
-    <Compile Include="lib\Apache\Cassandra\ConsistencyLevel.cs" />
-    <Compile Include="lib\Apache\Cassandra\Constants.cs" />
-    <Compile Include="lib\Apache\Cassandra\InvalidRequestException.cs" />
-    <Compile Include="lib\Apache\Cassandra\KeySlice.cs" />
-    <Compile Include="lib\Apache\Cassandra\NotFoundException.cs" />
-    <Compile Include="lib\Apache\Cassandra\SlicePredicate.cs" />
-    <Compile Include="lib\Apache\Cassandra\SliceRange.cs" />
-    <Compile Include="lib\Apache\Cassandra\SuperColumn.cs" />
-    <Compile Include="lib\Apache\Cassandra\TimedOutException.cs" />
-    <Compile Include="lib\Apache\Cassandra\UnavailableException.cs" />
-    <Compile Include="lib\InetAddress.cs" />
-    <Compile Include="lib\Thrift\Collections\THashSet.cs" />
-    <Compile Include="lib\Thrift\Protocol\TBase.cs" />
-    <Compile Include="lib\Thrift\Protocol\TBinaryProtocol.cs" />
-    <Compile Include="lib\Thrift\Protocol\TField.cs" />
-    <Compile Include="lib\Thrift\Protocol\TList.cs" />
-    <Compile Include="lib\Thrift\Protocol\TMap.cs" />
-    <Compile Include="lib\Thrift\Protocol\TMessage.cs" />
-    <Compile Include="lib\Thrift\Protocol\TMessageType.cs" />
-    <Compile Include="lib\Thrift\Protocol\TProtocol.cs" />
-    <Compile Include="lib\Thrift\Protocol\TProtocolException.cs" />
-    <Compile Include="lib\Thrift\Protocol\TProtocolFactory.cs" />
-    <Compile Include="lib\Thrift\Protocol\TProtocolUtil.cs" />
-    <Compile Include="lib\Thrift\Protocol\TSet.cs" />
-    <Compile Include="lib\Thrift\Protocol\TStruct.cs" />
-    <Compile Include="lib\Thrift\Protocol\TType.cs" />
-    <Compile Include="lib\Thrift\Server\TServer.cs" />
-    <Compile Include="lib\Thrift\Server\TSimpleServer.cs" />
-    <Compile Include="lib\Thrift\Server\TThreadedServer.cs" />
-    <Compile Include="lib\Thrift\Server\TThreadPoolServer.cs" />
-    <Compile Include="lib\Thrift\TApplicationException.cs" />
-    <Compile Include="lib\Thrift\TProcessor.cs" />
-    <Compile Include="lib\Thrift\Transport\TBufferedTransport.cs" />
-    <Compile Include="lib\Thrift\Transport\TFramedTransport.cs" />
-    <Compile Include="lib\Thrift\Transport\TServerSocket.cs" />
-    <Compile Include="lib\Thrift\Transport\TServerTransport.cs" />
-    <Compile Include="lib\Thrift\Transport\TSocket.cs" />
-    <Compile Include="lib\Thrift\Transport\TStreamTransport.cs" />
-    <Compile Include="lib\Thrift\Transport\TTransport.cs" />
-    <Compile Include="lib\Thrift\Transport\TTransportException.cs" />
-    <Compile Include="lib\Thrift\Transport\TTransportFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CassandraClientConfig.cs" />
     <Compile Include="Service\CassandraClientPoolFactory.cs" />
     <Compile Include="Service\Enums.cs" />
-    <Compile Include="Service\Endpoint.cs" />
+    <Compile Include="Model\Endpoint.cs" />
     <Compile Include="Service\FailoverPolicy.cs" />
     <Compile Include="Service\Interfaces\ICassandraClient.cs" />
     <Compile Include="Service\CassandraClientFactory.cs" />
     <Compile Include="Service\CassandraClient.cs" />
     <Compile Include="Service\CassandraClientMonitor.cs" />
     <Compile Include="Service\Interfaces\ICassandraClientMonitor.cs" />
-    <None Include="Service\Legacy\CassandraClientPool.cs" />
-    <None Include="Service\Legacy\CassandraClientPoolByHost.cs" />
-    <None Include="Service\Legacy\CassandraClientPoolByHostImpl.cs" />
-    <None Include="Service\Legacy\CassandraClientPoolFactory.cs" />
-    <None Include="Service\Legacy\CassandraClientPoolImpl.cs" />
-    <None Include="Service\Legacy\ExampleClient.cs" />
     <Compile Include="Service\Interfaces\IKeyspace.cs" />
     <Compile Include="Service\KeyspaceFactory.cs" />
-    <Compile Include="Service\Keyspace.cs" />
+    <Compile Include="Service\_051\Keyspace.cs" />
     <Compile Include="Service\PoolExhaustedException.cs" />
     <Compile Include="Utils\ConcurrentDictionary.cs" />
     <Compile Include="Utils\Counter.cs" />
@@ -122,13 +70,42 @@
     <Compile Include="Utils\StringUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lib\Thrift\Thrift.csproj" />
-    <Content Include="lib\Thrift\Thrift.sln" />
     <None Include="LICENSE" />
     <None Include="README" />
-    <Compile Include="Service\Keyspace.Operation.cs" />
-    <Compile Include="Service\Keyspace.IKeyspace.cs" />
+    <Compile Include="Model\InetAddress.cs" />
+    <Compile Include="Model\InvalidRequestException.cs" />
+    <Compile Include="Model\NotFoundException.cs" />
+    <Compile Include="Model\TimedOutException.cs" />
+    <Compile Include="Model\UnavailableException.cs" />
+    <Compile Include="Service\_051\Extension\ToThrift.cs" />
+    <Compile Include="Service\_051\Extension\ToModel.cs" />
+    <Compile Include="Model\Column.cs" />
+    <Compile Include="Model\ColumnOrSuperColumn.cs" />
+    <Compile Include="Model\ColumnParent.cs" />
+    <Compile Include="Model\ColumnPath.cs" />
+    <Compile Include="Model\SlicePredicate.cs" />
+    <Compile Include="Model\SliceRange.cs" />
+    <Compile Include="Model\SuperColumn.cs" />
+    <Compile Include="Service\_051\Keyspace.Operation.cs" />
+    <Compile Include="Service\_051\Keyspace.IKeyspace.cs" />
     <Compile Include="Utils\Util.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\Apache\Cassandra 0.5.1\Cassandra 0.5.1.csproj">
+      <Project>{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}</Project>
+      <Name>Cassandra 0.5.1</Name>
+    </ProjectReference>
+    <ProjectReference Include="lib\Apache\Cassandra 0.6.0 beta 3\Cassandra 0.6.0 beta 3.csproj">
+      <Project>{337FBB0C-E1B5-4115-827F-AFEAE3678311}</Project>
+      <Name>Cassandra 0.6.0 beta 3</Name>
+    </ProjectReference>
+    <ProjectReference Include="lib\Thrift\Thrift.csproj">
+      <Project>{499EB63C-D74C-47E8-AE48-A2FC94538E9D}</Project>
+      <Name>Thrift</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Service\_060\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

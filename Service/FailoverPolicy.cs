@@ -21,12 +21,16 @@ namespace HectorSharp.Service
 	public class FailoverPolicy
 	{
 		Counter retryCount;
-		FailoverStrategy defaultStrategy = FailoverStrategy.ON_FAIL_TRY_ALL_AVAILABLE;
+		static readonly FailoverStrategy defaultStrategy = FailoverStrategy.ON_FAIL_TRY_ALL_AVAILABLE;
 
 		public FailoverPolicy(long retryCount)
+			: this(retryCount, FailoverPolicy.defaultStrategy)
+		{}
+
+		public FailoverPolicy(long retryCount, FailoverStrategy strategy)
 		{
 			this.retryCount = new Counter(retryCount);
-			this.Strategy = defaultStrategy;
+			this.Strategy = strategy;
 		}
 
 		public long RetryCount { get { return retryCount.Value; } }

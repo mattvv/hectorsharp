@@ -11,7 +11,13 @@ namespace HectorSharp.Utils
 	
 		public static long UnixTimestamp
 		{ 
-			get { return (long)(DateTime.UtcNow - Epoch).TotalMilliseconds; }
+			get { return Convert.ToInt64((DateTime.UtcNow - Epoch).TotalMilliseconds);  }
+		}
+
+		public static IEnumerable<TOutput> Transform<TInput, TOutput>(this IEnumerable<TInput> input, Func<TInput, TOutput> transform)
+		{
+			if (input != null && transform != null)
+				foreach (var item in input) yield return transform(item);
 		}
 	}
 }

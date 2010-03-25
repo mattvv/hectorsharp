@@ -62,6 +62,14 @@
       <Project>{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}</Project>
       <Name>HectorSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\lib\Apache\Cassandra 0.5.1\Cassandra 0.5.1.csproj">
+      <Project>{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}</Project>
+      <Name>Cassandra 0.5.1</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\Thrift\Thrift.csproj">
+      <Project>{499EB63C-D74C-47E8-AE48-A2FC94538E9D}</Project>
+      <Name>Thrift</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

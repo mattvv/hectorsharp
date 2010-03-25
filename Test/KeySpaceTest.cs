@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HectorSharp.Model;
 using HectorSharp.Service;
-using HectorSharp.Utils.ObjectPool;
 using HectorSharp.Utils;
-using Xunit;
+using HectorSharp.Utils.ObjectPool;
 using Moq;
-using Apache.Cassandra;
+using Thrift.Protocol;
+using Thrift.Transport;
+using Xunit;
 
 namespace HectorSharp.Test
 {
@@ -147,7 +149,7 @@ namespace HectorSharp.Test
 
 			// get
 			var columnParent = new ColumnParent("Standard2");
-			var sliceRange = new SliceRange(new byte[0], new byte[0], false, 150);
+			var sliceRange = new SliceRange(false, 150);
 			var slicePredicate = new SlicePredicate(null, sliceRange);
 			var columns = Keyspace.GetSlice("GetSlice", columnParent, slicePredicate);
 
@@ -175,7 +177,7 @@ namespace HectorSharp.Test
 
 			// get
 			var columnParent = new ColumnParent("Super1");
-			var sliceRange = new SliceRange(new byte[0], new byte[0], false, 150);
+			var sliceRange = new SliceRange(false, 150);
 			var slicePredicate = new SlicePredicate(null, sliceRange);
 			var columns = Keyspace.GetSuperSlice("GetSuperSlice", columnParent, slicePredicate);
 
@@ -257,7 +259,7 @@ namespace HectorSharp.Test
 
 			// get
 			var columnParent = new ColumnParent("Standard1");
-			var sliceRange = new SliceRange(new byte[0], new byte[0], false, 150);
+			var sliceRange = new SliceRange(false, 150);
 			var slicePredicate = new SlicePredicate(null, sliceRange);
 			var ms = Keyspace.MultigetSlice(keys, columnParent, slicePredicate);
 
@@ -298,7 +300,7 @@ namespace HectorSharp.Test
 			try
 			{
 				var columnParent = new ColumnParent("Super1", "SuperColumn_1");
-				var predicate = new SlicePredicate(null, new SliceRange(new byte[0], new byte[0], false, 150));
+				var predicate = new SlicePredicate(null, new SliceRange(false, 150));
 				var superc = Keyspace.MultigetSlice(keys, columnParent, predicate);
 
 				Assert.NotNull(superc);
@@ -339,7 +341,7 @@ namespace HectorSharp.Test
 			try
 			{
 				var columnParent = new ColumnParent("Super1");
-				var predicate = new SlicePredicate(null, new SliceRange(new byte[0], new byte[0], false, 150));
+				var predicate = new SlicePredicate(null, new SliceRange(false, 150));
 				var superc = Keyspace.MultigetSuperSlice(keys, columnParent, predicate);
 
 				Assert.NotNull(superc);
@@ -384,7 +386,7 @@ namespace HectorSharp.Test
 			try
 			{
 				var columnParent = new ColumnParent("Super1", "SuperColumn_1");
-				var predicate = new SlicePredicate(null, new SliceRange(new byte[0], new byte[0], false, 150));
+				var predicate = new SlicePredicate(null, new SliceRange(false, 150));
 				var superc = Keyspace.MultigetSuperSlice(keys, columnParent, predicate);
 
 				Assert.NotNull(superc);
@@ -434,7 +436,7 @@ namespace HectorSharp.Test
 			}
 
 			var columnParent = new ColumnParent("Standard2");
-			var predicate = new SlicePredicate(null, new SliceRange(new byte[0], new byte[0], false, 150));
+			var predicate = new SlicePredicate(null, new SliceRange(false, 150));
 			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "GetRangeSlice0", "GetRangeSlice3", 5);
 
 			Assert.NotNull(keySlices);
@@ -458,7 +460,7 @@ namespace HectorSharp.Test
 					Keyspace.Insert("GetSuperRangeSlice" + j, cp, "GetSuperRangeSlice_value_" + i);
 			}
 			var columnParent = new ColumnParent("Super1");
-			var predicate = new SlicePredicate(null, new SliceRange(new byte[0], new byte[0], false, 150));
+			var predicate = new SlicePredicate(null, new SliceRange(false, 150));
 			var keySlices = Keyspace.GetSuperRangeSlice(columnParent, predicate, "GetSuperRangeSlice0", "GetSuperRangeSlice3", 5);
 
 			Assert.NotNull(keySlices);
@@ -487,7 +489,7 @@ namespace HectorSharp.Test
 			Assert.Equal("Keyspace1", Keyspace.Name);
 		}
 
-		[Fact]
+		[Fact(Skip="Incomplete")]
 		public void Failover()
 		{
 			var h1client = new Mock<ICassandraClient>();
@@ -496,16 +498,17 @@ namespace HectorSharp.Test
 			var h1endpoint = new Endpoint("h1", 111, "ip1");
 			var h2endpoint = new Endpoint("h2", 111, "ip2");
 			var h3endpoint = new Endpoint("h3", 111, "ip3");
-			var h1cassandra = new Mock<Cassandra.Client>();
-			var h2cassandra = new Mock<Cassandra.Client>();
-			var h3cassandra = new Mock<Cassandra.Client>();
+			var tprotocol = new Mock<TProtocol>(new Mock<TTransport>().Object);
+			var h1cassandra = new Mock<Apache.Cassandra051.Cassandra.Client>(tprotocol.Object);
+			var h2cassandra = new Mock<Apache.Cassandra051.Cassandra.Client>(tprotocol.Object);
+			var h3cassandra = new Mock<Apache.Cassandra051.Cassandra.Client>(tprotocol.Object);
 			var keyspaceName = "Keyspace1";
-			var description = new Dictionary<string, IDictionary<string, string>>();
+			var description = new Dictionary<string, Dictionary<string, string>>();
 			var keyspace1desc = new Dictionary<string, string>();
-			keyspace1desc.Add(HectorSharp.Service.Keyspace.CF_TYPE, HectorSharp.Service.Keyspace.CF_TYPE_STANDARD);
+			keyspace1desc.Add(HectorSharp.Service._051.Keyspace.CF_TYPE, HectorSharp.Service._051.Keyspace.CF_TYPE_STANDARD);
 			description.Add("Standard1", keyspace1desc);
-			var consistencyLevel = Apache.Cassandra.ConsistencyLevel.ONE;
-			var cp = new ColumnPath("Sandard1", null, "Failover");
+			var consistencyLevel = HectorSharp.Service.ConsistencyLevel.ONE;
+			var cp = new ColumnPath("Standard1", null, "Failover");
 			var clientPool = new Mock<IKeyedObjectPool<Endpoint, ICassandraClient>>();
 			var monitor = new Mock<ICassandraClientMonitor>();
 
@@ -528,7 +531,50 @@ namespace HectorSharp.Test
 			clientPool.Setup(p => p.Borrow(It.Is<Endpoint>(e => e == h2endpoint))).Returns(h2client.Object);
 			clientPool.Setup(p => p.Borrow(It.Is<Endpoint>(e => e == h2endpoint))).Returns(h2client.Object);
 
-			// TODO: finish Failover test
+			// success without failover
+			var failoverPolicy = new FailoverPolicy(0) { Strategy = FailoverStrategy.FAIL_FAST };
+			var ks = new Service._051.Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+
+			ks.Insert("key", cp, "value");
+
+			// fail fast
+
+			h1cassandra.Setup(c =>
+				c.insert(
+					It.IsAny<string>(),
+					It.IsAny<string>(),
+					It.IsAny<Apache.Cassandra051.ColumnPath>(),
+					It.IsAny<byte[]>(),
+					It.IsAny<long>(),
+					It.IsAny<Apache.Cassandra051.ConsistencyLevel>())
+					).Throws(new TimedOutException());
+
+			Assert.Throws<TimedOutException>(() =>
+				{
+					ks.Insert("key", cp, "value");
+				});
+
+			// on fail try next one, h1 fails, h3 succeeds
+			failoverPolicy = new FailoverPolicy(3, FailoverStrategy.ON_FAIL_TRY_ONE_NEXT_AVAILABLE);
+			ks = new Service._051.Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+
+			ks.Insert("key", cp, "value");
+
+			h3cassandra.Verify(c =>
+				c.insert(
+					It.IsAny<string>(),
+					It.IsAny<string>(),
+					It.IsAny<Apache.Cassandra051.ColumnPath>(),
+					It.IsAny<byte[]>(),
+					It.IsAny<long>(),
+					It.IsAny<Apache.Cassandra051.ConsistencyLevel>())
+					);
+
+			clientPool.Verify(p => p.Borrow(h3endpoint));
+
+			// h1 and h3 fail
+			ks = new Service._051.Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+
 		}
 
 

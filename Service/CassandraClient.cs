@@ -7,6 +7,7 @@ using HectorSharp.Utils;
 using Thrift;
 using Apache.Cassandra;
 using HectorSharp.Utils.ObjectPool;
+using HectorSharp.Model;
 
 namespace HectorSharp.Service
 {
@@ -31,13 +32,11 @@ namespace HectorSharp.Service
 		static Counter serial = new Counter();
 		long mySerial;
 
-		Cassandra.Client cassandra; // The thrift object
-
 		// List of known keyspaces 
-		List<string> keyspaces;
-		ConcurrentDictionary<string, Keyspace> keyspaceMap = new ConcurrentDictionary<string, Keyspace>();
+		IList<string> keyspaces;
+		IDictionary<string, IKeyspace> keyspaceMap = new ConcurrentDictionary<string, IKeyspace>();
 		string clusterName;
-		Dictionary<string, string> tokenMap;
+		IDictionary<string, string> tokenMap;
 		string configFile;
 		string serverVersion;
 		KeyspaceFactory keyspaceFactory;
@@ -46,14 +45,31 @@ namespace HectorSharp.Service
 		bool closed = false;
 		bool hasErrors = false;
 
+		public CassandraVersion Version { get; private set; }
 		public int Port { get { return port.HasValue ? port.Value : -1; } }
 		public ICassandraClientMonitor Monitor { get; private set; }
-		
+
+		Apache.Cassandra051.Cassandra.Client cassandra051;
+		Apache.Cassandra060b3.Cassandra.Client cassandra060;
+
 		#region ctor
-		internal CassandraClient(Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
+		internal CassandraClient(Apache.Cassandra051.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
+			: this(keyspaceFactory, endpoint, pool)
+		{
+			Version = CassandraVersion.v0_5_1;
+			cassandra051 = thriftClient;
+		}
+
+		internal CassandraClient(Apache.Cassandra060b3.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
+			: this(keyspaceFactory, endpoint, pool)
+		{
+			Version = CassandraVersion.v0_6_0_beta_3;
+			cassandra060 = thriftClient;
+		}
+
+		internal CassandraClient(KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 		{
 			this.mySerial = serial.Increment();
-			cassandra = thriftClient;
 			this.keyspaceFactory = keyspaceFactory;
 			
 			if (endpoint == null)
@@ -71,7 +87,7 @@ namespace HectorSharp.Service
 
 			this.Endpoint = endpoint;
 			this.pool = pool;
-		} 
+		}
 		#endregion
 
 		public string ClusterName
@@ -103,7 +119,7 @@ namespace HectorSharp.Service
 		{
 			var key = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
 			
-			Keyspace keyspace;
+			IKeyspace keyspace;
 
 			if (keyspaceMap.ContainsKey(key))
 				keyspace = keyspaceMap[key];
@@ -111,10 +127,16 @@ namespace HectorSharp.Service
 			{
 				if (Keyspaces.Contains(keyspaceName))
 				{
-					var keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-					keyspace = (Keyspace)keyspaceFactory.Create(this, keyspaceName, keyspaceDesc,
+					IDictionary<string, Dictionary<string, string>> keyspaceDesc = null;
+
+					if(Version == CassandraVersion.v0_5_1)
+						keyspaceDesc = cassandra051.describe_keyspace(keyspaceName);
+					else if(Version == CassandraVersion.v0_6_0_beta_3)
+						keyspaceDesc = cassandra060.describe_keyspace(keyspaceName);
+
+					keyspace = keyspaceFactory.Create(this, keyspaceName, keyspaceDesc,
 						 consistencyLevel, failoverPolicy, pool);
-					Keyspace tmp = null;
+					IKeyspace tmp = null;
 					if (!keyspaceMap.ContainsKey(key))
 					{
 						keyspaceMap.Add(key, keyspace);
@@ -135,17 +157,33 @@ namespace HectorSharp.Service
 			get
 			{
 				if (keyspaces == null)
-					keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
+					switch (Version)
+					{
+						case CassandraVersion.v0_6_0_beta_3:
+							keyspaces = cassandra060.get_string_list_property(PROP_KEYSPACE);
+							break;
+						default:
+						case CassandraVersion.v0_5_1:
+							keyspaces = cassandra051.get_string_list_property(PROP_KEYSPACE);
+							break;
+					}
 				return keyspaces;
 			}
 		}
 
 		public string GetStringProperty(string propertyName)
 		{
-			return cassandra.get_string_property(propertyName);
+			switch (Version)
+			{
+				case CassandraVersion.v0_6_0_beta_3:
+					return cassandra060.get_string_property(propertyName);
+				default:
+				case CassandraVersion.v0_5_1:
+					return cassandra051.get_string_property(propertyName);
+			}
 		}
 
-		public Dictionary<string, string> GetTokenMap(bool fresh)
+		public IDictionary<string, string> GetTokenMap(bool fresh)
 		{
 			if (tokenMap == null || fresh)
 			{
@@ -186,7 +224,17 @@ namespace HectorSharp.Service
 			return string.Format("{0}[{1},{2}]", keyspaceName, consistencyLevel, failoverPolicy);
 		}
 
-		public Cassandra.Client Client { get { return cassandra; } }
+		public object Client
+		{ 
+			get 
+			{
+				switch (Version)
+				{
+					case CassandraVersion.v0_6_0_beta_3: return cassandra060;
+					default: return cassandra051;
+				}
+			} 
+		}
 
 		public Endpoint Endpoint { get; private set; }
 

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using HectorSharp.Model;
 using HectorSharp.Service;
 using HectorSharp.Utils.ObjectPool;
-using Apache.Cassandra;
 
 namespace HectorSharp.Test
 {

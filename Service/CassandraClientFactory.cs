@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HectorSharp;
-using Apache.Cassandra;
 using Thrift.Protocol;
 using Thrift.Transport;
 using HectorSharp.Utils.ObjectPool;
+using HectorSharp.Model;
 
 namespace HectorSharp.Service
 {
@@ -16,18 +16,23 @@ namespace HectorSharp.Service
 		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
 		Config config;
 		int timeout = 10;
+		CassandraVersion version = CassandraVersion.v0_5_1;
 
 		public class Config
 		{
 			public int Timeout { get; set; }
+			public CassandraVersion CassandraVersion { get; set; }
 		}
 
 		public KeyedCassandraClientFactory(IKeyedObjectPool<Endpoint, ICassandraClient> pool, Config config)
 		{
 			KeyedCassandraClientFactory.monitor = new CassandraClientMonitor();
 			this.pool = pool;
-			if(config != null)
+			if (config != null)
+			{
 				this.timeout = config.Timeout;
+				this.version = config.CassandraVersion;
+			}
 		}
 
 		#region IKeyedPoolableObjectFactory<Endpoint,CassandraClient> Members
@@ -38,8 +43,22 @@ namespace HectorSharp.Service
 
 			var transport = new TSocket(key.Host, key.Port, timeout);
 			var protocol = new TBinaryProtocol(transport);
-			var thriftClient = new Cassandra.Client(protocol);
 
+			Apache.Cassandra060b3.Cassandra.Client v060client = null;
+			Apache.Cassandra051.Cassandra.Client v051client = null;
+
+			switch (version)
+			{
+				case CassandraVersion.v0_6_0_beta_3:
+					v060client = new Apache.Cassandra060b3.Cassandra.Client(protocol);
+					break;
+
+				default:
+				case CassandraVersion.v0_5_1:
+					v051client = new Apache.Cassandra051.Cassandra.Client(protocol);
+					break;
+			}
+			
 			try
 			{
 				transport.Open();
@@ -50,16 +69,39 @@ namespace HectorSharp.Service
 				// add details to it.
 				throw new Exception("Unable to open transport to " + key.ToString() + " , ", e);
 			}
+			
+			switch (version)
+			{
+				case CassandraVersion.v0_6_0_beta_3:
+					return new CassandraClient(v060client, new KeyspaceFactory(monitor), key, pool);
 
-			return new CassandraClient(thriftClient, new KeyspaceFactory(monitor), key, pool);
+				default:
+				case CassandraVersion.v0_5_1:
+					return new CassandraClient(v051client, new KeyspaceFactory(monitor), key, pool);
+			}
+
 		}
 
 		public void Destroy(Endpoint key, ICassandraClient obj)
 		{
 			// ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
-			var thriftClient = obj.Client;
-			thriftClient.InputProtocol.Transport.Close();
-			thriftClient.OutputProtocol.Transport.Close();
+			switch (version)
+			{
+				case CassandraVersion.v0_6_0_beta_3:
+					var v060client = obj.Client as Apache.Cassandra060b3.Cassandra.Client;
+					v060client.InputProtocol.Transport.Close();
+					v060client.OutputProtocol.Transport.Close();
+
+					break;
+		
+				default:
+				case CassandraVersion.v0_5_1:
+					var v050client = obj.Client as Apache.Cassandra051.Cassandra.Client;
+					v050client.InputProtocol.Transport.Close();
+					v050client.OutputProtocol.Transport.Close();
+
+					break;
+			}
 			obj.MarkAsClosed();
 		}
 
