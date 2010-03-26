@@ -109,7 +109,7 @@ namespace HectorSharp.Test
 			Assert.Equal(Client, Keyspace.Client);
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void GetSuperColumn()
 		{
 			var columnFamilyMap = new Dictionary<string, IList<SuperColumn>>();
@@ -136,7 +136,7 @@ namespace HectorSharp.Test
 			}
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void GetSlice()
 		{
 			// insert
@@ -157,20 +157,21 @@ namespace HectorSharp.Test
 			Assert.Equal(100, columns.Count());
 
 			var receivedColumnNames = columns.OrderBy(c => c.Name).Select(c => c.Name).ToList();
-			Assert.Equal(columnNames, receivedColumnNames);
+			Assert.NotEmpty(receivedColumnNames);
+			Assert.Equal(columnNames.OrderBy(i => i).ToList(), receivedColumnNames);
 
 			// clean up
 			Keyspace.Remove("GetSlice", new ColumnPath("Standard2"));
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void GetSuperSlice()
 		{
 			// insert
 			for (int i = 0; i < 100; i++)
 			{
-				var cp = new ColumnPath("Super1", "SuperColumn_1", "GetSuperSlice_" + i);
-				var cp2 = new ColumnPath("Super1", "SuperColumn_2", "GetSuperSlice_" + i);
+				var cp = new ColumnPath("Super1", "SuperColumn.1", "GetSuperSlice_" + i);
+				var cp2 = new ColumnPath("Super1", "SuperColumn.2", "GetSuperSlice_" + i);
 				Keyspace.Insert("GetSuperSlice", cp, "GetSuperSlice_value_" + i);
 				Keyspace.Insert("GetSuperSlice", cp2, "GetSuperSlice_value_" + i);
 			}
@@ -215,7 +216,7 @@ namespace HectorSharp.Test
 				Keyspace.Remove("MultigetColumn." + i, columnPath);
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact] 
 		public void MultigetSuperColumn()
 		{
 			var list = new List<Column>();
@@ -224,27 +225,27 @@ namespace HectorSharp.Test
 				list.Add(new Column("MultigetSuperColumn_" + i, "MultigetSuperColumn_value_" + i));
 
 			var cfmap = new Dictionary<string, IList<SuperColumn>>();
-			cfmap.Add("Super1", new List<SuperColumn>() { new SuperColumn("SuperColumn_1", list) });
+			cfmap.Add("Super1", new List<SuperColumn>() { new SuperColumn("SuperColumn.1", list) });
 
-			Keyspace.BatchInsert("MultigetSuperColumn_1", null, cfmap);
+			Keyspace.BatchInsert("MultigetSuperColumn.1", null, cfmap);
 
-			var columnPath = new ColumnPath("Super1", "SuperColumn_1", null);
+			var columnPath = new ColumnPath("Super1", "SuperColumn.1", null);
 			try
 			{
-				var keys = new List<string> { "MultigetSuperColumn_1" };
+				var keys = new List<string> { "MultigetSuperColumn.1" };
 				var superColumn = Keyspace.MultigetSuperColumn(keys, columnPath);
 
 				Assert.NotNull(superColumn);
 				Assert.Equal(1, superColumn.Count);
-				Assert.Equal(10, superColumn["MultigetSuperColumn_1"].Columns.Count);
+				Assert.Equal(10, superColumn["MultigetSuperColumn.1"].Columns.Count);
 			}
 			finally
 			{
-				Keyspace.Remove("MultigetSuperColumn_1", columnPath);
+				Keyspace.Remove("MultigetSuperColumn.1", columnPath);
 			}
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void MultigetSlice()
 		{
 			// insert
@@ -252,7 +253,7 @@ namespace HectorSharp.Test
 			var keys = new List<string>();
 			for (int i = 0; i < 100; i++)
 			{
-				var key = "MultigetSlice_" + i;
+				var key = "MultigetSlice." + i;
 				Keyspace.Insert(key, columnPath, "MultigetSlice.value." + i);
 				keys.Add(key);
 			}
@@ -268,39 +269,42 @@ namespace HectorSharp.Test
 				var columns = ms[keys[i]];
 				Assert.NotNull(columns);
 				Assert.Equal(1, columns.Count);
-				Assert.True(columns.First().Value.StartsWith("MultigetSlice_"));
+				Assert.True(columns.First().Value.StartsWith("MultigetSlice."));
 			}
 
 			// remove
 			for (int i = 0; i < 100; i++)
-				Keyspace.Remove("MultigetSlice_" + i, columnPath);
+				Keyspace.Remove("MultigetSlice." + i, columnPath);
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void MultigetSuperSlice_With_MultigetSlice()
 		{
-			var cfmap = new Dictionary<string, IList<SuperColumn>>();
 			var list = new List<Column>();
-			for (int i = 0; i < 100; i++)
-				list.Add(new Column("MultigetSuperSlice_" + i, "MultigetSuperSlice.value." + i));
+			for (int i = 0; i < 10; i++)
+				list.Add(new Column("MultigetSuperSlice." + i, "MultigetSuperSlice.value." + i));
 
-			var superList = new List<SuperColumn>
+			// super-column map
+			var scmap = new Dictionary<string, IList<SuperColumn>>();
+			scmap.Add("Super1", new List<SuperColumn>
 			{
-				new SuperColumn("SuperColumn_1", list),
-				new SuperColumn("SuperColumn_2", list),
-			};
+				new SuperColumn("SuperColumn.1", list),
+				new SuperColumn("SuperColumn.2", list),
+			});
+ 
 			var keys = new List<string>();
 
 			for (int i = 1; i <= 3; i++)
 			{
-				var key = "MultigetSuperSlice_" + i;
-				Keyspace.BatchInsert(key, null, cfmap);
+				var key = "MultigetSuperSlice." + i;
+				Keyspace.BatchInsert(key, null, scmap);
 				keys.Add(key);
 			}
+
 			try
 			{
-				var columnParent = new ColumnParent("Super1", "SuperColumn_1");
-				var predicate = new SlicePredicate(null, new SliceRange(false, 150));
+				var columnParent = new ColumnParent("Super1", "SuperColumn.1");
+				var predicate = new SlicePredicate(new SliceRange(false, 150));
 				var superc = Keyspace.MultigetSlice(keys, columnParent, predicate);
 
 				Assert.NotNull(superc);
@@ -312,36 +316,37 @@ namespace HectorSharp.Test
 			{
 				var columnPath = new ColumnPath("Super1");
 				for (int i = 1; i <= 3; i++)
-					Keyspace.Remove("MultigetSuperSlice_" + i, columnPath);
+					Keyspace.Remove("MultigetSuperSlice." + i, columnPath);
 			}
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void MultigetSuperSlice()
 		{
-			var cfmap = new Dictionary<string, IList<SuperColumn>>();
+			var scmap = new Dictionary<string, IList<SuperColumn>>();
 			var list = new List<Column>();
-			for (int i = 0; i < 100; i++)
-				list.Add(new Column("MultigetSuperSlice_" + i, "MultigetSuperSlice.value." + i));
+			for (int i = 0; i < 10; i++)
+				list.Add(new Column("MultigetSuperSlice." + i, "MultigetSuperSlice.value." + i));
 
-			var superList = new List<SuperColumn>
+			scmap.Add("Super1", new List<SuperColumn>
 			{
-				new SuperColumn("SuperColumn_1", list),
-				new SuperColumn("SuperColumn_2", list),
-			};
+				new SuperColumn("SuperColumn.1", list),
+				new SuperColumn("SuperColumn.2", list),
+			});
+ 
 			var keys = new List<string>();
 
 			for (int i = 1; i <= 3; i++)
 			{
-				var key = "MultigetSuperSlice_" + i;
-				Keyspace.BatchInsert(key, null, cfmap);
+				var key = "MultigetSuperSlice." + i;
+				Keyspace.BatchInsert(key, null, scmap);
 				keys.Add(key);
 			}
 
 			try
 			{
 				var columnParent = new ColumnParent("Super1");
-				var predicate = new SlicePredicate(null, new SliceRange(false, 150));
+				var predicate = new SlicePredicate(new SliceRange(false, 150));
 				var superc = Keyspace.MultigetSuperSlice(keys, columnParent, predicate);
 
 				Assert.NotNull(superc);
@@ -357,35 +362,36 @@ namespace HectorSharp.Test
 			{
 				var columnPath = new ColumnPath("Super1");
 				for (int i = 1; i <= 3; i++)
-					Keyspace.Remove("MultigetSuperSlice_" + i, columnPath);
+					Keyspace.Remove("MultigetSuperSlice." + i, columnPath);
 			}
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact]
 		public void MultigetSuperSlice_With_SuperColumn()
 		{
-			var cfmap = new Dictionary<string, IList<SuperColumn>>();
 			var list = new List<Column>();
-			for (int i = 0; i < 100; i++)
-				list.Add(new Column("MultigetSuperSlice_" + i, "MultigetSuperSlice.value." + i));
+			for (int i = 0; i < 10; i++)
+				list.Add(new Column("MultigetSuperSlice." + i, "MultigetSuperSlice.value." + i));
 
-			var superList = new List<SuperColumn>
+			var scmap = new Dictionary<string, IList<SuperColumn>>();
+			scmap.Add("Super1", new List<SuperColumn>
 			{
-				new SuperColumn("SuperColumn_1", list),
-				new SuperColumn("SuperColumn_2", list),
-			};
+				new SuperColumn("SuperColumn.1", list),
+				new SuperColumn("SuperColumn.2", list),
+			});
+
 			var keys = new List<string>();
 
 			for (int i = 1; i <= 3; i++)
 			{
-				var key = "MultigetSuperSlice_" + i;
-				Keyspace.BatchInsert(key, null, cfmap);
+				var key = "MultigetSuperSlice." + i;
+				Keyspace.BatchInsert(key, null, scmap);
 				keys.Add(key);
 			}
 
 			try
 			{
-				var columnParent = new ColumnParent("Super1", "SuperColumn_1");
+				var columnParent = new ColumnParent("Super1", "SuperColumn.1");
 				var predicate = new SlicePredicate(null, new SliceRange(false, 150));
 				var superc = Keyspace.MultigetSuperSlice(keys, columnParent, predicate);
 
@@ -402,7 +408,7 @@ namespace HectorSharp.Test
 			{
 				var columnPath = new ColumnPath("Super1");
 				for (int i = 1; i <= 3; i++)
-					Keyspace.Remove("MultigetSuperSlice_" + i, columnPath);
+					Keyspace.Remove("MultigetSuperSlice." + i, columnPath);
 			}
 		}
 
@@ -417,7 +423,7 @@ namespace HectorSharp.Test
 		public void GetCount()
 		{
 			for (int i = 0; i < 100; i++)
-				Keyspace.Insert("GetCount", new ColumnPath("Standard1", null, "GetCount_" + i), "GetCount_value_" + i);
+				Keyspace.Insert("GetCount", new ColumnPath("Standard1", null, "GetCount." + i), "GetCount.value." + i);
 
 			int count = Keyspace.GetCount("GetCount", new ColumnParent("Standard1"));
 			Assert.Equal(100, count);
@@ -425,37 +431,39 @@ namespace HectorSharp.Test
 			Keyspace.Remove("GetCount", new ColumnPath("Standard1"));
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact(Skip = @"InvalidRequestException : start key's md5 sorts after end key's md5.  \
+			this is not allowed; you probably should not specify end key at all, under RandomPartitioner")]
 		public void GetRangeSlice()
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				var cp = new ColumnPath("Standard2", null, "GetRangeSlice_" + i);
+				var cp = new ColumnPath("Standard2", null, "GetRangeSlice." + i);
 				for (int j = 0; j < 3; j++)
-					Keyspace.Insert("GetRangeSlice" + j, cp, "GetRangeSlice_value_" + i);
+					Keyspace.Insert("GetRangeSlice." + j, cp, "GetRangeSlice.value." + i);
 			}
 
 			var columnParent = new ColumnParent("Standard2");
-			var predicate = new SlicePredicate(null, new SliceRange(false, 150));
-			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "GetRangeSlice0", "GetRangeSlice3", 5);
+			var predicate = new SlicePredicate(new SliceRange(false, 150));
+
+			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "GetRangeSlice.0", "GetRangeSlice.3", 5);
 
 			Assert.NotNull(keySlices);
 			Assert.Equal(3, keySlices.Count);
-			Assert.NotNull(keySlices["GetRangeSlice0"]);
-			Assert.Equal("GetRangeSlice_value_0", keySlices["GetRangeSlice0"].First().Value);
-			Assert.Equal(10, keySlices["GetRangeSlice1"].Count);
+			Assert.NotNull(keySlices["GetRangeSlice.0"]);
+			Assert.Equal("GetRangeSlice.value.0", keySlices["GetRangeSlice.0"].First().Value);
+			Assert.Equal(10, keySlices["GetRangeSlice.1"].Count);
 
 			var columnPath = new ColumnPath("Standard2");
 			for (int i = 0; i < 3; i++)
-				Keyspace.Remove("GetRangeSlice" + i, columnPath);
+				Keyspace.Remove("GetRangeSlice." + i, columnPath);
 		}
 
-		[Fact(Skip = "haven't solved problem with get_slice")]
+		[Fact(Skip = @"UnavailableException : Internal error processing insert")]
 		public void GetSuperRangeSlice()
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				var cp = new ColumnPath("Super1", "SuperColumn_1");
+				var cp = new ColumnPath("Super1", "SuperColumn.1");
 				for (int j = 0; j < 2; j++)
 					Keyspace.Insert("GetSuperRangeSlice" + j, cp, "GetSuperRangeSlice_value_" + i);
 			}

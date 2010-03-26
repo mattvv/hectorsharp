@@ -52,6 +52,7 @@
     <Compile Include="ColumnPath.cs" />
     <Compile Include="ConsistencyLevel.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Extension\Column.cs" />
     <Compile Include="Extension\ColumnOrSuperColumn.cs" />
     <Compile Include="Extension\ColumnParent.cs" />
     <Compile Include="Extension\ColumnPath.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Extension\SlicePredicate.cs" />
     <Compile Include="Extension\SliceRange.cs" />
     <Compile Include="Extension\StringUtil.cs" />
+    <Compile Include="Extension\Timestamp.cs" />
     <Compile Include="InvalidRequestException.cs" />
     <Compile Include="KeySlice.cs" />
     <Compile Include="NotFoundException.cs" />

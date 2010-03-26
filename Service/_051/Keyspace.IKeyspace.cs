@@ -50,7 +50,7 @@ namespace HectorSharp.Service._051
 		{
 			AssertSuperColumnPath(columnPath);
 
-			var sliceRange = new Apache.Cassandra051.SliceRange(null, null, reversed, size);
+			var sliceRange = new Apache.Cassandra051.SliceRange(reversed, size);
 
 			var op = new Operation<SuperColumn>(ClientCounter.READ_FAIL,
 				client =>
