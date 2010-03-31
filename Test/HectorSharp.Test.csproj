@@ -53,9 +53,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cassandra051Test.cs" />
-    <Compile Include="CassandraTestFixture.cs" />
-    <Compile Include="KeySpaceTest.cs" />
+    <Compile Include="0.5.1\Cassandra051Test.cs" />
+    <Compile Include="0.5.1\CassandraTestFixture.cs" />
+    <Compile Include="0.5.1\KeySpaceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

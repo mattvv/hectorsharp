@@ -26,5 +26,11 @@ namespace HectorSharp.Model
 			if (timestamp > 0)
 				Timestamp = timestamp;
 		}
+
+		public override string ToString()
+		{
+			return string.Format("Column ({0} = {1}){2}", Name, Value, 
+				Timestamp.HasValue ? ", [" + Timestamp.Value + "]" : "");
+		}
 	}
 }
