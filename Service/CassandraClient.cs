@@ -50,7 +50,7 @@ namespace HectorSharp.Service
 		public ICassandraClientMonitor Monitor { get; private set; }
 
 		Apache.Cassandra051.Cassandra.Client cassandra051;
-		Apache.Cassandra060b3.Cassandra.Client cassandra060;
+		Apache.Cassandra060.Cassandra.Client cassandra060;
 
 		#region ctor
 		internal CassandraClient(Apache.Cassandra051.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
@@ -60,7 +60,7 @@ namespace HectorSharp.Service
 			cassandra051 = thriftClient;
 		}
 
-		internal CassandraClient(Apache.Cassandra060b3.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
+		internal CassandraClient(Apache.Cassandra060.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 			: this(keyspaceFactory, endpoint, pool)
 		{
 			Version = CassandraVersion.v0_6_0_beta_3;

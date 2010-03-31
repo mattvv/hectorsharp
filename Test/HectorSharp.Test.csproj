@@ -53,7 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="0.5.1\Cassandra051Test.cs" />
+    <Compile Include="0.5.1\RawThriftTest.cs" />
     <Compile Include="0.5.1\CassandraTestFixture.cs" />
     <Compile Include="0.5.1\KeySpaceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -71,6 +71,12 @@
       <Project>{499EB63C-D74C-47E8-AE48-A2FC94538E9D}</Project>
       <Name>Thrift</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="0.6.0\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

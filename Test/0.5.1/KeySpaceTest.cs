@@ -112,14 +112,14 @@ namespace HectorSharp.Test._0_5_1
 		[Fact]
 		public void GetSuperColumn()
 		{
-			var columnFamilyMap = new Dictionary<string, IList<SuperColumn>>();
+			var scmap = new Dictionary<string, IList<SuperColumn>>();
 			var list = new List<Column>();
 			for (int i = 0; i < 10; i++)
 				list.Add(new Column("GetSuperColumn." + i, "GetSuperColumn.Value." + i));
 
 			var superList = new List<SuperColumn> { new SuperColumn("SuperColumn.1", list) };
-			columnFamilyMap.Add("Super1", superList);
-			Keyspace.BatchInsert("GetSuperColumn.1", null, columnFamilyMap);
+			scmap.Add("Super1", superList);
+			Keyspace.BatchInsert("GetSuperColumn.1", null, scmap);
 
 			var columnPath = new ColumnPath("Super1", "SuperColumn.1", null);
 

@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  */
 
-namespace Apache.Cassandra060b3
+namespace Apache.Cassandra060
 {
   public enum ConsistencyLevel
   {

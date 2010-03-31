@@ -44,13 +44,13 @@ namespace HectorSharp.Service
 			var transport = new TSocket(key.Host, key.Port, timeout);
 			var protocol = new TBinaryProtocol(transport);
 
-			Apache.Cassandra060b3.Cassandra.Client v060client = null;
+			Apache.Cassandra060.Cassandra.Client v060client = null;
 			Apache.Cassandra051.Cassandra.Client v051client = null;
 
 			switch (version)
 			{
 				case CassandraVersion.v0_6_0_beta_3:
-					v060client = new Apache.Cassandra060b3.Cassandra.Client(protocol);
+					v060client = new Apache.Cassandra060.Cassandra.Client(protocol);
 					break;
 
 				default:
@@ -88,7 +88,7 @@ namespace HectorSharp.Service
 			switch (version)
 			{
 				case CassandraVersion.v0_6_0_beta_3:
-					var v060client = obj.Client as Apache.Cassandra060b3.Cassandra.Client;
+					var v060client = obj.Client as Apache.Cassandra060.Cassandra.Client;
 					v060client.InputProtocol.Transport.Close();
 					v060client.OutputProtocol.Transport.Close();
 

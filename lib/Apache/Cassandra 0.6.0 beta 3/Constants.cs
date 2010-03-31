@@ -11,7 +11,7 @@ using System.IO;
 using Thrift;
 using Thrift.Collections;
 
-namespace Apache.Cassandra060b3
+namespace Apache.Cassandra060
 {
   public class Constants
   {

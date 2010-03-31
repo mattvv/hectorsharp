@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace HectorSharp.Utils
+namespace Apache.Cassandra060
 {
 	/// <summary>
 	/// Encoding and decoding utilities.
 	/// </summary>
-	public static class StringUtils
+	internal static class StringUtils
 	{
 		//private static sealed Logger log = LoggerFactory.getLogger(StringUtils.class);
 
@@ -31,25 +31,15 @@ namespace HectorSharp.Utils
 			return ascii.GetString(instance);
 		}
 
-		public static byte[] UTF(this string instance, byte[] @default)
-		{
-			return instance.ToUtf8Bytes(@default);
-		}
-
 		public static byte[] UTF(this string instance)
 		{
-			return instance.ToUtf8Bytes(null);
+			return instance.ToUtf8Bytes();
 		}
 
 		public static byte[] ToUtf8Bytes(this string instance)
 		{
-			return instance.ToUtf8Bytes(null);
-		}
-
-		public static byte[] ToUtf8Bytes(this string instance, byte[] @default)
-		{
 			if (String.IsNullOrEmpty(instance))
-				return @default;
+				return new byte[0];
 
 			return utf8.GetBytes(instance);
 		}
@@ -62,9 +52,48 @@ namespace HectorSharp.Utils
 			return utf8.GetString(instance);
 		}
 
-		public static string UTFDecode(this byte[] instance)
+
+		/**
+		 * Gets UTF-8 bytes from the string.
+		 *
+		 * @param s
+		 * @return
+		 */
+		public static byte[] bytes(String s)
 		{
-			return instance.DecodeUtf8String();
+			try
+			{
+
+				return ascii.GetBytes(s);
+			}
+			catch (Exception e)
+			{
+				//log.error("UnsupportedEncodingException ", e);
+				throw new Exception(e.Message);
+			}
 		}
+
+		/**
+		 * Utility for converting bytes to strings. UTF-8 is assumed.
+		 * @param bytes
+		 * @return
+		 */
+		public static String toString(byte[] bytes)
+		{
+			if (bytes == null)
+			{
+				return null;
+			}
+			try
+			{
+				return bytes.ToString();
+			}
+			catch (Exception e)
+			{
+				//log.error("UnsupportedEncodingException ", e);
+				throw new Exception(e.Message);
+			}
+		}
+
 	}
 }

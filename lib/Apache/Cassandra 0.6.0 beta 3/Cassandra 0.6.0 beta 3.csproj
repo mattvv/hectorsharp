@@ -8,7 +8,7 @@
     <ProjectGuid>{337FBB0C-E1B5-4115-827F-AFEAE3678311}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Apache.Cassandra060b3</RootNamespace>
+    <RootNamespace>Apache.Cassandra060</RootNamespace>
     <AssemblyName>Apache.Cassandra060b3</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -56,6 +56,15 @@
     <Compile Include="ConsistencyLevel.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Deletion.cs" />
+    <Compile Include="Extension\Column.cs" />
+    <Compile Include="Extension\ColumnOrSuperColumn.cs" />
+    <Compile Include="Extension\ColumnParent.cs" />
+    <Compile Include="Extension\ColumnPath.cs" />
+    <Compile Include="Extension\InvalidRequestException.cs" />
+    <Compile Include="Extension\SlicePredicate.cs" />
+    <Compile Include="Extension\SliceRange.cs" />
+    <Compile Include="Extension\StringUtil.cs" />
+    <Compile Include="Extension\Timestamp.cs" />
     <Compile Include="InvalidRequestException.cs" />
     <Compile Include="KeyRange.cs" />
     <Compile Include="KeySlice.cs" />
