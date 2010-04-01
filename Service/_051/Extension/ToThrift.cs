@@ -16,12 +16,7 @@ namespace HectorSharp.Service._051
 
 		public static Column ToThrift(this Model.Column c)
 		{
-			return new Column
-			{
-				Name = c.Name.ToUtf8Bytes(),
-				Value = c.Value.ToUtf8Bytes(),
-				Timestamp = c.Timestamp.Value,
-			};
+			return new Column(c.Name.UTF(), c.Value.UTF(new byte[0]), c.Timestamp.Value);
 		}
 
 		public static SuperColumn ToThrift(this Model.SuperColumn sc)
