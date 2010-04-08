@@ -8,22 +8,27 @@ namespace HectorSharp.Service
 		static IKeyedObjectPool<Endpoint, ICassandraClient> pool;
 
 		#region IKeyedObjectPoolFactory<Endpoint,CassandraClient> Members
-
+		
 		public IKeyedObjectPool<Endpoint, ICassandraClient> Create()
+		{
+			return Create(new KeyedCassandraClientFactory(null, null));
+		}
+
+		public IKeyedObjectPool<Endpoint, ICassandraClient> Create(IKeyedPoolableObjectFactory<Endpoint, ICassandraClient> factory)
 		{
 			if (pool == null)
 			{
 				pool = new KeyedObjectPool<Endpoint, ICassandraClient>(null,
 					new KeyedObjectPool<Endpoint, ICassandraClient>.Configuration
 					{
-						MaxSize = 25, MinSize = 4, Timeout = 20
+						MaxSize = 25,
+						MinSize = 4,
+						Timeout = 20
 					});
-				var factory = new KeyedCassandraClientFactory(null, null);
 				pool.SetFactory(factory);
 			}
 			return pool;
 		}
-
 		#endregion
 	}
 }

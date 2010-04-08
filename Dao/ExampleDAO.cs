@@ -28,12 +28,12 @@ namespace HectorSharp.Dao
  */
 public class ExampleDao {
  
-  private sealed static String CASSANDRA_KEYSPACE = "Keyspace1";
-  private sealed static int CASSANDRA_PORT = 9170;
-  private sealed static String CASSANDRA_HOST = "localhost";
-  private sealed String CF_NAME = "Standard1";
+  static String CASSANDRA_KEYSPACE = "Keyspace1";
+  static int CASSANDRA_PORT = 9170;
+  static String CASSANDRA_HOST = "localhost";
+  String CF_NAME = "Standard1";
   /** Column name where values are stored */
-  private sealed String COLUMN_NAME = "v";
+  String COLUMN_NAME = "v";
  
   /**
    * Insert a new value keyed by key

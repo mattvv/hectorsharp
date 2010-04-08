@@ -90,6 +90,9 @@
     <Compile Include="Service\_051\Keyspace.IKeyspace.cs" />
     <Compile Include="Service\_060\Extension\ToModel.cs" />
     <Compile Include="Service\_060\Extension\ToThrift.cs" />
+    <Compile Include="Service\_060\Keyspace.cs" />
+    <Compile Include="Service\_060\Keyspace.IKeyspace.cs" />
+    <Compile Include="Service\_060\Keyspace.Operation.cs" />
     <Compile Include="Utils\Util.cs" />
   </ItemGroup>
   <ItemGroup>

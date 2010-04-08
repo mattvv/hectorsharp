@@ -1,4 +1,4 @@
-﻿HectorSharp Unit tests
+HectorSharp Unit tests
 
 Dependencies: Moq, XUnit, HectorSharp, Thrift
 

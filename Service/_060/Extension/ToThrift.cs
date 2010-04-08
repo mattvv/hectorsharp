@@ -51,7 +51,7 @@ namespace HectorSharp.Service._060
 
 		public static SliceRange ToThrift(this Model.SliceRange range)
 		{
-			return new SliceRange(range.Start.UTF(), range.Finish.UTF(), range.Reversed, range.Count);
+			return new SliceRange(range.Start.UTF(new byte[0]), range.Finish.UTF(new byte[0]), range.Reversed, range.Count);
 		}
 	}
 }

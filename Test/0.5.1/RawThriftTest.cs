@@ -6,7 +6,7 @@ using Thrift.Transport;
 using Xunit;
 using HectorSharp.Utils;
 
-namespace HectorSharp.Test._0_5_1
+namespace HectorSharp.Test._051
 {
 	/// <summary>
 	/// Tests thrift-generated Cassandra classes and Thrift directly

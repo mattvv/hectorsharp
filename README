@@ -14,13 +14,12 @@ This client provides:
 
 Current TO DOs:
 
- o Get it to compile
- o Refactor interfaces to conform to .net conventions
+ o 0.6.0 thrift compatibility
+ o Complete Failover unit tests
  o Evaluate high-level API interface - optimize for usability
 	o Make connection pooling transparent to user api
  o Provide configuration system
  o Convert client monitor to perf counters?
- o Port legacy java unit tests
  o write some docs on how to get cassandra working on Windows
 
 If you are interested in contributing, let us know.
