@@ -3,7 +3,7 @@
 
 <target name="Build">
 <msbuild projects="HectorSharp.sln" targets="Build" properties="Configuration=Debug">
-<xunit assembly="bin\Debug\HectorSharp.dll">
+<xunit assembly="Test\bin\Debug\HectorSharp.Test.dll">
 </xunit></msbuild></target>
 
 </usingtask></project>
