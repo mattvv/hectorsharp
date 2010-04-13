@@ -27,7 +27,7 @@ namespace HectorSharp.Service
 		{
 			switch (client.Version)
 			{
-				case CassandraVersion.v0_6_0_beta_3:
+				case CassandraVersion.v0_6_0:
 					throw new NotImplementedException("Version 0.6.0 not implimented yet");
 
 				default:

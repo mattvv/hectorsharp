@@ -49,7 +49,7 @@ namespace HectorSharp.Service
 
 			switch (version)
 			{
-				case CassandraVersion.v0_6_0_beta_3:
+				case CassandraVersion.v0_6_0:
 					v060client = new Apache.Cassandra060.Cassandra.Client(protocol);
 					break;
 
@@ -72,7 +72,7 @@ namespace HectorSharp.Service
 			
 			switch (version)
 			{
-				case CassandraVersion.v0_6_0_beta_3:
+				case CassandraVersion.v0_6_0:
 					return new CassandraClient(v060client, new KeyspaceFactory(monitor), key, pool);
 
 				default:
@@ -87,7 +87,7 @@ namespace HectorSharp.Service
 			// ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
 			switch (version)
 			{
-				case CassandraVersion.v0_6_0_beta_3:
+				case CassandraVersion.v0_6_0:
 					var v060client = obj.Client as Apache.Cassandra060.Cassandra.Client;
 					v060client.InputProtocol.Transport.Close();
 					v060client.OutputProtocol.Transport.Close();

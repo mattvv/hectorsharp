@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace HectorSharp.Service
+﻿namespace HectorSharp.Service
 {
 	public enum CassandraVersion
 	{
 		v0_5_1, 
-		v0_6_0_beta_3,
+		v0_6_0,
 	}
 
 	public enum ConsistencyLevel

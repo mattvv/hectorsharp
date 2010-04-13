@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Apache.Cassandra051;
+using Apache.Cassandra060;
 using Thrift.Protocol;
 using Thrift.Transport;
 using Xunit;
 using HectorSharp.Utils;
 
-namespace HectorSharp.Test._051
+namespace HectorSharp.Test._060
 {
 	/// <summary>
 	/// Tests thrift-generated Cassandra classes and Thrift directly

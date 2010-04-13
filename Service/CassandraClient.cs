@@ -63,7 +63,7 @@ namespace HectorSharp.Service
 		internal CassandraClient(Apache.Cassandra060.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 			: this(keyspaceFactory, endpoint, pool)
 		{
-			Version = CassandraVersion.v0_6_0_beta_3;
+			Version = CassandraVersion.v0_6_0;
 			cassandra060 = thriftClient;
 		}
 
@@ -131,7 +131,7 @@ namespace HectorSharp.Service
 
 					if(Version == CassandraVersion.v0_5_1)
 						keyspaceDesc = cassandra051.describe_keyspace(keyspaceName);
-					else if(Version == CassandraVersion.v0_6_0_beta_3)
+					else if(Version == CassandraVersion.v0_6_0)
 						keyspaceDesc = cassandra060.describe_keyspace(keyspaceName);
 
 					keyspace = keyspaceFactory.Create(this, keyspaceName, keyspaceDesc,
@@ -159,7 +159,7 @@ namespace HectorSharp.Service
 				if (keyspaces == null)
 					switch (Version)
 					{
-						case CassandraVersion.v0_6_0_beta_3:
+						case CassandraVersion.v0_6_0:
 							keyspaces = cassandra060.get_string_list_property(PROP_KEYSPACE);
 							break;
 						default:
@@ -175,7 +175,7 @@ namespace HectorSharp.Service
 		{
 			switch (Version)
 			{
-				case CassandraVersion.v0_6_0_beta_3:
+				case CassandraVersion.v0_6_0:
 					return cassandra060.get_string_property(propertyName);
 				default:
 				case CassandraVersion.v0_5_1:
@@ -230,7 +230,7 @@ namespace HectorSharp.Service
 			{
 				switch (Version)
 				{
-					case CassandraVersion.v0_6_0_beta_3: return cassandra060;
+					case CassandraVersion.v0_6_0: return cassandra060;
 					default: return cassandra051;
 				}
 			} 

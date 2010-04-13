@@ -53,9 +53,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="0.5.1\KeySpaceTest.cs" />
-    <Compile Include="0.5.1\RawThriftTest.cs" />
+    <None Include="0.5.1\KeySpaceTest.cs" />
+    <None Include="0.5.1\RunCassandra.bat" />
+    <None Include="0.6.0\conf\access.properties" />
+    <None Include="0.6.0\conf\log4j-tools.properties" />
+    <None Include="0.6.0\conf\log4j.properties" />
+    <None Include="0.6.0\conf\passwd.properties" />
+    <None Include="0.6.0\RunCassandra.bat" />
     <Compile Include="0.5.1\TestFixture.cs" />
+    <Compile Include="0.6.0\RawThriftTest.cs" />
     <Compile Include="0.6.0\TestFixture.cs" />
     <Compile Include="0.6.0\KeySpaceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -79,6 +85,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="0.6.0\conf\storage-conf.xml" />
     <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
