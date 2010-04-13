@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}</ProjectGuid>
+    <ProjectGuid>{F300C023-618A-43BC-BF53-978540962971}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HectorSharp.Test</RootNamespace>
-    <AssemblyName>HectorSharp.Test</AssemblyName>
+    <RootNamespace>Apache.Cassandra060</RootNamespace>
+    <AssemblyName>Apache.Cassandra060</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Moq, Version=3.1.416.3, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\Moq\Moq.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -47,39 +43,46 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit, Version=1.5.0.1479, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\XUnit\xunit.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="0.5.1\KeySpaceTest.cs" />
-    <Compile Include="0.5.1\RawThriftTest.cs" />
-    <Compile Include="0.5.1\TestFixture.cs" />
-    <Compile Include="0.6.0\TestFixture.cs" />
-    <Compile Include="0.6.0\KeySpaceTest.cs" />
+    <Compile Include="AuthenticationException.cs" />
+    <Compile Include="AuthenticationRequest.cs" />
+    <Compile Include="AuthorizationException.cs" />
+    <Compile Include="Cassandra.cs" />
+    <Compile Include="Column.cs" />
+    <Compile Include="ColumnOrSuperColumn.cs" />
+    <Compile Include="ColumnParent.cs" />
+    <Compile Include="ColumnPath.cs" />
+    <Compile Include="ConsistencyLevel.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Deletion.cs" />
+    <Compile Include="Extension\Column.cs" />
+    <Compile Include="Extension\ColumnOrSuperColumn.cs" />
+    <Compile Include="Extension\ColumnParent.cs" />
+    <Compile Include="Extension\ColumnPath.cs" />
+    <Compile Include="Extension\InvalidRequestException.cs" />
+    <Compile Include="Extension\SlicePredicate.cs" />
+    <Compile Include="Extension\SliceRange.cs" />
+    <Compile Include="Extension\StringUtil.cs" />
+    <Compile Include="Extension\Timestamp.cs" />
+    <Compile Include="InvalidRequestException.cs" />
+    <Compile Include="KeyRange.cs" />
+    <Compile Include="KeySlice.cs" />
+    <Compile Include="Mutation.cs" />
+    <Compile Include="NotFoundException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SlicePredicate.cs" />
+    <Compile Include="SliceRange.cs" />
+    <Compile Include="SuperColumn.cs" />
+    <Compile Include="TimedOutException.cs" />
+    <Compile Include="TokenRange.cs" />
+    <Compile Include="UnavailableException.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HectorSharp.csproj">
-      <Project>{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}</Project>
-      <Name>HectorSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\Apache\Cassandra 0.5.1\Cassandra 0.5.1.csproj">
-      <Project>{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}</Project>
-      <Name>Cassandra 0.5.1</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\Apache\Cassandra 0.6.0\Cassandra 0.6.0.csproj">
-      <Project>{F300C023-618A-43BC-BF53-978540962971}</Project>
-      <Name>Cassandra 0.6.0</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\Thrift\Thrift.csproj">
+    <ProjectReference Include="..\..\Thrift\Thrift.csproj">
       <Project>{499EB63C-D74C-47E8-AE48-A2FC94538E9D}</Project>
       <Name>Thrift</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
