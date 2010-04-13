@@ -21,7 +21,10 @@ namespace HectorSharp.Test._060
 		[Fact]
 		public void SimpleScenario()
 		{
-			TTransport transport = new TSocket("localhost", 9160);
+			CassandraRunner.CleanData();
+			CassandraRunner.Start();
+
+			TTransport transport = new TSocket("localhost", 9060);
 			TProtocol protocol = new TBinaryProtocol(transport);
 			var client = new Cassandra.Client(protocol);
 
@@ -87,12 +90,18 @@ namespace HectorSharp.Test._060
 
 			Console.WriteLine("closing connection");
 			transport.Close();
+
+			CassandraRunner.Stop();
+			CassandraRunner.CleanData();
 		}
 
 		[Fact]
 		public void BlogModelScenario()
 		{
-			TTransport transport = new TSocket("localhost", 9160);
+			CassandraRunner.CleanData();
+			CassandraRunner.Start();
+
+			TTransport transport = new TSocket("localhost", 9060);
 			TProtocol protocol = new TBinaryProtocol(transport);
 			var client = new Cassandra.Client(protocol);
 
@@ -133,6 +142,9 @@ namespace HectorSharp.Test._060
 			}
 			Console.WriteLine("closing connection");
 			transport.Close();
+
+			CassandraRunner.Stop();
+			CassandraRunner.CleanData();
 		}
 	}
 }

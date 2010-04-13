@@ -13,9 +13,12 @@ namespace HectorSharp.Test._060
 
 		public TestFixture()
 		{
+			CassandraRunner.CleanData();
+			CassandraRunner.Start();
+
 			Pool = new CassandraClientPoolFactory().Create();
 			Client = new KeyedCassandraClientFactory(Pool, new KeyedCassandraClientFactory.Config { Timeout = 10 })
-				.Make(new Endpoint("localhost", 9160));
+				.Make(new Endpoint("localhost", 9060));
 			Keyspace = Client.GetKeyspace("Keyspace1", ConsistencyLevel.ONE, new FailoverPolicy(0) { Strategy = FailoverStrategy.FAIL_FAST });
 		}
 
@@ -33,6 +36,8 @@ namespace HectorSharp.Test._060
 				Pool.Close();
 				Pool = null;
 			}
+			CassandraRunner.Stop();
+			CassandraRunner.CleanData();
 		}
 
 		#endregion

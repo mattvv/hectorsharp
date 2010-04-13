@@ -1,5 +1,7 @@
-﻿@echo off
+@echo off
 @setlocal
 @if not exist V:\ subst V: .
-@rmdir V:\var /S /Q
+@V:
+@cd \
+@if exist var rmdir var /S /Q
 @if exist V:\ subst V: /D
