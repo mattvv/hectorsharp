@@ -23,9 +23,17 @@ namespace HectorSharp.Test._060
 
 		static CassandraRunner()
 		{
-			// set to ../../0.6.0
-			// assumes cwd = ./HectorSharp/Test/bin/Debug
-			rundir = Directory.GetParent(Environment.CurrentDirectory).Parent.GetDirectories(batchDir)[0];
+			// if running from msbuild for CI server will be ./HectorSharp
+			originalWorkingDirectory = Environment.CurrentDirectory;
+			var curdir = new DirectoryInfo(Environment.CurrentDirectory);
+			if (curdir.Name.Equals("debug", StringComparison.InvariantCultureIgnoreCase))
+				// assumes cwd = ./HectorSharp/Test/bin/Debug
+				// set to ../../0.6.0
+				rundir = curdir.Parent.GetDirectories(batchDir)[0];
+			else if (Directory.Exists("Test/" + batchDir))
+				rundir = new DirectoryInfo("Test/" + batchDir);
+			else
+				throw new ApplicationException("unable to resolve path to ./HectorSharp/Test/" + batchDir);
 		}
 
 		public static void Start()
