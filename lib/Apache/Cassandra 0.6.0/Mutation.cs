@@ -12,7 +12,7 @@ using Thrift;
 using Thrift.Collections;
 using Thrift.Protocol;
 using Thrift.Transport;
-namespace Apache.Cassandra060
+namespace Apache.Cassandra
 {
 
   [Serializable]

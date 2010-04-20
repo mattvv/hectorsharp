@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Apache.Cassandra060
+namespace Apache.Cassandra
 {
 	public static class UnixTimestamp
 	{

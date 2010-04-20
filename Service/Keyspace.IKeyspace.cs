@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using HectorSharp.Utils;
 using HectorSharp.Model;
 
-namespace HectorSharp.Service._051
+namespace HectorSharp.Service
 {
 	internal partial class Keyspace : IKeyspace
 	{
@@ -26,7 +26,7 @@ namespace HectorSharp.Service._051
 					var cosc = client.get(Name, key, columnPath.ToThrift(), ConsistencyLevel.ToThrift());
 					return cosc == null ? null : cosc.Column.ToModel();
 				}
-				catch (Apache.Cassandra051.NotFoundException ex)
+				catch (Apache.Cassandra.NotFoundException ex)
 				{
 					op.Error = new NotFoundException("Column Not Found: key: " + key + ", " + columnPath.ToString(), ex);
 				}
@@ -50,13 +50,13 @@ namespace HectorSharp.Service._051
 		{
 			AssertSuperColumnPath(columnPath);
 
-			var sliceRange = new Apache.Cassandra051.SliceRange(reversed, size);
+			var sliceRange = new Apache.Cassandra.SliceRange(reversed, size);
 
 			var op = new Operation<SuperColumn>(ClientCounter.READ_FAIL,
 				client =>
 				{
-					var columnParent = new Apache.Cassandra051.ColumnParent(columnPath.ColumnFamily, columnPath.SuperColumn);
-					var predicate = new Apache.Cassandra051.SlicePredicate(null, sliceRange);
+					var columnParent = new Apache.Cassandra.ColumnParent(columnPath.ColumnFamily, columnPath.SuperColumn);
+					var predicate = new Apache.Cassandra.SlicePredicate(null, sliceRange);
 					var data = client.get_slice(Name, key, columnParent, predicate, ConsistencyLevel.ToThrift());
 					return new SuperColumn(columnPath.SuperColumn, GetColumnList(data));
 				});
@@ -194,7 +194,15 @@ namespace HectorSharp.Service._051
 				client =>
 				{
 					var result = new Dictionary<string, IList<Column>>();
-					var keySlices = client.get_range_slice(Name, columnParent.ToThrift(), predicate.ToThrift(), start, finish, count, ConsistencyLevel.ToThrift());
+					var keyRange = new Apache.Cassandra.KeyRange();
+					keyRange.Start_key = start;
+					keyRange.End_key = finish;
+					keyRange.Count = count;
+
+					// deprecated
+					//	var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), start, finish, count, ConsistencyLevel.ToThrift());
+					
+					var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), keyRange, ConsistencyLevel.ToThrift());
 					if (keySlices == null || keySlices.Count == 0)
 						return result;
 
@@ -250,7 +258,7 @@ namespace HectorSharp.Service._051
 			if (columnMap == null && superColumnMap == null)
 				throw new Exception("columnMap and SuperColumnMap can not be null at same time");
 
-			var cfmap = new Dictionary<string, List<Apache.Cassandra051.ColumnOrSuperColumn>>();
+			var cfmap = new Dictionary<string, List<Apache.Cassandra.ColumnOrSuperColumn>>();
 
 			if (columnMap != null)
 				foreach (var map in columnMap)

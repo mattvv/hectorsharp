@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace HectorSharp.Utils
+namespace System
 {
 	/// <summary>
 	/// Encoding and decoding utilities.

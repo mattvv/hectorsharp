@@ -45,33 +45,23 @@ namespace HectorSharp.Service
 		bool closed = false;
 		bool hasErrors = false;
 
-		public CassandraVersion Version { get; private set; }
 		public int Port { get { return port.HasValue ? port.Value : -1; } }
 		public ICassandraClientMonitor Monitor { get; private set; }
 
-		Apache.Cassandra051.Cassandra.Client cassandra051;
-		Apache.Cassandra060.Cassandra.Client cassandra060;
+		Apache.Cassandra.Cassandra.Client cassandra;
 
 		#region ctor
-		internal CassandraClient(Apache.Cassandra051.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
+		internal CassandraClient(Apache.Cassandra.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 			: this(keyspaceFactory, endpoint, pool)
 		{
-			Version = CassandraVersion.v0_5_1;
-			cassandra051 = thriftClient;
-		}
-
-		internal CassandraClient(Apache.Cassandra060.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
-			: this(keyspaceFactory, endpoint, pool)
-		{
-			Version = CassandraVersion.v0_6_0;
-			cassandra060 = thriftClient;
+			cassandra = thriftClient;
 		}
 
 		internal CassandraClient(KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 		{
 			this.mySerial = serial.Increment();
 			this.keyspaceFactory = keyspaceFactory;
-			
+
 			if (endpoint == null)
 				throw new ArgumentNullException("endpoint");
 
@@ -118,7 +108,7 @@ namespace HectorSharp.Service
 		public IKeyspace GetKeyspace(string keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
 		{
 			var key = BuildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
-			
+
 			IKeyspace keyspace;
 
 			if (keyspaceMap.ContainsKey(key))
@@ -129,11 +119,7 @@ namespace HectorSharp.Service
 				{
 					IDictionary<string, Dictionary<string, string>> keyspaceDesc = null;
 
-					if(Version == CassandraVersion.v0_5_1)
-						keyspaceDesc = cassandra051.describe_keyspace(keyspaceName);
-					else if(Version == CassandraVersion.v0_6_0)
-						keyspaceDesc = cassandra060.describe_keyspace(keyspaceName);
-
+					keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
 					keyspace = keyspaceFactory.Create(this, keyspaceName, keyspaceDesc,
 						 consistencyLevel, failoverPolicy, pool);
 					IKeyspace tmp = null;
@@ -157,30 +143,14 @@ namespace HectorSharp.Service
 			get
 			{
 				if (keyspaces == null)
-					switch (Version)
-					{
-						case CassandraVersion.v0_6_0:
-							keyspaces = cassandra060.get_string_list_property(PROP_KEYSPACE);
-							break;
-						default:
-						case CassandraVersion.v0_5_1:
-							keyspaces = cassandra051.get_string_list_property(PROP_KEYSPACE);
-							break;
-					}
+					keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
 				return keyspaces;
 			}
 		}
 
 		public string GetStringProperty(string propertyName)
 		{
-			switch (Version)
-			{
-				case CassandraVersion.v0_6_0:
-					return cassandra060.get_string_property(propertyName);
-				default:
-				case CassandraVersion.v0_5_1:
-					return cassandra051.get_string_property(propertyName);
-			}
+			return cassandra.get_string_property(propertyName);
 		}
 
 		public IDictionary<string, string> GetTokenMap(bool fresh)
@@ -225,15 +195,8 @@ namespace HectorSharp.Service
 		}
 
 		public object Client
-		{ 
-			get 
-			{
-				switch (Version)
-				{
-					case CassandraVersion.v0_6_0: return cassandra060;
-					default: return cassandra051;
-				}
-			} 
+		{
+			get { return cassandra; }
 		}
 
 		public Endpoint Endpoint { get; private set; }

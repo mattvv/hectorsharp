@@ -5,7 +5,7 @@ using System.Text;
 using Xunit;
 using System.Threading;
 
-namespace HectorSharp.Test._060
+namespace HectorSharp.Test
 {
 	public class RunCassandraTest
 	{

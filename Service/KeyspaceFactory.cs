@@ -25,23 +25,15 @@ namespace HectorSharp.Service
 			FailoverPolicy failoverPolicy,
 			IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 		{
-			switch (client.Version)
-			{
-				case CassandraVersion.v0_6_0:
-					throw new NotImplementedException("Version 0.6.0 not implimented yet");
-
-				default:
-				case CassandraVersion.v0_5_1:
-					return new _051.Keyspace(
-						client,
-						keyspaceName,
-						keyspaceDesc,
-						consistencyLevel,
-						failoverPolicy,
-						pool,
-						monitor
-						);
-			}
+			return new Keyspace(
+				client,
+				keyspaceName,
+				keyspaceDesc,
+				consistencyLevel,
+				failoverPolicy,
+				pool,
+				monitor
+				);
 		}
 	}
 }

@@ -3,7 +3,7 @@ using HectorSharp.Model;
 using HectorSharp.Service;
 using HectorSharp.Utils.ObjectPool;
 
-namespace HectorSharp.Test._060
+namespace HectorSharp.Test
 {
 	public class TestFixture : IDisposable
 	{

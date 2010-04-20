@@ -1,19 +1,27 @@
-﻿using System.Linq;
-using Apache.Cassandra051;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Apache.Cassandra;
 using HectorSharp.Utils;
 
-namespace HectorSharp.Service._051
+namespace HectorSharp.Service
 {
 	static class ToThriftExtension
 	{
-		public static Apache.Cassandra051.ConsistencyLevel ToThrift(this ConsistencyLevel level)
+		public static Apache.Cassandra.ConsistencyLevel ToThrift(this ConsistencyLevel level)
 		{
-			return (Apache.Cassandra051.ConsistencyLevel)level;
+			return (Apache.Cassandra.ConsistencyLevel)level;
 		}
 
 		public static Column ToThrift(this Model.Column c)
 		{
-			return new Column(c.Name.UTF(), c.Value.UTF(new byte[0]), c.Timestamp.Value);
+			return new Column
+			{
+				Name = c.Name.ToUtf8Bytes(),
+				Value = c.Value.ToUtf8Bytes(),
+				Timestamp = c.Timestamp.Value,
+			};
 		}
 
 		public static SuperColumn ToThrift(this Model.SuperColumn sc)
@@ -43,7 +51,7 @@ namespace HectorSharp.Service._051
 
 		public static SliceRange ToThrift(this Model.SliceRange range)
 		{
-			return new SliceRange(range.Start.UTF(), range.Finish.UTF(), range.Reversed, range.Count);
+			return new SliceRange(range.Start.UTF(new byte[0]), range.Finish.UTF(new byte[0]), range.Reversed, range.Count);
 		}
 	}
 }

@@ -1,11 +1,5 @@
 ﻿namespace HectorSharp.Service
 {
-	public enum CassandraVersion
-	{
-		v0_5_1, 
-		v0_6_0,
-	}
-
 	public enum ConsistencyLevel
 	{
 		ZERO = 0,

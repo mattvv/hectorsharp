@@ -1,9 +1,9 @@
-﻿using Apache.Cassandra051;
+﻿using Apache.Cassandra;
 using HectorSharp.Utils;
 using System.Collections.Generic;
 using System;
 
-namespace HectorSharp.Service._051
+namespace HectorSharp.Service
 {
 	static class ToModelExtension
 	{

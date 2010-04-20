@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Apache.Cassandra060;
+using Apache.Cassandra;
 using HectorSharp.Utils.ObjectPool;
 using HectorSharp.Utils;
 using Thrift.Transport;
 using HectorSharp.Model;
 
-namespace HectorSharp.Service._060
+namespace HectorSharp.Service
 {
 	internal partial class Keyspace
 	{
@@ -35,8 +35,6 @@ namespace HectorSharp.Service._060
 		{
 			if (client == null)
 				throw new ArgumentNullException("client");
-			if (client.Version != CassandraVersion.v0_5_1)
-				throw new ArgumentOutOfRangeException("client version is not v 0.5.1");
 
 			this.Client = client;
 			this.ConsistencyLevel = consistencyLevel;
@@ -90,22 +88,22 @@ namespace HectorSharp.Service._060
 				 "Invalid super column or super column family does not exist: " + cf, null);
 		}
 
-		static List<Apache.Cassandra060.ColumnOrSuperColumn> GetSoscList(IEnumerable<Model.Column> columns)
+		static List<Apache.Cassandra.ColumnOrSuperColumn> GetSoscList(IEnumerable<Model.Column> columns)
 		{
-			return new List<Apache.Cassandra060.ColumnOrSuperColumn>(columns.Transform(c => new Apache.Cassandra060.ColumnOrSuperColumn(c.ToThrift(), null)));
+			return new List<Apache.Cassandra.ColumnOrSuperColumn>(columns.Transform(c => new Apache.Cassandra.ColumnOrSuperColumn(c.ToThrift(), null)));
 		}
 
-		static List<Apache.Cassandra060.ColumnOrSuperColumn> GetSoscSuperList(IEnumerable<Model.SuperColumn> columns)
+		static List<Apache.Cassandra.ColumnOrSuperColumn> GetSoscSuperList(IEnumerable<Model.SuperColumn> columns)
 		{
-			return new List<Apache.Cassandra060.ColumnOrSuperColumn>(columns.Transform(c => new Apache.Cassandra060.ColumnOrSuperColumn(null, c.ToThrift())));
+			return new List<Apache.Cassandra.ColumnOrSuperColumn>(columns.Transform(c => new Apache.Cassandra.ColumnOrSuperColumn(null, c.ToThrift())));
 		}
 
-		static List<Model.Column> GetColumnList(IEnumerable<Apache.Cassandra060.ColumnOrSuperColumn> columns)
+		static List<Model.Column> GetColumnList(IEnumerable<Apache.Cassandra.ColumnOrSuperColumn> columns)
 		{
 			return new List<Model.Column>(columns.Transform(c => c.Column.ToModel()));
 		}
 
-		static List<Model.SuperColumn> GetSuperColumnList(IEnumerable<Apache.Cassandra060.ColumnOrSuperColumn> columns)
+		static List<Model.SuperColumn> GetSuperColumnList(IEnumerable<Apache.Cassandra.ColumnOrSuperColumn> columns)
 		{
 			return new List<Model.SuperColumn>(columns.Transform(c => c.Super_column.ToModel()));
 		}
@@ -177,7 +175,7 @@ namespace HectorSharp.Service._060
 			}
 			// assume they use the same port
 			Client = pool.Borrow(new Endpoint(nextHost, Client.Port));
-			cassandra = Client.Client as Apache.Cassandra060.Cassandra.Client;
+			cassandra = Client.Client as Apache.Cassandra.Cassandra.Client;
 			monitor.IncrementCounter(ClientCounter.SKIP_HOST_SUCCESS);
 			//log.info("Skipped host. New host is: {}", client.getUrl());
 		}
@@ -227,7 +225,7 @@ namespace HectorSharp.Service._060
 						// monitor.incCounter(op.successCounter);
 						//   log.debug("Operation succeeded on {}", client.getUrl());
 					}
-					catch (Apache.Cassandra051.TimedOutException)
+					catch (Apache.Cassandra.TimedOutException)
 					{
 						//   log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
 						if (retries == 0)
@@ -238,7 +236,7 @@ namespace HectorSharp.Service._060
 							monitor.IncrementCounter(ClientCounter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
 						}
 					}
-					catch (Apache.Cassandra051.UnavailableException)
+					catch (Apache.Cassandra.UnavailableException)
 					{
 						//  log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
 						//      retries);
@@ -264,12 +262,12 @@ namespace HectorSharp.Service._060
 					}
 				}
 			}
-			catch (Apache.Cassandra051.InvalidRequestException ex)
+			catch (Apache.Cassandra.InvalidRequestException ex)
 			{
 				monitor.IncrementCounter(op.FailCounter);
 				throw new Model.InvalidRequestException(ex.__isset.why ? ex.Why : ex.Message, ex);
 			}
-			catch (Apache.Cassandra051.UnavailableException ex)
+			catch (Apache.Cassandra.UnavailableException ex)
 			{
 				monitor.IncrementCounter(op.FailCounter);
 				throw new Model.UnavailableException(ex.Message, ex);
@@ -278,7 +276,7 @@ namespace HectorSharp.Service._060
 			monitor.incCounter(op.failCounter);
 			throw e;
 			} */
-			catch (Apache.Cassandra051.TimedOutException ex)
+			catch (Apache.Cassandra.TimedOutException ex)
 			{
 				monitor.IncrementCounter(op.FailCounter);
 				throw new Model.TimedOutException(ex.Message, ex);

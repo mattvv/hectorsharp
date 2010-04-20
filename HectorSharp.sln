@@ -7,14 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp.Test", "Test\HectorSharp.Test.csproj", "{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{7E51E2B8-65F7-47CC-B5BC-D60D1DFEB15D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cassandra 0.5.1", "lib\Apache\Cassandra 0.5.1\Cassandra 0.5.1.csproj", "{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrift", "lib\Thrift\Thrift.csproj", "{499EB63C-D74C-47E8-AE48-A2FC94538E9D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cassandra 0.6.0", "lib\Apache\Cassandra 0.6.0\Cassandra 0.6.0.csproj", "{F300C023-618A-43BC-BF53-978540962971}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,25 +21,8 @@ Global
 		{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F300C023-618A-43BC-BF53-978540962971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F300C023-618A-43BC-BF53-978540962971}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F300C023-618A-43BC-BF53-978540962971}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F300C023-618A-43BC-BF53-978540962971}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49} = {7E51E2B8-65F7-47CC-B5BC-D60D1DFEB15D}
-		{499EB63C-D74C-47E8-AE48-A2FC94538E9D} = {7E51E2B8-65F7-47CC-B5BC-D60D1DFEB15D}
-		{F300C023-618A-43BC-BF53-978540962971} = {7E51E2B8-65F7-47CC-B5BC-D60D1DFEB15D}
 	EndGlobalSection
 EndGlobal

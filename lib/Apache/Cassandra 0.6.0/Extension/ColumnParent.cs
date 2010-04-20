@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Apache.Cassandra060
+namespace Apache.Cassandra
 {
 	public partial class ColumnParent
 	{

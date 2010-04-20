@@ -7,7 +7,7 @@ using System.Threading;
 using System.IO;
 using Xunit;
 
-namespace HectorSharp.Test._060
+namespace HectorSharp.Test
 {
 	static class CassandraRunner
 	{

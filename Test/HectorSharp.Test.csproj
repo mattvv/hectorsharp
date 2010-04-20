@@ -53,44 +53,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="0.5.1\KeySpaceTest.cs" />
-    <None Include="0.5.1\RunCassandra.bat" />
-    <None Include="0.6.0\conf\access.properties">
-    </None>
-    <None Include="0.6.0\conf\log4j-tools.properties">
-    </None>
-    <None Include="0.6.0\conf\log4j.properties" />
-    <None Include="0.6.0\conf\passwd.properties" />
-    <None Include="0.6.0\CleanCassandraData.bat" />
-    <None Include="0.6.0\RunCassandra.bat" />
-    <Compile Include="0.5.1\TestFixture.cs" />
-    <Compile Include="0.6.0\CassandraRunner.cs" />
-    <Compile Include="0.6.0\RawThriftTest.cs" />
-    <Compile Include="0.6.0\RunCassandraTest.cs" />
-    <Compile Include="0.6.0\TestFixture.cs" />
-    <Compile Include="0.6.0\KeySpaceTest.cs" />
+    <None Include="CleanCassandraData.bat" />
+    <None Include="conf\access.properties" />
+    <None Include="conf\log4j-tools.properties" />
+    <None Include="conf\log4j.properties" />
+    <None Include="conf\passwd.properties" />
+    <None Include="RunCassandra.bat" />
+    <Compile Include="CassandraRunner.cs" />
+    <Compile Include="KeySpaceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawThriftTest.cs" />
+    <Compile Include="RunCassandraTest.cs" />
+    <Compile Include="TestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HectorSharp.csproj">
       <Project>{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}</Project>
       <Name>HectorSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\lib\Apache\Cassandra 0.5.1\Cassandra 0.5.1.csproj">
-      <Project>{5DDD7BEC-1833-4C64-B3CA-50A4B4117D49}</Project>
-      <Name>Cassandra 0.5.1</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\Apache\Cassandra 0.6.0\Cassandra 0.6.0.csproj">
-      <Project>{F300C023-618A-43BC-BF53-978540962971}</Project>
-      <Name>Cassandra 0.6.0</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\Thrift\Thrift.csproj">
-      <Project>{499EB63C-D74C-47E8-AE48-A2FC94538E9D}</Project>
-      <Name>Thrift</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="0.6.0\conf\storage-conf.xml" />
+    <Content Include="conf\storage-conf.xml" />
     <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

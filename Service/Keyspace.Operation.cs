@@ -1,7 +1,7 @@
 ﻿using System;
-using Apache.Cassandra060;
+using Apache.Cassandra;
 
-namespace HectorSharp.Service._060
+namespace HectorSharp.Service
 {
 	internal partial class Keyspace
 	{
