@@ -1,6 +1,7 @@
 A high level cassandra C#/.NET client ported from Java
 
-Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
+Cassandra is a highly available column oriented database.
+
 Hector is the greatest warrior in the greek mithology, Troy's builder and brother of Cassandra
 http://en.wikipedia.org/wiki/Hector
 http://en.wikipedia.org/wiki/Cassandra
@@ -12,10 +13,43 @@ This client provides:
  o connection pooling for improved performance and scalability
  o load balancing
 
+Installing Cassandra on Windows:
+	
+1. Download and install the latest Sun Java Runtime - http://www.java.com/getjava
+2. Set your JAVA_HOME environment variable, example "c:\Program Files\Java\jdk1.6.0_18"
+	verify the path.
+3. Download latest Cassandra distribution (currently 0.6.1) - http://cassandra.apache.org/
+	(The package is a .tar.gz file, which can be unpacked using 7-zip from http://www.7-zip.org/) 
+4. Unpack Cassandra distro, I prefer c:\casssandra###, where ### is the version without "."
+	for example "c:\cassandra061".
+5. Set your CASSANDRA_HOME environment variable to the path from step 4.
+6. To manually test that Cassandra is installed, 
+	A. open a command prompt:
+		run -> cmd
+		cd c:\cassandra061
+		bin/cassandra.bat -f
+	B. open a second command prompt:
+		run -> cmd
+		cd c:\cassandra061
+		bin/cassandra-cli.bat
+			cassandra> ?
+				help on commands
+			cassandra> connect localhost/9160
+			Connected to: "Test Cluster" on localhost/9160
+			cassandra> show api version
+			2.1.0
+			cassandra> show keyspaces
+			Keyspace1
+			System
+	C.	Cassandra is properly installed.
+	
+The integration tests in the HectorSharp project starts up cassandra listening to thrift
+on port 9060 automatically, and then executes the tests.  It maintains a separate configuration
+and database files, in the build output directory.		
+
 Current TO DOs:
 
- o 0.6.0 thrift compatibility
- o Complete Failover unit tests
+ o Failover unit tests
  o Evaluate high-level API interface - optimize for usability
 	o Make connection pooling transparent to user api
  o Provide configuration system
