@@ -14,8 +14,9 @@ namespace HectorSharp.Test
 		static Object padlock = new object();
 		static Process cassandra = null;
 		static string originalWorkingDirectory = Environment.CurrentDirectory;
-		static string batchDir = "0.6.0";
+		static string cassandraHome = Environment.GetEnvironmentVariable("CASSANDRA_HOME");
 		static string comspec = Environment.GetEnvironmentVariable("ComSpec");
+		static string debugDir = "Test/bin/Debug/";
 		static DirectoryInfo rundir;
 
 		public static bool Running { get; private set; }
@@ -26,14 +27,19 @@ namespace HectorSharp.Test
 			// if running from msbuild for CI server will be ./HectorSharp
 			originalWorkingDirectory = Environment.CurrentDirectory;
 			var curdir = new DirectoryInfo(Environment.CurrentDirectory);
-			if (curdir.Name.Equals("debug", StringComparison.InvariantCultureIgnoreCase))
-				// assumes cwd = ./HectorSharp/Test/bin/Debug
-				// set to ../../0.6.0
-				rundir = curdir.Parent.GetDirectories(batchDir)[0];
-			else if (Directory.Exists("Test/" + batchDir))
-				rundir = new DirectoryInfo("Test/" + batchDir);
+
+			if (!Directory.Exists(cassandraHome))
+				throw new ApplicationException("unable to find path specified in CASSANDRA_HOME environment variable: " + cassandraHome);
+
+			bool isDebug = curdir.Name.Equals("debug", StringComparison.InvariantCultureIgnoreCase);
+			bool isRelease = curdir.Name.Equals("release", StringComparison.InvariantCultureIgnoreCase);
+
+			if (isDebug || isRelease)
+				rundir = curdir; // assumes cwd = ./HectorSharp/Test/bin/Debug
+			else if (Directory.Exists(debugDir))
+				rundir = new DirectoryInfo(debugDir);
 			else
-				throw new ApplicationException("unable to resolve path to ./HectorSharp/Test/" + batchDir);
+				throw new ApplicationException("unable to resolve path to ./HectorSharp/" + debugDir);
 		}
 
 		public static void Start()
@@ -45,8 +51,8 @@ namespace HectorSharp.Test
 				cassandra = RunBatchFile("RunCassandra.bat");
 				Console.WriteLine("Waiting 3 seconds while Cassandra starts up");
 				Console.WriteLine("Cassandra, pid: {0} is active: {1}", cassandra.Id, !cassandra.HasExited);
-				Console.WriteLine(cassandra.StandardOutput.ReadToEnd());
-				//Thread.Sleep(3000);
+				//Console.WriteLine(cassandra.StandardOutput.ReadToEnd());
+				Thread.Sleep(3000);
 
 				if (!cassandra.HasExited)
 					Running = true;
@@ -57,19 +63,21 @@ namespace HectorSharp.Test
 		{
 			lock (padlock)
 			{
-				if(!Running) return;
+				if (!Running) return;
 
 				// send control-c to cancel the batch file
 				cassandra.StandardInput.Write("\x3");
 				// terminate batch file? (y/n)
 				cassandra.StandardInput.WriteLine("y");
-				cassandra.Close();
 				cassandra.WaitForExit(1000);
-
 				Console.WriteLine("Cassandra, pid: {0} is active: {1}", cassandra.Id, !cassandra.HasExited);
-				
-				if(cassandra.HasExited)
+
+
+				if (cassandra.HasExited)
+				{
 					ExitCode = cassandra.ExitCode;
+					cassandra.Close();
+				}
 				else
 					cassandra.Kill();
 
@@ -91,9 +99,9 @@ namespace HectorSharp.Test
 
 		static Process RunBatchFile(string filename)
 		{
-			if(!Environment.CurrentDirectory.Equals(rundir.FullName))
+			if (!Environment.CurrentDirectory.Equals(rundir.FullName))
 				Environment.CurrentDirectory = rundir.FullName;
-		
+
 			var bat = rundir.GetFiles(filename)[0];
 			Console.WriteLine("Running Batch File: " + bat.FullName);
 

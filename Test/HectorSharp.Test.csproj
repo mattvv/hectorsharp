@@ -53,12 +53,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CleanCassandraData.bat" />
-    <None Include="conf\access.properties" />
-    <None Include="conf\log4j-tools.properties" />
-    <None Include="conf\log4j.properties" />
-    <None Include="conf\passwd.properties" />
-    <None Include="RunCassandra.bat" />
+    <Content Include="CleanCassandraData.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="conf\access.properties">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="conf\log4j-tools.properties">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="conf\log4j.properties">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="conf\passwd.properties">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RunCassandra.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="CassandraRunner.cs" />
     <Compile Include="KeySpaceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -73,7 +85,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="conf\storage-conf.xml" />
+    <Content Include="conf\storage-conf.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

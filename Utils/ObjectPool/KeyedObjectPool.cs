@@ -25,22 +25,22 @@ namespace HectorSharp.Utils.ObjectPool
 		public int Timeout { get; private set; }
 		public bool IsClosed { get; private set; }
 
-		Dictionary<K, Queue<V>> idle = new Dictionary<K, Queue<V>>();
-		Dictionary<K, List<V>> active = new Dictionary<K, List<V>>();
+		IDictionary<K, Queue<V>> idle = new ConcurrentDictionary<K, Queue<V>>();
+		IDictionary<K, List<V>> active = new ConcurrentDictionary<K, List<V>>();
 		// counters
-		Dictionary<K, Counter> available = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedActivateIdleCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedValidateIdleCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedActivateNewCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedValidateNewCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedValidateReturnCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedDestroyCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedPassivateReturnCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> reuseCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> borrowedCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> returnCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> makeCounts = new Dictionary<K, Counter>();
-		Dictionary<K, Counter> failedMakeCounts = new Dictionary<K, Counter>();
+		IDictionary<K, Counter> available = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedActivateIdleCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedValidateIdleCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedActivateNewCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedValidateNewCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedValidateReturnCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedDestroyCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedPassivateReturnCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> reuseCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> borrowedCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> returnCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> makeCounts = new ConcurrentDictionary<K, Counter>();
+		IDictionary<K, Counter> failedMakeCounts = new ConcurrentDictionary<K, Counter>();
 
 		AutoResetEvent reset = new AutoResetEvent(false);
 
@@ -299,14 +299,14 @@ namespace HectorSharp.Utils.ObjectPool
 			return available[key].Increment();
 		}
 
-		long Decrement(K key, Dictionary<K, Counter> counters)
+		long Decrement(K key, IDictionary<K, Counter> counters)
 		{
 			if (!counters.ContainsKey(key))
 				counters.Add(key, new Counter());
 			return counters[key].Decrement();
 		}
 
-		long Increment(K key, Dictionary<K, Counter> counters)
+		long Increment(K key, IDictionary<K, Counter> counters)
 		{
 			if (!counters.ContainsKey(key))
 				counters.Add(key, new Counter());
