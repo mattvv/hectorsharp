@@ -72,9 +72,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Compile Include="CassandraRunner.cs" />
-    <Compile Include="KeySpaceTest.cs" />
+    <Compile Include="KeySpaceShould.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawThriftTest.cs" />
     <Compile Include="RunCassandraTest.cs" />
     <Compile Include="TestFixture.cs" />
   </ItemGroup>

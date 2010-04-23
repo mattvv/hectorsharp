@@ -11,7 +11,7 @@ using System;
 
 namespace HectorSharp.Test
 {
-	public class KeySpaceTest : IUseFixture<TestFixture>
+	public class KeySpaceShould : IUseFixture<TestFixture>
 	{
 		ICassandraClient Client { get { return fixture.Client; } }
 		IKeyspace Keyspace { get { return fixture.Keyspace; } }
