@@ -6,6 +6,6 @@ if exist V:\ subst V: /D
 subst V: .
 set CASSANDRA_CONF=V:\conf
 cd %CASSANDRA_HOME%
-call bin\cassandra.bat -f
+call bin\cassandra.bat 
 
 endlocal
