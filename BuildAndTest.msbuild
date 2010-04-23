@@ -5,6 +5,6 @@
     <MSBuild Projects="HectorSharp.sln"/>
   </Target>
   <Target Name="Test" DependsOnTargets="BuildSolution">
-    <xunit assembly="Test\bin\Debug\HectorSharp.Test.dll"/>
+    <xunit assembly="Test\bin\Debug\HectorSharp.Test.dll" TeamCity="true"/>
   </Target>
 </Project>
