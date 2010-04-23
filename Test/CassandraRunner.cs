@@ -17,6 +17,7 @@ namespace HectorSharp.Test
 		static string cassandraHome = Environment.GetEnvironmentVariable("CASSANDRA_HOME");
 		static string comspec = Environment.GetEnvironmentVariable("ComSpec");
 		static string debugDir = "Test/bin/Debug/";
+
 		static DirectoryInfo rundir;
 
 		public static bool Running { get; private set; }
@@ -48,15 +49,44 @@ namespace HectorSharp.Test
 
 			lock (padlock)
 			{
-				cassandra = RunBatchFile("RunCassandra.bat");
-				Console.WriteLine("Waiting 3 seconds while Cassandra starts up");
+				var reset = new AutoResetEvent(false);
+				cassandra = RunBatchFile("RunCassandra.bat", false);
+				cassandra.Exited += new EventHandler((sender, e) => { Console.WriteLine("CASSANDRA EXITED!"); });
+				cassandra.OutputDataReceived += new DataReceivedEventHandler(
+					(sender, e) =>
+					{
+						reset.Set();
+						Console.WriteLine("CASSANDRA > " + e.Data);
+					});
+				cassandra.ErrorDataReceived += new DataReceivedEventHandler(
+					(sender, e) =>
+					{
+						reset.Set();
+						Console.WriteLine("CASSANDRA ERROR > " + e.Data);
+					});
+				cassandra.EnableRaisingEvents = true;
+
+				cassandra.Start();
+				
+				cassandra.BeginOutputReadLine();
+				cassandra.BeginErrorReadLine();
+
+				reset.WaitOne(3000); // wait up to 3 seconds before continuing
 				Console.WriteLine("Cassandra, pid: {0} is active: {1}", cassandra.Id, !cassandra.HasExited);
-				//Console.WriteLine(cassandra.StandardOutput.ReadToEnd());
-				Thread.Sleep(3000);
 
 				if (!cassandra.HasExited)
 					Running = true;
 			}
+		}
+
+		static void cassandra_Exited(object sender, EventArgs e)
+		{
+			throw new NotImplementedException();
+		}
+
+		static void cassandra_OutputDataReceived(object sender, DataReceivedEventArgs e)
+		{
+			throw new NotImplementedException();
 		}
 
 		public static void Stop()
@@ -91,21 +121,20 @@ namespace HectorSharp.Test
 		{
 			if (Running) return;
 
-			var process = RunBatchFile("CleanCassandraData.bat");
+			var process = RunBatchFile("CleanCassandraData.bat", true);
 			process.WaitForExit(2000);
 			if (!process.HasExited)
 				process.Kill();
 		}
 
-		static Process RunBatchFile(string filename)
+		static Process RunBatchFile(string filename, bool start)
 		{
 			if (!Environment.CurrentDirectory.Equals(rundir.FullName))
 				Environment.CurrentDirectory = rundir.FullName;
 
 			var bat = rundir.GetFiles(filename)[0];
-			Console.WriteLine("Running Batch File: " + bat.FullName);
 
-			return Process.Start(new ProcessStartInfo(comspec, "/C " + bat.FullName)
+			var startInfo = new ProcessStartInfo(comspec, "/C " + bat.FullName)
 			{
 				WindowStyle = ProcessWindowStyle.Hidden,
 				UseShellExecute = false,
@@ -113,7 +142,12 @@ namespace HectorSharp.Test
 				RedirectStandardInput = true,
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
-			});
+			};
+			var process = new Process { StartInfo = startInfo };
+			Console.WriteLine("Running Batch File: " + bat.FullName);
+			if (start)
+				process.Start();
+			return process;
 		}
 	}
 }
