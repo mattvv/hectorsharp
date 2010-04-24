@@ -6,7 +6,7 @@
   </Target>
   <Target Name="Test" DependsOnTargets="BuildSolution">
     <xunit 
-      assembly="HectorSharp.Test.dll"
+      assembly="Test\bin\Debug\HectorSharp.Test.dll"
       />
   </Target>
 </Project>
