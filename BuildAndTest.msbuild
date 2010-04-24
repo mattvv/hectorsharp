@@ -5,6 +5,11 @@
     <MSBuild Projects="HectorSharp.sln"/>
   </Target>
   <Target Name="Test" DependsOnTargets="BuildSolution">
-    <xunit assembly="Test\bin\Debug\HectorSharp.Test.dll" TeamCity="true"/>
+    <xunit 
+      assembly="HectorSharp.Test.dll"
+      html="${results.dir}\test_report.html"
+      workingDir="${out.dir}"
+      />
+    <echo message="##teamcity[publishArtifacts '${results.dir}\test_report.html']" />
   </Target>
 </Project>
