@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace HectorSharp.Test
 {
-	public class RunCassandraTest
+	public class RunCassandraShould
 	{
 		[Fact]//(Skip="quick integration test, don't run with other tests")]
 		public void RunCassandra()
