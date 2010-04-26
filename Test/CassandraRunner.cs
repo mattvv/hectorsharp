@@ -93,20 +93,25 @@ namespace HectorSharp.Test
 				cassandra.Exited += new EventHandler((sender, e) => { Console.WriteLine("CASSANDRA EXITED!"); });
 				cassandra.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
 				{
-					reset.Set();
-					Console.WriteLine("CASSANDRA > " + e.Data);
+					if (!string.IsNullOrEmpty(e.Data))
+					{
+						Console.WriteLine("CASSANDRA > " + e.Data);
+
+						if(e.Data.Contains("Cassandra starting up..."))
+							reset.Set();
+					}
 				});
 				cassandra.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
 				{
-					reset.Set();
-					Console.WriteLine("CASSANDRA ERROR > " + e.Data);
+					if(!string.IsNullOrEmpty(e.Data))
+						Console.WriteLine("CASSANDRA ERROR > " + e.Data);
 				});
 
 				cassandra.Start();
 				cassandra.BeginOutputReadLine();
 				cassandra.BeginErrorReadLine();
 
-				reset.WaitOne(3000); // wait up to 3 seconds before continuing
+				reset.WaitOne(5000); // wait up to 5 seconds before continuing
 				Console.WriteLine("Cassandra, pid: {0} is active: {1}", cassandra.Id, !cassandra.HasExited);
 
 				if (!cassandra.HasExited)
