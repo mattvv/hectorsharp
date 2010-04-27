@@ -7,6 +7,8 @@
   <Target Name="Test" DependsOnTargets="BuildSolution">
     <xunit 
       assembly="Test\bin\Debug\HectorSharp.Test.dll"
+      Html="test_report.html"
       />
+    <Message Text="##teamcity[publishArtifacts 'test_report.html']" />
   </Target>
 </Project>
