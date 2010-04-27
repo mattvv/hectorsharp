@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Collections;
+using System.Collections.Concurrent;
 
 namespace HectorSharp.Utils.ObjectPool
 {

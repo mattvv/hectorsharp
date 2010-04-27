@@ -35,6 +35,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Threading, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Rx\System.Threading.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -61,7 +65,7 @@
     <Compile Include="Service\Interfaces\IKeyspace.cs" />
     <Compile Include="Service\KeyspaceFactory.cs" />
     <Compile Include="Service\PoolExhaustedException.cs" />
-    <Compile Include="Utils\ConcurrentDictionary.cs" />
+    <None Include="Utils\ConcurrentDictionary.cs" />
     <Compile Include="Utils\Counter.cs" />
     <Compile Include="Utils\ObjectPool\Interfaces.cs" />
     <Compile Include="Utils\ObjectPool\KeyedObjectPool.cs" />

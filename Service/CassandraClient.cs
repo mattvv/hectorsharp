@@ -1,13 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using HectorSharp.Service;
-using HectorSharp.Utils;
-using Thrift;
-using Apache.Cassandra;
-using HectorSharp.Utils.ObjectPool;
 using HectorSharp.Model;
+using HectorSharp.Utils;
+using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Service
 {
