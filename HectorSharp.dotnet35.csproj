@@ -66,7 +66,6 @@
     <Compile Include="Service\Interfaces\IKeyspace.cs" />
     <Compile Include="Service\KeyspaceFactory.cs" />
     <Compile Include="Service\PoolExhaustedException.cs" />
-    <None Include="Utils\ConcurrentDictionary.cs" />
     <Compile Include="Utils\Counter.cs" />
     <Compile Include="Utils\ObjectPool\Interfaces.cs" />
     <Compile Include="Utils\ObjectPool\KeyedObjectPool.cs" />
