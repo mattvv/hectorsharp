@@ -14,7 +14,7 @@ namespace HectorSharp.Service
 	{
 		static ICassandraClientMonitor monitor;
 		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
-		Config config;
+		//Config config;
 		int timeout = 10;
 
 		public class Config

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask AssemblyFile="lib\XUnit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+  <Target Name="BuildSolution">
+    <MSBuild Projects="HectorSharp.dotnet35.sln"/>
+  </Target>
+  <Target Name="Test" DependsOnTargets="BuildSolution">
+    <xunit 
+      assembly="Test\bin\dotnet35\Debug\HectorSharp.Test.dll"
+      Html="test_report.html"
+      />
+    <Message Text="##teamcity[publishArtifacts 'test_report_dotnet35.html']" />
+  </Target>
+</Project>

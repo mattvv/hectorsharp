@@ -19,8 +19,11 @@ namespace HectorSharp.Test
 		static string javaHome = Environment.GetEnvironmentVariable("JAVA_HOME");
 		static DirectoryInfo javaHomeDir;
 		static string comspec = Environment.GetEnvironmentVariable("ComSpec");
+#if DOTNET35
+		static string debugDir = "Test/bin/dotnet35/Debug/";
+#else
 		static string debugDir = "Test/bin/Debug/";
-
+#endif
 		static DirectoryInfo rundir;
 
 		public static bool Running { get; private set; }

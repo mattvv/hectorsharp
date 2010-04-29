@@ -1,11 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D081DAEF-8B88-4363-BFAA-CABF5D82D025}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp", "HectorSharp.csproj", "{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp.dotnet35", "HectorSharp.dotnet35.csproj", "{B26B94BF-BB04-4B76-8BE5-F99FC2BE3F33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp.Test", "Test\HectorSharp.Test.csproj", "{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HectorSharp.Test.dotnet35", "Test\HectorSharp.Test.dotnet35.csproj", "{0C75DB8E-6971-4837-9D6D-DE57AD8F6D90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

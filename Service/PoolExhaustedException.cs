@@ -8,7 +8,7 @@ namespace HectorSharp.Service
     public class PoolExhaustedException : Exception
     {
 
-        private static long serialVersionUID = -6200999597951673383L;
+        //private static long serialVersionUID = -6200999597951673383L;
 
         public PoolExhaustedException(String msg) : base(msg)
         {
