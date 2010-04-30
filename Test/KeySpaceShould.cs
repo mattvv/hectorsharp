@@ -8,7 +8,7 @@ using Xunit;
 
 namespace HectorSharp.Test
 {
-	public class KeySpaceShould : IUseFixture<TestFixture>
+	public class KeySpaceShould : IUseFixture<HectorSharpFixture>
 	{
 		ICassandraClient Client { get { return fixture.Client; } }
 		IKeyspace Keyspace { get { return fixture.Keyspace; } }
@@ -595,9 +595,9 @@ namespace HectorSharp.Test
 
 		#region IUseFixture<CassandraTestFixture> Members
 
-		TestFixture fixture;
+		HectorSharpFixture fixture;
 
-		public void SetFixture(TestFixture fixture)
+		public void SetFixture(HectorSharpFixture fixture)
 		{
 			this.fixture = fixture;
 		}

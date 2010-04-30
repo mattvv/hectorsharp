@@ -98,6 +98,7 @@
     <Compile Include="CassandraRunnerShould.cs" />
     <Compile Include="KeySpaceShould.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawThriftFixture.cs" />
     <Compile Include="RawThriftShould.cs" />
     <Compile Include="TestFixture.cs" />
   </ItemGroup>

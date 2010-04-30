@@ -3,13 +3,13 @@ using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Test
 {
-	public class TestFixture : IDisposable
+	public class HectorSharpFixture : IDisposable
 	{
 		internal ICassandraClient Client;
 		internal IKeyspace Keyspace;
 		internal IKeyedObjectPool<Endpoint, ICassandraClient> Pool;
 
-		public TestFixture()
+		public HectorSharpFixture()
 		{
 			CassandraRunner.CleanData();
 			CassandraRunner.Start();

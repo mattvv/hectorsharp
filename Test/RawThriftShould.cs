@@ -1,37 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
 using Apache.Cassandra;
-using Thrift.Protocol;
-using Thrift.Transport;
 using Xunit;
 
 namespace Test
 {
-	using CassandraRunner = HectorSharp.Test.CassandraRunner;
-	using ConsistencyLevel = Apache.Cassandra.ConsistencyLevel;
-
 	/// <summary>
 	/// Tests thrift-generated Cassandra classes and Thrift directly
 	/// These are integration tests and require cassandra running locally,
 	/// listening to thrift at port 9160
 	/// </summary>
-	public class RawThriftShould
+	public class RawThriftShould : IUseFixture<RawThriftFixture>
 	{
+		[Fact]
+		public void GetRangeSlice()
+		{
+			env.RestartCassandra();
+			env.OpenConnection();
+
+			var cf = "Standard2";
+			for (int i = 0; i < 10; i++)
+			{
+				var cp = new ColumnPath(cf);
+				cp.Column = ("testGetRangeSlice" + i).UTF();
+
+				client.insert(
+					"Keyspace1",
+					"GetRangeSlice.0", cp,
+					("GetRangeSlice.value." + i).UTF(),
+					HectorSharp.Util.UnixTimestamp,
+					ConsistencyLevel.ONE);
+
+				client.insert(
+					"Keyspace1",
+					"GetRangeSlice.1", cp,
+					("GetRangeSlice.value." + i).UTF(),
+					HectorSharp.Util.UnixTimestamp,
+					ConsistencyLevel.ONE);
+
+				client.insert(
+					"Keyspace1",
+					"GetRangeSlice.2", cp,
+					("GetRangeSlice.value." + i).UTF(),
+					HectorSharp.Util.UnixTimestamp,
+					ConsistencyLevel.ONE);
+			}
+
+			var columnParent = new ColumnParent(cf);
+			var predicate = new SlicePredicate(new SliceRange(false, 150));
+
+			var keySlices = client.get_range_slice(
+				"Keyspace1", columnParent, predicate,
+				"testGetRangeSlice0", "testGetRangeSlice3", 5, ConsistencyLevel.ONE);
+
+			Assert.NotNull(keySlices);
+			Assert.Equal(3, keySlices.Count);
+			//Assert.NotNull(keySlices["GetRangeSlice.0"]);
+			//Assert.Equal("GetRangeSlice.value.0", keySlices["GetRangeSlice.0"].First().Value);
+			//Assert.Equal(10, keySlices["GetRangeSlice.1"].Count);
+
+			env.CloseConnection();
+			env.StopCassandra();
+		}
+
+
 		/// <summary>
 		/// Adapted from sample code at: http://it.toolbox.com/people/joshschulz/journal-entry/4691
 		/// </summary>
 		[Fact]
 		public void SimpleScenario()
 		{
-			CassandraRunner.CleanData();
-			CassandraRunner.Start();
-
-			TTransport transport = new TSocket("localhost", 9060);
-			TProtocol protocol = new TBinaryProtocol(transport);
-			var client = new Cassandra.Client(protocol);
-
-			Console.WriteLine("Opening Connection");
-			transport.Open();
+			env.RestartCassandra();
+			env.OpenConnection();
 
 			//At this point we're using the standard configuration file
 			var nameColumnPath = new ColumnPath("Standard1", null, "name");
@@ -90,25 +130,15 @@ namespace Test
 				}
 			}
 
-			Console.WriteLine("closing connection");
-			transport.Close();
-
-			CassandraRunner.Stop();
-			CassandraRunner.CleanData();
+			env.CloseConnection();
+			env.StopCassandra();
 		}
 
 		[Fact]
 		public void BlogModelScenario()
 		{
-			CassandraRunner.CleanData();
-			CassandraRunner.Start();
-
-			TTransport transport = new TSocket("localhost", 9060);
-			TProtocol protocol = new TBinaryProtocol(transport);
-			var client = new Cassandra.Client(protocol);
-
-			Console.WriteLine("Opening Connection");
-			transport.Open();
+			env.RestartCassandra();
+			env.OpenConnection();
 
 			string entryTitle = "now with bonus batch writes";
 			string entryAuthor = "josh";
@@ -142,11 +172,23 @@ namespace Test
 					column.Name.UTFDecode(),
 					column.Value.UTFDecode());
 			}
-			Console.WriteLine("closing connection");
-			transport.Close();
 
-			CassandraRunner.Stop();
-			CassandraRunner.CleanData();
+			env.CloseConnection();
+			env.StopCassandra();
 		}
+
+
+		#region IUseFixture<RawThriftFixture> Members
+
+		RawThriftFixture env;
+		Cassandra.Client client;
+
+		public void SetFixture(RawThriftFixture fixture)
+		{
+			env = fixture;
+			client = env.Client;
+		}
+
+		#endregion
 	}
 }
