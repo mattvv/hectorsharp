@@ -461,7 +461,7 @@ namespace HectorSharp.Test
 				Keyspace.Remove("GetRangeSlice." + i, columnPath);
 		}
 
-		[Fact]//]		(Skip = @"UnavailableException : Internal error processing insert")]
+		[Fact]
 		public void GetSuperRangeSlice()
 		{
 			for (int i = 0; i < 10; i++)
