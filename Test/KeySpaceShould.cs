@@ -461,27 +461,27 @@ namespace HectorSharp.Test
 				Keyspace.Remove("GetRangeSlice." + i, columnPath);
 		}
 
-		[Fact//]
-		(Skip = @"UnavailableException : Internal error processing insert")]
+		[Fact]//]		(Skip = @"UnavailableException : Internal error processing insert")]
 		public void GetSuperRangeSlice()
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				var cp = new ColumnPath("Super1", "SuperColumn.1");
-				for (int j = 0; j < 2; j++)
-					Keyspace.Insert("GetSuperRangeSlice" + j, cp, "GetSuperRangeSlice_value_" + i);
+				var cp = new ColumnPath("Super1", "SuperColumn.1", "GetSuperRangeSlice." + i);
+				Keyspace.Insert("GetSuperRangeSlice.0", cp, "GetSuperRangeSlice_value_" + i);
+				Keyspace.Insert("GetSuperRangeSlice.1", cp, "GetSuperRangeSlice_value_" + i);
 			}
+
 			var columnParent = new ColumnParent("Super1");
 			var predicate = new SlicePredicate(null, new SliceRange(false, 150));
-			var keySlices = Keyspace.GetSuperRangeSlice(columnParent, predicate, "GetSuperRangeSlice0", "GetSuperRangeSlice3", 5);
+			var keySlices = Keyspace.GetSuperRangeSlice(columnParent, predicate, "GetSuperRangeSlice.0", "GetSuperRangeSlice.3", 5);
 
 			Assert.NotNull(keySlices);
 			Assert.Equal(2, keySlices.Count);
-			Assert.NotNull(keySlices["GetSuperRangeSlice0"]);
+			Assert.NotNull(keySlices["GetSuperRangeSlice.0"]);
 			Assert.Equal("GetSuperRangeSlice_value_0",
-				keySlices["GetSuperRangeSlice0"].First().Columns.First().Value);
-			Assert.Equal(1, keySlices["GetSuperRangeSlice1"].Count);
-			Assert.Equal(10, keySlices["GetSuperRangeSlice1"].First().Columns.Count);
+				keySlices["GetSuperRangeSlice.0"].First().Columns.First().Value);
+			Assert.Equal(1, keySlices["GetSuperRangeSlice.1"].Count);
+			Assert.Equal(10, keySlices["GetSuperRangeSlice.1"].First().Columns.Count);
 
 			var columnPath = new ColumnPath("Super1");
 
