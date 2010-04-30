@@ -15,5 +15,13 @@ namespace HectorSharp
 			Column = column;
 			SuperColumn = superColumn;
 		}
+
+		public ColumnOrSuperColumn(Column column) :
+			this(column, null)
+		{}
+
+		public ColumnOrSuperColumn(SuperColumn superColumn) :
+			this(null, superColumn)
+		{}
 	}
 }

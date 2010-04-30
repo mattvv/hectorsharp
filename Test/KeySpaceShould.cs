@@ -211,7 +211,7 @@ namespace HectorSharp.Test
 				Keyspace.Remove("MultigetColumn." + i, columnPath);
 		}
 
-		[Fact] 
+		[Fact]
 		public void MultigetSuperColumn()
 		{
 			var list = new List<Column>();
@@ -286,7 +286,7 @@ namespace HectorSharp.Test
 				new SuperColumn("SuperColumn.1", list),
 				new SuperColumn("SuperColumn.2", list),
 			});
- 
+
 			var keys = new List<string>();
 
 			for (int i = 1; i <= 3; i++)
@@ -328,7 +328,7 @@ namespace HectorSharp.Test
 				new SuperColumn("SuperColumn.1", list),
 				new SuperColumn("SuperColumn.2", list),
 			});
- 
+
 			var keys = new List<string>();
 
 			for (int i = 1; i <= 3; i++)
@@ -434,21 +434,23 @@ namespace HectorSharp.Test
 			Keyspace.Remove("GetCount", new ColumnPath("Standard1"));
 		}
 
-		[Fact(Skip = "failed: System.Collections.Generic.KeyNotFoundException : The given key was not present in the dictionary.")]
+		[Fact]//(Skip = "failed: System.Collections.Generic.KeyNotFoundException : The given key was not present in the dictionary.")]
 		public void GetRangeSlice()
 		{
 			var cf = "Standard2";
 			for (int i = 0; i < 10; i++)
 			{
-				var cp = new ColumnPath(cf, null, "GetRangeSlice." + i);
-				for (int j = 0; j < 3; j++)
-					Keyspace.Insert("GetRangeSlice." + j, cp, "GetRangeSlice.value." + i);
+				var cp = new ColumnPath(cf);
+				cp.Column = "testGetRangeSlice" + i;
+				Keyspace.Insert("GetRangeSlice.0", cp, "GetRangeSlice.value." + i);
+				Keyspace.Insert("GetRangeSlice.1", cp, "GetRangeSlice.value." + i);
+				Keyspace.Insert("GetRangeSlice.2", cp, "GetRangeSlice.value." + i);
 			}
 
 			var columnParent = new ColumnParent(cf);
 			var predicate = new SlicePredicate(new SliceRange(false, 150));
 
-			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "GetRange", null, 5);
+			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "testGetRangeSlice0", "testGetRangeSlice3", 5);
 
 			Assert.NotNull(keySlices);
 			Assert.Equal(3, keySlices.Count);
@@ -476,7 +478,8 @@ namespace HectorSharp.Test
 			var keySlices = Keyspace.GetSuperRangeSlice(columnParent, predicate, "GetSuperRangeSlice.0", "GetSuperRangeSlice.3", 5);
 
 			Assert.NotNull(keySlices);
-			Assert.Equal(2, keySlices.Count);
+
+			Assert.Equal(2, keySlices.Where(x => x.Key.StartsWith("GetSuperRangeSlice.")).Count());
 			Assert.NotNull(keySlices["GetSuperRangeSlice.0"]);
 			Assert.Equal("GetSuperRangeSlice_value_0",
 				keySlices["GetSuperRangeSlice.0"].First().Columns.First().Value);
@@ -501,7 +504,7 @@ namespace HectorSharp.Test
 			Assert.Equal("Keyspace1", Keyspace.Name);
 		}
 
-		[Fact(Skip="Incomplete")]
+		[Fact(Skip = "Incomplete")]
 		public void Failover()
 		{
 			var h1client = new Mock<ICassandraClient>();

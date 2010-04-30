@@ -72,6 +72,10 @@
     <None Include="BuildAndTest.msbuild" />
     <None Include="Dao\Command.cs" />
     <None Include="Dao\ExampleDAO.cs" />
+    <Compile Include="Model\BatchMutation.cs" />
+    <Compile Include="Model\Deletion.cs" />
+    <Compile Include="Model\KeyRange.cs" />
+    <Compile Include="Model\Mutation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CassandraClientConfig.cs" />
     <Compile Include="Service\CassandraClientPoolFactory.cs" />

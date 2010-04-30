@@ -37,7 +37,7 @@ namespace HectorSharp
 		/// <param name="columnPath"></param>
 		/// <returns></returns>
 		SuperColumn GetSuperColumn(string key, ColumnPath columnPath);
-		
+
 		/// <summary>
 		/// Get the SuperColumn at the given columnPath.
 		/// </summary>
@@ -49,7 +49,7 @@ namespace HectorSharp
 		/// <param name="size">column size</param>
 		/// <returns></returns>
 		SuperColumn GetSuperColumn(string key, ColumnPath columnPath, bool reversed, int size);
-		
+
 		/// <summary>
 		/// Get the group of columns contained by columnParent.
 		/// </summary>
@@ -148,6 +148,18 @@ namespace HectorSharp
 		void BatchInsert(string key, IDictionary<string, IList<Column>> cfmap, IDictionary<string, IList<SuperColumn>> superColumnMap);
 
 		/// <summary>
+		/// Call batch mutate with the assembled mutationMap. This method is a direct pass-through to the underlying Thrift API 
+		/// </summary>
+		/// <param name="mutationMap"></param>
+		void BatchMutate(IDictionary<String, IDictionary<String, IList<Mutation>>> mutationMap);
+
+		/// <summary>
+		/// Call batch mutate with the BatchMutation object which encapsulates some of the complexity of the batch_mutate API signature
+		/// </summary>
+		/// <param name="batchMutation"></param>
+		void BatchMutate(BatchMutation batchMutation);
+
+		/// <summary>
 		/// Remove data from the row specified by key at the columnPath.
 		/// </summary>
 		/// <remarks>
@@ -177,9 +189,21 @@ namespace HectorSharp
 		/// <param name="count"></param>
 		/// <returns></returns>
 		IDictionary<string, IList<Column>> GetRangeSlice(
-			ColumnParent columnParent, 
+			ColumnParent columnParent,
 			SlicePredicate predicate,
 			 string start, string finish, int count);
+
+		/// <summary>
+		/// a subset of columns for a range of keys.
+		/// </summary>
+		/// <param name="columnParent"></param>
+		/// <param name="predicate"></param>
+		/// <param name="keyRange"></param>
+		/// <returns></returns>
+		IDictionary<string, IList<Column>> GetRangeSlices(
+			ColumnParent columnParent,
+			SlicePredicate predicate,
+			KeyRange keyRange);
 
 		/// <summary>
 		/// a subset of super columns for a range of keys.
@@ -191,7 +215,7 @@ namespace HectorSharp
 		/// <param name="count"></param>
 		/// <returns></returns>
 		IDictionary<string, IList<SuperColumn>> GetSuperRangeSlice(
-			ColumnParent columnParent, 
+			ColumnParent columnParent,
 			SlicePredicate predicate,
 			string start, string finish, int count);
 	}

@@ -200,8 +200,29 @@ namespace HectorSharp
 
 					// deprecated
 					//	var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), start, finish, count, ConsistencyLevel.ToThrift());
-					
+
 					var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), keyRange, ConsistencyLevel.ToThrift());
+					if (keySlices == null || keySlices.Count == 0)
+						return result;
+
+					foreach (var entry in keySlices.Transform(entry => new { entry.Key, Columns = GetColumnList(entry.Columns) }))
+						result.Add(entry.Key, entry.Columns);
+
+					return result;
+				});
+
+			OperateWithFailover(op);
+			return op.Result;
+		}
+
+		public IDictionary<string, IList<Column>> GetRangeSlices(ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange)
+		{
+			var op = new Operation<IDictionary<string, IList<Column>>>(ClientCounter.READ_FAIL,
+				client =>
+				{
+					var result = new Dictionary<string, IList<Column>>();
+
+					var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), keyRange.ToThrift(), ConsistencyLevel.ToThrift());
 					if (keySlices == null || keySlices.Count == 0)
 						return result;
 
@@ -274,6 +295,16 @@ namespace HectorSharp
 			OperateWithFailover(op);
 		}
 
+		public void BatchMutate(IDictionary<string, IDictionary<string, IList<Mutation>>> mutationMap)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void BatchMutate(BatchMutation batchMutation)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void Remove(string key, ColumnPath columnPath)
 		{
 			var op = new VoidOperation(ClientCounter.WRITE_FAIL,
@@ -296,6 +327,7 @@ namespace HectorSharp
 			OperateWithFailover(op);
 			return op.Result;
 		}
+
 
 		#endregion
 	}

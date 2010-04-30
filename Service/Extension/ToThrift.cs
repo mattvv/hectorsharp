@@ -52,5 +52,20 @@ namespace HectorSharp
 		{
 			return new Apache.Cassandra.SliceRange(range.Start.UTF(new byte[0]), range.Finish.UTF(new byte[0]), range.Reversed, range.Count);
 		}
+
+		public static Apache.Cassandra.KeyRange ToThrift(this KeyRange keyRange)
+		{
+			var kr = new Apache.Cassandra.KeyRange();
+			if (!string.IsNullOrEmpty(keyRange.StartKey))
+				kr.Start_key = keyRange.StartKey;
+			if (!string.IsNullOrEmpty(keyRange.EndKey))
+				kr.End_key = keyRange.EndKey;
+			if (!string.IsNullOrEmpty(keyRange.StartToken))
+				kr.Start_token = keyRange.StartToken;
+			if (!string.IsNullOrEmpty(keyRange.EndToken))
+				kr.End_token = keyRange.EndToken;
+			kr.Count = keyRange.Count;
+			return kr;
+		}
 	}
 }
