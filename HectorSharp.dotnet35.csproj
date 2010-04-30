@@ -135,8 +135,12 @@
     <Compile Include="lib\Thrift\Transport\TTransport.cs" />
     <Compile Include="lib\Thrift\Transport\TTransportException.cs" />
     <Compile Include="lib\Thrift\Transport\TTransportFactory.cs" />
+    <Compile Include="Model\BatchMutation.cs" />
+    <Compile Include="Model\Deletion.cs" />
     <Compile Include="Model\InetAddress.cs" />
     <Compile Include="Model\InvalidRequestException.cs" />
+    <Compile Include="Model\KeyRange.cs" />
+    <Compile Include="Model\Mutation.cs" />
     <Compile Include="Model\NotFoundException.cs" />
     <Compile Include="Model\TimedOutException.cs" />
     <Compile Include="Model\UnavailableException.cs" />
