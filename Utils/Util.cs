@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace HectorSharp.Utils
+namespace HectorSharp
 {
-	public static class Util
+	internal static class Util
 	{
 		static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 	

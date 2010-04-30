@@ -3,13 +3,13 @@ using HectorSharp.Utils;
 using System.Collections.Generic;
 using System;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	static class ToModelExtension
 	{
-		public static Model.Column ToModel(this Column c)
+		public static Column ToModel(this Apache.Cassandra.Column c)
 		{
-			return new Model.Column
+			return new Column
 			{
 				Name = c.Name.UTFDecode(),
 				Value = c.Value.UTFDecode(),
@@ -17,10 +17,10 @@ namespace HectorSharp.Service
 			};
 		}
 
-		public static Model.SuperColumn ToModel(this SuperColumn sc)
+		public static SuperColumn ToModel(this Apache.Cassandra.SuperColumn sc)
 		{
-			var columns = new List<Model.Column>(sc.Columns.Transform(item => item.ToModel()));
-			return new HectorSharp.Model.SuperColumn(sc.Name.UTFDecode(), columns);
+			var columns = new List<Column>(sc.Columns.Transform(item => item.ToModel()));
+			return new HectorSharp.SuperColumn(sc.Name.UTFDecode(), columns);
 		}
 	}
 }

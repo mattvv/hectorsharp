@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Apache.Cassandra;
-using HectorSharp.Utils;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	static class ToThriftExtension
 	{
@@ -14,9 +13,9 @@ namespace HectorSharp.Service
 			return (Apache.Cassandra.ConsistencyLevel)level;
 		}
 
-		public static Column ToThrift(this Model.Column c)
+		public static Apache.Cassandra.Column ToThrift(this Column c)
 		{
-			return new Column
+			return new Apache.Cassandra.Column
 			{
 				Name = c.Name.ToUtf8Bytes(),
 				Value = c.Value.ToUtf8Bytes(),
@@ -24,34 +23,34 @@ namespace HectorSharp.Service
 			};
 		}
 
-		public static SuperColumn ToThrift(this Model.SuperColumn sc)
+		public static Apache.Cassandra.SuperColumn ToThrift(this SuperColumn sc)
 		{
-			return new SuperColumn
+			return new Apache.Cassandra.SuperColumn
 			{
 				Name = sc.Name.UTF(),
 				Columns = sc.Columns.Transform(c => c.ToThrift()).ToList(),
 			};
 		}
 
-		public static ColumnPath ToThrift(this Model.ColumnPath path)
+		public static Apache.Cassandra.ColumnPath ToThrift(this ColumnPath path)
 		{
-			return new ColumnPath(path.ColumnFamily, path.SuperColumn, path.Column);
+			return new Apache.Cassandra.ColumnPath(path.ColumnFamily, path.SuperColumn, path.Column);
 		}
 
-		public static ColumnParent ToThrift(this Model.ColumnParent parent)
+		public static Apache.Cassandra.ColumnParent ToThrift(this ColumnParent parent)
 		{
-			return new ColumnParent(parent.ColumnFamily, parent.SuperColumn);
+			return new Apache.Cassandra.ColumnParent(parent.ColumnFamily, parent.SuperColumn);
 		}
 
-		public static SlicePredicate ToThrift(this Model.SlicePredicate predicate)
+		public static Apache.Cassandra.SlicePredicate ToThrift(this SlicePredicate predicate)
 		{
 			var columnNames = predicate.ColumnNames.Transform(i => i.UTF()).ToList();
-			return new SlicePredicate(columnNames, predicate.SliceRange.ToThrift());
+			return new Apache.Cassandra.SlicePredicate(columnNames, predicate.SliceRange.ToThrift());
 		}
 
-		public static SliceRange ToThrift(this Model.SliceRange range)
+		public static Apache.Cassandra.SliceRange ToThrift(this SliceRange range)
 		{
-			return new SliceRange(range.Start.UTF(new byte[0]), range.Finish.UTF(new byte[0]), range.Reversed, range.Count);
+			return new Apache.Cassandra.SliceRange(range.Start.UTF(new byte[0]), range.Finish.UTF(new byte[0]), range.Reversed, range.Count);
 		}
 	}
 }

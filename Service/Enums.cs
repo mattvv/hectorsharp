@@ -1,4 +1,4 @@
-﻿namespace HectorSharp.Service
+﻿namespace HectorSharp
 {
 	public enum ConsistencyLevel
 	{

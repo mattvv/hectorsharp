@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	public class CassandraClientConfig
 	{

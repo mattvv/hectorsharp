@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using HectorSharp.Utils;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	internal partial class Keyspace : IKeyspace
 	{
@@ -216,9 +215,9 @@ namespace HectorSharp.Service
 			return op.Result;
 		}
 
-		public IDictionary<string, IList<Model.SuperColumn>> GetSuperRangeSlice(Model.ColumnParent columnParent, Model.SlicePredicate predicate, string start, string finish, int count)
+		public IDictionary<string, IList<SuperColumn>> GetSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate, string start, string finish, int count)
 		{
-			var op = new Operation<IDictionary<string, IList<Model.SuperColumn>>>(ClientCounter.READ_FAIL,
+			var op = new Operation<IDictionary<string, IList<SuperColumn>>>(ClientCounter.READ_FAIL,
 				client =>
 				{
 					var result = new Dictionary<string, IList<SuperColumn>>();

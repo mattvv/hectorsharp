@@ -1,7 +1,6 @@
-﻿using HectorSharp.Model;
-using HectorSharp.Utils.ObjectPool;
+﻿using HectorSharp.Utils.ObjectPool;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	public class CassandraClientPoolFactory : IKeyedObjectPoolFactory<Endpoint, ICassandraClient>
 	{

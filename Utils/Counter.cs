@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace HectorSharp.Utils
 {
-	public class Counter
+	internal class Counter
 	{
 		long count = 0;
 

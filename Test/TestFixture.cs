@@ -1,6 +1,4 @@
 ﻿using System;
-using HectorSharp.Model;
-using HectorSharp.Service;
 using HectorSharp.Utils.ObjectPool;
 
 namespace HectorSharp.Test

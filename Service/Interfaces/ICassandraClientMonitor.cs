@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	public interface ICassandraClientMonitor
 	{

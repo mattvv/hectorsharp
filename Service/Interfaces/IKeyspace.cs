@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	/// <summary>
 	/// The keyspace is a high level handle to all read/write operations to cassandra.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace HectorSharp.Model
+namespace HectorSharp
 {
 	public class InetAddress : IComparable, IComparable<InetAddress>
 	{

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using HectorSharp.Utils;
 
-namespace HectorSharp.Model
+namespace HectorSharp
 {
 	public class Column
 	{

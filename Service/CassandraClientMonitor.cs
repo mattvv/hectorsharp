@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using HectorSharp.Model;
 using HectorSharp.Utils;
 using HectorSharp.Utils.ObjectPool;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	public class CassandraClientMonitor : ICassandraClientMonitor
 	{

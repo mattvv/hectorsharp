@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HectorSharp.Model;
-using HectorSharp.Service;
 using HectorSharp.Utils.ObjectPool;
 using Moq;
 using Thrift.Protocol;
 using Thrift.Transport;
 using Xunit;
-using System;
 
 namespace HectorSharp.Test
 {
@@ -520,9 +517,9 @@ namespace HectorSharp.Test
 			var keyspaceName = "Keyspace1";
 			var description = new Dictionary<string, Dictionary<string, string>>();
 			var keyspace1desc = new Dictionary<string, string>();
-			keyspace1desc.Add(HectorSharp.Service.Keyspace.CF_TYPE, HectorSharp.Service.Keyspace.CF_TYPE_STANDARD);
+			keyspace1desc.Add(HectorSharp.Keyspace.CF_TYPE, HectorSharp.Keyspace.CF_TYPE_STANDARD);
 			description.Add("Standard1", keyspace1desc);
-			var consistencyLevel = HectorSharp.Service.ConsistencyLevel.ONE;
+			var consistencyLevel = HectorSharp.ConsistencyLevel.ONE;
 			var cp = new ColumnPath("Standard1", null, "Failover");
 			var clientPool = new Mock<IKeyedObjectPool<Endpoint, ICassandraClient>>();
 			var monitor = new Mock<ICassandraClientMonitor>();
@@ -548,7 +545,7 @@ namespace HectorSharp.Test
 
 			// success without failover
 			var failoverPolicy = new FailoverPolicy(0) { Strategy = FailoverStrategy.FAIL_FAST };
-			var ks = new Service.Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+			var ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
 
 			ks.Insert("key", cp, "value");
 
@@ -571,7 +568,7 @@ namespace HectorSharp.Test
 
 			// on fail try next one, h1 fails, h3 succeeds
 			failoverPolicy = new FailoverPolicy(3, FailoverStrategy.ON_FAIL_TRY_ONE_NEXT_AVAILABLE);
-			ks = new Service.Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+			ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
 
 			ks.Insert("key", cp, "value");
 
@@ -588,7 +585,7 @@ namespace HectorSharp.Test
 			clientPool.Verify(p => p.Borrow(h3endpoint));
 
 			// h1 and h3 fail
-			ks = new Service.Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+			ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
 
 		}
 

@@ -6,9 +6,8 @@ using HectorSharp;
 using Thrift.Protocol;
 using Thrift.Transport;
 using HectorSharp.Utils.ObjectPool;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	public class KeyedCassandraClientFactory : IKeyedPoolableObjectFactory<Endpoint, ICassandraClient>
 	{

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using HectorSharp.Utils;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	/// <summary>
 	/// What should the client do if a call to cassandra node fails and we suspect that the node is

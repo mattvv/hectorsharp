@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Apache.Cassandra;
-using HectorSharp.Service;
 using Thrift;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	/// <summary>
 	/// Client object, a high level handle to the remove cassandra service.

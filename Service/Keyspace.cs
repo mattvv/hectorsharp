@@ -5,9 +5,8 @@ using Apache.Cassandra;
 using HectorSharp.Utils.ObjectPool;
 using HectorSharp.Utils;
 using Thrift.Transport;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	internal partial class Keyspace
 	{
@@ -51,13 +50,13 @@ namespace HectorSharp.Service
 		/// Make sure that if the given column path was a Column. Throws an InvalidRequestException if not.
 		/// </summary>
 		/// <param name="columnPath">if either the column family does not exist or that it's type does not match (super)..</param>
-		void AssertColumnPath(Model.ColumnPath columnPath)
+		void AssertColumnPath(ColumnPath columnPath)
 		//throws InvalidRequestException 
 		{
 			string cf = columnPath.ColumnFamily;
 			IDictionary<string, string> cfdefine;
 			if (!Description.ContainsKey(cf))
-				throw new Model.InvalidRequestException("The specified column family does not exist: " + cf, null);
+				throw new InvalidRequestException("The specified column family does not exist: " + cf, null);
 
 			cfdefine = Description[cf];
 
@@ -72,7 +71,7 @@ namespace HectorSharp.Service
 		///Make sure that the given column path is a SuperColumn in the DB, Throws an exception if it's not.
 		/// </summary>
 		/// <param name="columnPath"></param>
-		void AssertSuperColumnPath(Model.ColumnPath columnPath)
+		void AssertSuperColumnPath(ColumnPath columnPath)
 		//throws InvalidRequestException 
 		{
 			var cf = columnPath.ColumnFamily;
@@ -84,28 +83,28 @@ namespace HectorSharp.Service
 			{
 				return;
 			}
-			throw new Model.InvalidRequestException(
+			throw new InvalidRequestException(
 				 "Invalid super column or super column family does not exist: " + cf, null);
 		}
 
-		static List<Apache.Cassandra.ColumnOrSuperColumn> GetSoscList(IEnumerable<Model.Column> columns)
+		static List<Apache.Cassandra.ColumnOrSuperColumn> GetSoscList(IEnumerable<Column> columns)
 		{
 			return new List<Apache.Cassandra.ColumnOrSuperColumn>(columns.Transform(c => new Apache.Cassandra.ColumnOrSuperColumn(c.ToThrift(), null)));
 		}
 
-		static List<Apache.Cassandra.ColumnOrSuperColumn> GetSoscSuperList(IEnumerable<Model.SuperColumn> columns)
+		static List<Apache.Cassandra.ColumnOrSuperColumn> GetSoscSuperList(IEnumerable<SuperColumn> columns)
 		{
 			return new List<Apache.Cassandra.ColumnOrSuperColumn>(columns.Transform(c => new Apache.Cassandra.ColumnOrSuperColumn(null, c.ToThrift())));
 		}
 
-		static List<Model.Column> GetColumnList(IEnumerable<Apache.Cassandra.ColumnOrSuperColumn> columns)
+		static List<Column> GetColumnList(IEnumerable<Apache.Cassandra.ColumnOrSuperColumn> columns)
 		{
-			return new List<Model.Column>(columns.Transform(c => c.Column.ToModel()));
+			return new List<Column>(columns.Transform(c => c.Column.ToModel()));
 		}
 
-		static List<Model.SuperColumn> GetSuperColumnList(IEnumerable<Apache.Cassandra.ColumnOrSuperColumn> columns)
+		static List<SuperColumn> GetSuperColumnList(IEnumerable<Apache.Cassandra.ColumnOrSuperColumn> columns)
 		{
-			return new List<Model.SuperColumn>(columns.Transform(c => c.Super_column.ToModel()));
+			return new List<SuperColumn>(columns.Transform(c => c.Super_column.ToModel()));
 		}
 
 		/// <summary>
@@ -265,12 +264,12 @@ namespace HectorSharp.Service
 			catch (Apache.Cassandra.InvalidRequestException ex)
 			{
 				monitor.IncrementCounter(op.FailCounter);
-				throw new Model.InvalidRequestException(ex.__isset.why ? ex.Why : ex.Message, ex);
+				throw new InvalidRequestException(ex.__isset.why ? ex.Why : ex.Message, ex);
 			}
 			catch (Apache.Cassandra.UnavailableException ex)
 			{
 				monitor.IncrementCounter(op.FailCounter);
-				throw new Model.UnavailableException(ex.Message, ex);
+				throw new UnavailableException(ex.Message, ex);
 			}
 			/*catch (TException e) {
 			monitor.incCounter(op.failCounter);
@@ -279,14 +278,14 @@ namespace HectorSharp.Service
 			catch (Apache.Cassandra.TimedOutException ex)
 			{
 				monitor.IncrementCounter(op.FailCounter);
-				throw new Model.TimedOutException(ex.Message, ex);
+				throw new TimedOutException(ex.Message, ex);
 			}
 			catch (PoolExhaustedException ex)
 			{
 				//log.warn("Pool is exhausted", e);
 				monitor.IncrementCounter(op.FailCounter);
 				monitor.IncrementCounter(ClientCounter.POOL_EXHAUSTED);
-				throw new Model.UnavailableException(ex.Message, ex);
+				throw new UnavailableException(ex.Message, ex);
 			} 
 			/*catch (IllegalStateException e) {
 			//log.error("Client Pool is already closed, cannot obtain new clients.", e);
@@ -297,7 +296,7 @@ namespace HectorSharp.Service
 			{
 				//log.error("Cannot retry failover, got an Exception", e);
 				monitor.IncrementCounter(op.FailCounter);
-				throw new Model.UnavailableException(ex.Message, ex);
+				throw new UnavailableException(ex.Message, ex);
 			}
 		}
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using Apache.Cassandra;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	internal partial class Keyspace
 	{
@@ -9,7 +9,7 @@ namespace HectorSharp.Service
 		{
 			void Execute(Cassandra.Client client);
 			bool HasError { get; }
-			Model.NotFoundException Error { get; }
+			NotFoundException Error { get; }
 			ClientCounter FailCounter { get; }
 		}
 
@@ -27,7 +27,7 @@ namespace HectorSharp.Service
 			public Func<Cassandra.Client, T> Handler { get; set; }
 			public T Result { get; private set; }
 			public bool HasError { get { return Error != null; } }
-			public Model.NotFoundException Error { get; set; }
+			public NotFoundException Error { get; set; }
 			public ClientCounter FailCounter { get; private set; }
 
 			public Operation(ClientCounter failCounter)
@@ -65,7 +65,7 @@ namespace HectorSharp.Service
 			public Action<Cassandra.Client> Handler { get; set; }
 
 			public bool HasError { get { return Error != null; } }
-			public Model.NotFoundException Error { get; set; }
+			public NotFoundException Error { get; set; }
 			public ClientCounter FailCounter { get; private set; }
 
 			public VoidOperation(ClientCounter failCounter)

@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BuildAndTest.msbuild" />
     <None Include="Dao\Command.cs" />
     <None Include="Dao\ExampleDAO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

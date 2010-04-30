@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using Apache.Cassandra;
 using HectorSharp.Utils.ObjectPool;
-using HectorSharp.Model;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	internal class KeyspaceFactory
 	{

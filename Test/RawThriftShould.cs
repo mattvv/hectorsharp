@@ -4,16 +4,18 @@ using Apache.Cassandra;
 using Thrift.Protocol;
 using Thrift.Transport;
 using Xunit;
-using HectorSharp.Utils;
 
-namespace HectorSharp.Test
+namespace Test
 {
+	using CassandraRunner = HectorSharp.Test.CassandraRunner;
+	using ConsistencyLevel = Apache.Cassandra.ConsistencyLevel;
+
 	/// <summary>
 	/// Tests thrift-generated Cassandra classes and Thrift directly
 	/// These are integration tests and require cassandra running locally,
 	/// listening to thrift at port 9160
 	/// </summary>
-	public class RawThriftTest
+	public class RawThriftShould
 	{
 		/// <summary>
 		/// Adapted from sample code at: http://it.toolbox.com/people/joshschulz/journal-entry/4691
@@ -40,7 +42,7 @@ namespace HectorSharp.Test
 				"1",
 				nameColumnPath,
 				"Josh Blogs".UTF(),
-				Util.UnixTimestamp,
+				HectorSharp.Util.UnixTimestamp,
 				ConsistencyLevel.ONE
 				);
 
@@ -48,7 +50,7 @@ namespace HectorSharp.Test
 				"2",
 				nameColumnPath,
 				"Something else".UTF(),
-				Util.UnixTimestamp,
+				HectorSharp.Util.UnixTimestamp,
 				ConsistencyLevel.ONE);
 
 			//Let's get something back out (this is our select statement)

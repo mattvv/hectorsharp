@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using HectorSharp.Model;
 using HectorSharp.Utils;
 using HectorSharp.Utils.ObjectPool;
 
-namespace HectorSharp.Service
+namespace HectorSharp
 {
 	/// <summary>
 	/// Implementation of the client interface.
