@@ -93,6 +93,7 @@
     <Content Include="RunCassandra.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Compile Include="BatchMutationShould.cs" />
     <Compile Include="CassandraRunner.cs" />
     <Compile Include="CassandraRunnerShould.cs" />
     <Compile Include="KeySpaceShould.cs" />

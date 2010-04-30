@@ -19,5 +19,10 @@ namespace HectorSharp
 			if (input != null && transform != null)
 				foreach (var item in input) yield return transform(item);
 		}
+
+		public static bool IsNotNullOrEmpty<T>(this ICollection<T> instance)
+		{
+			return instance != null && instance.Count > 0;
+		}
 	}
 }

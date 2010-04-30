@@ -42,7 +42,8 @@ namespace HectorSharp
 				else
 					map[cf].Add(mutation);
 			}
-			Add(key, map);
+			if(!ContainsKey(key))
+				Add(key, map);
 		}
 	}
 }
