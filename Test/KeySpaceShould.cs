@@ -437,30 +437,29 @@ namespace HectorSharp.Test
 		[Fact]
 		public void GetRangeSlice()
 		{
-			var cf = "Standard2";
+			// build 3 keys with 10 columns each
 			for (int i = 0; i < 10; i++)
 			{
-				var cp = new ColumnPath(cf);
-				cp.Column = "testGetRangeSlice" + i;
-				Keyspace.Insert("GetRangeSlice.0", cp, "GetRangeSlice.value." + i);
-				Keyspace.Insert("GetRangeSlice.1", cp, "GetRangeSlice.value." + i);
-				Keyspace.Insert("GetRangeSlice.2", cp, "GetRangeSlice.value." + i);
+				var cp = new ColumnPath("Standard2", null, "c" + i);
+				Keyspace.Insert("rs0", cp, "v" + i);
+				Keyspace.Insert("rs1", cp, "v" + i);
+				Keyspace.Insert("rs2", cp, "v" + i);
 			}
 
-			var columnParent = new ColumnParent(cf);
+			var columnParent = new ColumnParent("Standard2");
 			var predicate = new SlicePredicate(new SliceRange(false, 150));
 
-			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "testGetRangeSlice0", "testGetRangeSlice3", 5);
+			var keySlices = Keyspace.GetRangeSlice(columnParent, predicate, "rs0", "rs3", 5);
 
 			Assert.NotNull(keySlices);
 			Assert.Equal(3, keySlices.Count);
-			Assert.NotNull(keySlices["GetRangeSlice.0"]);
-			Assert.Equal("GetRangeSlice.value.0", keySlices["GetRangeSlice.0"].First().Value);
-			Assert.Equal(10, keySlices["GetRangeSlice.1"].Count);
+			Assert.NotNull(keySlices["rs0"]);
+			Assert.Equal("v0", keySlices["rs0"].First().Value);
+			Assert.Equal(10, keySlices["rs1"].Count);
 
-			var columnPath = new ColumnPath(cf);
+			var columnPath = new ColumnPath("Standard2");
 			for (int i = 0; i < 3; i++)
-				Keyspace.Remove("GetRangeSlice." + i, columnPath);
+				Keyspace.Remove("rs" + i, columnPath);
 		}
 
 		[Fact]

@@ -7,57 +7,42 @@ namespace Test
 {
 	/// <summary>
 	/// Tests thrift-generated Cassandra classes and Thrift directly
-	/// These are integration tests and require cassandra running locally,
-	/// listening to thrift at port 9160
 	/// </summary>
 	public class RawThriftShould : IUseFixture<RawThriftFixture>
 	{
+		void Insert(string key, string value, ColumnPath path)
+		{
+			client.insert("Keyspace1", key, path, value.UTF(), HectorSharp.Util.UnixTimestamp, ConsistencyLevel.ONE); 
+		}
+
 		[Fact]
 		public void GetRangeSlice()
 		{
 			env.RestartCassandra();
 			env.OpenConnection();
 
-			var cf = "Standard2";
+			// build 3 keys with 10 columns each
 			for (int i = 0; i < 10; i++)
 			{
-				var cp = new ColumnPath(cf);
-				cp.Column = ("testGetRangeSlice" + i).UTF();
+				var cp = new ColumnPath("Standard2", null, "c" + i);
 
-				client.insert(
-					"Keyspace1",
-					"GetRangeSlice.0", cp,
-					("GetRangeSlice.value." + i).UTF(),
-					HectorSharp.Util.UnixTimestamp,
-					ConsistencyLevel.ONE);
-
-				client.insert(
-					"Keyspace1",
-					"GetRangeSlice.1", cp,
-					("GetRangeSlice.value." + i).UTF(),
-					HectorSharp.Util.UnixTimestamp,
-					ConsistencyLevel.ONE);
-
-				client.insert(
-					"Keyspace1",
-					"GetRangeSlice.2", cp,
-					("GetRangeSlice.value." + i).UTF(),
-					HectorSharp.Util.UnixTimestamp,
-					ConsistencyLevel.ONE);
+				Insert("rs0", "v" + i, cp);
+				Insert("rs1", "v" + i, cp);
+				Insert("rs2", "v" + i, cp);
 			}
 
-			var columnParent = new ColumnParent(cf);
+			var columnParent = new ColumnParent("Standard2");
 			var predicate = new SlicePredicate(new SliceRange(false, 150));
 
 			var keySlices = client.get_range_slice(
 				"Keyspace1", columnParent, predicate,
-				"testGetRangeSlice0", "testGetRangeSlice3", 5, ConsistencyLevel.ONE);
+				"rs0", "rs3", 5, ConsistencyLevel.ONE);
 
 			Assert.NotNull(keySlices);
 			Assert.Equal(3, keySlices.Count);
-			//Assert.NotNull(keySlices["GetRangeSlice.0"]);
-			//Assert.Equal("GetRangeSlice.value.0", keySlices["GetRangeSlice.0"].First().Value);
-			//Assert.Equal(10, keySlices["GetRangeSlice.1"].Count);
+			Assert.NotNull(keySlices[0]);
+			Assert.Equal("v0", keySlices[0].Columns[0].Column.Value.UTFDecode());
+			Assert.Equal(10, keySlices[1].Columns.Count);
 
 			env.CloseConnection();
 			env.StopCassandra();
@@ -74,30 +59,18 @@ namespace Test
 			env.OpenConnection();
 
 			//At this point we're using the standard configuration file
-			var nameColumnPath = new ColumnPath("Standard1", null, "name");
+			var cp = new ColumnPath("Standard1", null, "name");
 
 			Console.WriteLine("Inserting a column");
 
-			client.insert("Keyspace1",
-				"1",
-				nameColumnPath,
-				"Josh Blogs".UTF(),
-				HectorSharp.Util.UnixTimestamp,
-				ConsistencyLevel.ONE
-				);
-
-			client.insert("Keyspace1",
-				"2",
-				nameColumnPath,
-				"Something else".UTF(),
-				HectorSharp.Util.UnixTimestamp,
-				ConsistencyLevel.ONE);
+			Insert("1", "Josh Blogs", cp);
+			Insert("2", "Something else", cp);
 
 			//Let's get something back out (this is our select statement)
-			ColumnOrSuperColumn returnedColumn = client.get(
+			var returnedColumn = client.get(
 				"Keyspace1", //The database
 				"1", //The actual key we want 
-				nameColumnPath, //Where that key sits 
+				cp, //Where that key sits 
 				ConsistencyLevel.ONE //HAZY
 				);
 
