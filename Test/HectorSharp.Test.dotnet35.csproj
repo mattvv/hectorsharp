@@ -68,9 +68,6 @@
     <Content Include="conf\passwd.properties">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="RunCassandra.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Compile Include="BatchMutationShould.cs" />
     <Compile Include="CassandraRunner.cs" />
     <Compile Include="CassandraRunnerShould.cs" />
