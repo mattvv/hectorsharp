@@ -434,7 +434,7 @@ namespace HectorSharp.Test
 			Keyspace.Remove("GetCount", new ColumnPath("Standard1"));
 		}
 
-		[Fact]//(Skip = "failed: System.Collections.Generic.KeyNotFoundException : The given key was not present in the dictionary.")]
+		[Fact]
 		public void GetRangeSlice()
 		{
 			var cf = "Standard2";

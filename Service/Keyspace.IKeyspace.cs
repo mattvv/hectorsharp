@@ -193,15 +193,9 @@ namespace HectorSharp
 				client =>
 				{
 					var result = new Dictionary<string, IList<Column>>();
-					var keyRange = new Apache.Cassandra.KeyRange();
-					keyRange.Start_key = start;
-					keyRange.End_key = finish;
-					keyRange.Count = count;
 
-					// deprecated
-					//	var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), start, finish, count, ConsistencyLevel.ToThrift());
+					var keySlices = client.get_range_slice(Name, columnParent.ToThrift(), predicate.ToThrift(), start, finish, count, ConsistencyLevel.ToThrift());
 
-					var keySlices = client.get_range_slices(Name, columnParent.ToThrift(), predicate.ToThrift(), keyRange, ConsistencyLevel.ToThrift());
 					if (keySlices == null || keySlices.Count == 0)
 						return result;
 
