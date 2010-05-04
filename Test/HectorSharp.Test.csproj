@@ -93,7 +93,8 @@
     <Compile Include="BatchMutationShould.cs" />
     <Compile Include="CassandraRunner.cs" />
     <Compile Include="CassandraRunnerShould.cs" />
-    <Compile Include="KeySpaceShould.cs" />
+    <Compile Include="KeyspaceShould.cs" />
+    <Compile Include="KeyspaceShould.Failover.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawThriftFixture.cs" />
     <Compile Include="RawThriftShould.cs" />
