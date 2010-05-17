@@ -12,7 +12,7 @@ namespace HectorSharp
 		public Endpoint(string host, int port, string ip)
 		{
 			if (string.IsNullOrEmpty(host)) throw new ArgumentNullException(host);
-			if (port == 0) throw new ArgumentOutOfRangeException("port");
+			if (port <= 0) throw new ArgumentOutOfRangeException("port");
 
 			Host = host;
 			Port = port;
@@ -20,18 +20,25 @@ namespace HectorSharp
 			key = String.Format("{0}:{1}", Host, Port);
 		}
 
-
 		public Endpoint(string host, int port)
-			: this(host, port, Endpoint.GetIpString(host))
+			: this(host, port, "")
 		{}
 
 		public string Host { get; private set; }
 		public string IP { get; private set; }
 		public int Port { get; private set; }
+		public bool IsIPResolved { get { return !string.IsNullOrEmpty(IP); } }
+
+		public void ResolveIP()
+		{
+			IP = GetIpString(Host);
+		}
 
 		static String GetIpString(String host)
 		{
-			return InetAddress.GetByHostName(host).GetHostAddress();
+			var address = InetAddress.GetByHostName(host);
+
+			return address.GetHostAddress();
 		}
 
 		public override string ToString()

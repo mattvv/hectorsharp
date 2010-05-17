@@ -23,7 +23,7 @@ namespace HectorSharp
 		/**
 		 * @return the underline cassandra thrift object, all remote calls will be sent to this client.
 		 */
-		Object Client { get; }
+		Apache.Cassandra.Cassandra.Iface Client { get; }
 		/// <summary>
 		/// Return given key space, if keySpaceName not exist, will throw an exception.
 		/// Thread safety: not safe ;-)

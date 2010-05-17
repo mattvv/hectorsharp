@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using HectorSharp.Utils;
 using HectorSharp.Utils.ObjectPool;
+using Apache.Cassandra;
 
 namespace HectorSharp
 {
@@ -43,10 +44,10 @@ namespace HectorSharp
 		public int Port { get { return port.HasValue ? port.Value : -1; } }
 		public ICassandraClientMonitor Monitor { get; private set; }
 
-		Apache.Cassandra.Cassandra.Client cassandra;
+		Apache.Cassandra.Cassandra.Iface cassandra;
 
 		#region ctor
-		internal CassandraClient(Apache.Cassandra.Cassandra.Client thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
+		internal CassandraClient(Apache.Cassandra.Cassandra.Iface thriftClient, KeyspaceFactory keyspaceFactory, Endpoint endpoint, IKeyedObjectPool<Endpoint, ICassandraClient> pool)
 			: this(keyspaceFactory, endpoint, pool)
 		{
 			cassandra = thriftClient;
@@ -189,7 +190,7 @@ namespace HectorSharp
 			return string.Format("{0}[{1},{2}]", keyspaceName, consistencyLevel, failoverPolicy);
 		}
 
-		public object Client
+		public Cassandra.Iface Client
 		{
 			get { return cassandra; }
 		}

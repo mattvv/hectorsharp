@@ -7,7 +7,7 @@ namespace HectorSharp
 	{
 		interface IOperation
 		{
-			void Execute(Cassandra.Client client);
+			void Execute(Cassandra.Iface client);
 			bool HasError { get; }
 			NotFoundException Error { get; }
 			ClientCounter FailCounter { get; }
@@ -24,7 +24,7 @@ namespace HectorSharp
 		/// </typeparam>
 		class Operation<T> : IOperation
 		{
-			public Func<Cassandra.Client, T> Handler { get; set; }
+			public Func<Cassandra.Iface, T> Handler { get; set; }
 			public T Result { get; private set; }
 			public bool HasError { get { return Error != null; } }
 			public NotFoundException Error { get; set; }
@@ -35,7 +35,7 @@ namespace HectorSharp
 				this.FailCounter = failCounter;
 			}
 
-			public Operation(ClientCounter failCounter, Func<Cassandra.Client, T> handler)
+			public Operation(ClientCounter failCounter, Func<Cassandra.Iface, T> handler)
 				: this(failCounter)
 			{
 				this.Handler = handler;
@@ -44,14 +44,14 @@ namespace HectorSharp
 			/// <summary>
 			/// Performs the operation on the given cassandra instance.
 			/// </summary>
-			/// <param name="cassandra">client</param>
+			/// <param name="client">client</param>
 			/// <returns>null if no execute handler</returns>
-			public void Execute(Cassandra.Client cassandra)
+			public void Execute(Cassandra.Iface client)
 			{
 				if (Handler == null)
 					throw new ApplicationException("Execution Handler was null");
 
-				Result = Handler(cassandra);
+				Result = Handler(client);
 			}
 		}
 		#endregion
@@ -62,7 +62,7 @@ namespace HectorSharp
 		/// </summary>
 		class VoidOperation : IOperation
 		{
-			public Action<Cassandra.Client> Handler { get; set; }
+			public Action<Cassandra.Iface> Handler { get; set; }
 
 			public bool HasError { get { return Error != null; } }
 			public NotFoundException Error { get; set; }
@@ -73,7 +73,7 @@ namespace HectorSharp
 				this.FailCounter = failCounter;
 			}
 
-			public VoidOperation(ClientCounter failCounter, Action<Cassandra.Client> handler)
+			public VoidOperation(ClientCounter failCounter, Action<Cassandra.Iface> handler)
 				: this(failCounter)
 			{
 				this.Handler = handler;
@@ -83,7 +83,7 @@ namespace HectorSharp
 			/// Performs the operation on the given cassandra instance
 			/// </summary>
 			/// <param name="cassandra">client</param>
-			public void Execute(Cassandra.Client client)
+			public void Execute(Cassandra.Iface client)
 			{
 				if (Handler == null)
 					throw new ApplicationException("Execution Handler was null");

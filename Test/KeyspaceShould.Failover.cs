@@ -4,12 +4,14 @@ using Moq;
 using Thrift.Protocol;
 using Thrift.Transport;
 using Xunit;
+using System.Linq.Expressions;
+using System;
 
 namespace HectorSharp.Test
 {
-	public partial class KeyspaceShould
+	public class KeyspaceFailoverShould : TestBase
 	{
-		[Fact(Skip = "Incomplete")]
+		[Fact]
 		public void Failover()
 		{
 			var h1client = new Mock<ICassandraClient>();
@@ -19,9 +21,9 @@ namespace HectorSharp.Test
 			var h2endpoint = new Endpoint("h2", 111, "ip2");
 			var h3endpoint = new Endpoint("h3", 111, "ip3");
 			var tprotocol = new Mock<TProtocol>(new Mock<TTransport>().Object);
-			var h1cassandra = new Mock<Apache.Cassandra.Cassandra.Client>(tprotocol.Object);
-			var h2cassandra = new Mock<Apache.Cassandra.Cassandra.Client>(tprotocol.Object);
-			var h3cassandra = new Mock<Apache.Cassandra.Cassandra.Client>(tprotocol.Object);
+			var h1cassandra = new Mock<Apache.Cassandra.Cassandra.Client>(tprotocol.Object).As<Apache.Cassandra.Cassandra.Iface>();
+			var h2cassandra = new Mock<Apache.Cassandra.Cassandra.Client>(tprotocol.Object).As<Apache.Cassandra.Cassandra.Iface>();
+			var h3cassandra = new Mock<Apache.Cassandra.Cassandra.Client>(tprotocol.Object).As<Apache.Cassandra.Cassandra.Iface>();
 			var keyspaceName = "Keyspace1";
 			var description = new Dictionary<string, Dictionary<string, string>>();
 			var keyspace1desc = new Dictionary<string, string>();
@@ -29,7 +31,7 @@ namespace HectorSharp.Test
 			description.Add("Standard1", keyspace1desc);
 			var consistencyLevel = HectorSharp.ConsistencyLevel.ONE;
 			var cp = new ColumnPath("Standard1", null, "Failover");
-			var clientPool = new Mock<IKeyedObjectPool<Endpoint, ICassandraClient>>();
+			var pool = new Mock<IKeyedObjectPool<Endpoint, ICassandraClient>>();
 			var monitor = new Mock<ICassandraClientMonitor>();
 
 			// list of available servers
@@ -41,60 +43,59 @@ namespace HectorSharp.Test
 			h1client.Setup(c => c.Client).Returns(h1cassandra.Object);
 			h2client.Setup(c => c.Client).Returns(h2cassandra.Object);
 			h3client.Setup(c => c.Client).Returns(h3cassandra.Object);
-			h1client.Setup(c => c.GetTokenMap(It.IsAny<bool>())).Returns(tokenMap);
-			h2client.Setup(c => c.GetTokenMap(It.IsAny<bool>())).Returns(tokenMap);
-			h3client.Setup(c => c.GetTokenMap(It.IsAny<bool>())).Returns(tokenMap);
+			h1client.Setup(c => c.Port).Returns(h1endpoint.Port);
+			h2client.Setup(c => c.Port).Returns(h2endpoint.Port);
+			h3client.Setup(c => c.Port).Returns(h3endpoint.Port);
+			h1client.Setup(c => c.GetTokenMap(AnyBool())).Returns(tokenMap);
+			h2client.Setup(c => c.GetTokenMap(AnyBool())).Returns(tokenMap);
+			h3client.Setup(c => c.GetTokenMap(AnyBool())).Returns(tokenMap);
 			h1client.Setup(c => c.Endpoint).Returns(h1endpoint);
 			h2client.Setup(c => c.Endpoint).Returns(h2endpoint);
 			h3client.Setup(c => c.Endpoint).Returns(h3endpoint);
-			clientPool.Setup(p => p.Borrow(It.Is<Endpoint>(e => e == h1endpoint))).Returns(h1client.Object);
-			clientPool.Setup(p => p.Borrow(It.Is<Endpoint>(e => e == h2endpoint))).Returns(h2client.Object);
-			clientPool.Setup(p => p.Borrow(It.Is<Endpoint>(e => e == h2endpoint))).Returns(h2client.Object);
+			pool.Setup(p => p.Borrow(IsEndpoint(h1endpoint))).Returns(h1client.Object);
+			pool.Setup(p => p.Borrow(IsEndpoint(h2endpoint))).Returns(h2client.Object);
+			pool.Setup(p => p.Borrow(IsEndpoint(h3endpoint))).Returns(h3client.Object);
 
 			// success without failover
-			var failoverPolicy = new FailoverPolicy(0) { Strategy = FailoverStrategy.FAIL_FAST };
-			var ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+
+			var failoverPolicy = new FailoverPolicy(0, FailoverStrategy.FAIL_FAST);
+			var ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, pool.Object, monitor.Object);
 
 			ks.Insert("key", cp, "value");
 
 			// fail fast
 
-			h1cassandra.Setup(c =>
-				c.insert(
-					It.IsAny<string>(),
-					It.IsAny<string>(),
-					It.IsAny<Apache.Cassandra.ColumnPath>(),
-					It.IsAny<byte[]>(),
-					It.IsAny<long>(),
-					It.IsAny<Apache.Cassandra.ConsistencyLevel>())
-					).Throws(new TimedOutException());
+			h1cassandra.Setup(
+				c => c.insert(AnyString(), AnyString(), Any<Apache.Cassandra.ColumnPath>(), AnyBytes(), AnyLong(), Any<Apache.Cassandra.ConsistencyLevel>()))
+				.Throws(new Apache.Cassandra.TimedOutException());
 
-			Assert.Throws<TimedOutException>(() =>
-			{
-				ks.Insert("key", cp, "value");
-			});
+			Assert.Throws<TimedOutException>(() => ks.Insert("key", cp, "value"));
 
-			// on fail try next one, h1 fails, h3 succeeds
+			// on fail try next one, h1 fails, h2 succeeds
 			failoverPolicy = new FailoverPolicy(3, FailoverStrategy.ON_FAIL_TRY_ONE_NEXT_AVAILABLE);
-			ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+			ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, pool.Object, monitor.Object);
 
 			ks.Insert("key", cp, "value");
 
-			h3cassandra.Verify(c =>
-				c.insert(
-					It.IsAny<string>(),
-					It.IsAny<string>(),
-					It.IsAny<Apache.Cassandra.ColumnPath>(),
-					It.IsAny<byte[]>(),
-					It.IsAny<long>(),
-					It.IsAny<Apache.Cassandra.ConsistencyLevel>())
-					);
+			h2cassandra.Verify(
+				c => c.insert(AnyString(), AnyString(), Any<Apache.Cassandra.ColumnPath>(), AnyBytes(), AnyLong(), Any<Apache.Cassandra.ConsistencyLevel>())
+			);
 
-			clientPool.Verify(p => p.Borrow(h3endpoint));
+			pool.Verify(p => p.Borrow(IsEndpoint(h2endpoint)));
 
-			// h1 and h3 fail
-			ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, clientPool.Object, monitor.Object);
+			// make all nodes fail
 
+			h2cassandra.Setup(
+				c => c.insert(AnyString(), AnyString(), Any<Apache.Cassandra.ColumnPath>(), AnyBytes(), AnyLong(), Any<Apache.Cassandra.ConsistencyLevel>()))
+				.Throws(new Apache.Cassandra.TimedOutException());
+
+			h3cassandra.Setup(
+				c => c.insert(AnyString(), AnyString(), Any<Apache.Cassandra.ColumnPath>(), AnyBytes(), AnyLong(), Any<Apache.Cassandra.ConsistencyLevel>()))
+				.Throws(new Apache.Cassandra.TimedOutException());
+
+			ks = new Keyspace(h1client.Object, keyspaceName, description, consistencyLevel, failoverPolicy, pool.Object, monitor.Object);
+
+			Assert.Throws<TimedOutException>(() => ks.Insert("key", cp, "value"));
 		}
 	}
 }

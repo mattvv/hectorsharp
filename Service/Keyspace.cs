@@ -17,7 +17,7 @@ namespace HectorSharp
 
 		//private static sealed Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
 
-		Cassandra.Client cassandra; // The cassandra thrift proxy
+		Cassandra.Iface cassandra; // The cassandra thrift proxy
 		/** List of all known remote cassandra nodes */
 		List<string> knownHosts = new List<string>();
 		IKeyedObjectPool<Endpoint, ICassandraClient> pool;
@@ -174,7 +174,7 @@ namespace HectorSharp
 			}
 			// assume they use the same port
 			Client = pool.Borrow(new Endpoint(nextHost, Client.Port));
-			cassandra = Client.Client as Apache.Cassandra.Cassandra.Client;
+			cassandra = Client.Client;
 			monitor.IncrementCounter(ClientCounter.SKIP_HOST_SUCCESS);
 			//log.info("Skipped host. New host is: {}", client.getUrl());
 		}
@@ -258,6 +258,10 @@ namespace HectorSharp
 							SkipToNextHost();
 							monitor.IncrementCounter(ClientCounter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
 						}
+					}
+					catch (Exception ex)
+					{
+						throw;
 					}
 				}
 			}

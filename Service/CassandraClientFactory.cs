@@ -40,8 +40,8 @@ namespace HectorSharp
 			var transport = new TSocket(key.Host, key.Port, timeout);
 			var protocol = new TBinaryProtocol(transport);
 
-			Apache.Cassandra.Cassandra.Client v060client = null;
-			v060client = new Apache.Cassandra.Cassandra.Client(protocol);
+			Apache.Cassandra.Cassandra.Iface cassandra = null;
+			cassandra = new Apache.Cassandra.Cassandra.Client(protocol);
 
 			try
 			{
@@ -54,15 +54,15 @@ namespace HectorSharp
 				throw new Exception("Unable to open transport to " + key.ToString() + " , ", e);
 			}
 
-			return new CassandraClient(v060client, new KeyspaceFactory(monitor), key, pool);
+			return new CassandraClient(cassandra, new KeyspaceFactory(monitor), key, pool);
 		}
 
 		public void Destroy(Endpoint key, ICassandraClient obj)
 		{
 			// ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
-			var v060client = obj.Client as Apache.Cassandra.Cassandra.Client;
-			v060client.InputProtocol.Transport.Close();
-			v060client.OutputProtocol.Transport.Close();
+			var client = obj.Client as Apache.Cassandra.Cassandra.Client;
+			client.InputProtocol.Transport.Close();
+			client.OutputProtocol.Transport.Close();
 
 			obj.MarkAsClosed();
 		}

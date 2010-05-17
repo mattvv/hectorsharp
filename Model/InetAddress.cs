@@ -8,15 +8,21 @@ namespace HectorSharp
 		IPAddress addr;
 		string host;
 
-		public InetAddress(string addr)
+		public InetAddress(string host, bool resolveDns)
 		{
 			IPAddress ip;
-			if (IPAddress.TryParse(addr, out ip))
+			if (IPAddress.TryParse(host, out ip))
 				this.addr = ip;
-			else if (TryResolveInetAddress(addr, out ip, out this.host))
-				this.addr = ip;
-			else
-				throw new ArgumentException("InetAddress: unable to parse or resolve [" + addr + "]");
+
+			this.host = host;
+
+			if (resolveDns)
+			{
+				if (TryResolveInetAddress(host, out ip, out this.host))
+					this.addr = ip;
+				else
+					throw new ArgumentException("InetAddress: unable to parse or resolve [" + host + "]");
+			}
 		}
 
 		public InetAddress(IPAddress addr)
@@ -72,7 +78,7 @@ namespace HectorSharp
 			return new InetAddress(ip);
 		}
 
-		static bool TryResolveInetAddress(string addr, out IPAddress ip, out string hostname)
+		internal static bool TryResolveInetAddress(string addr, out IPAddress ip, out string hostname)
 		{
 			ip = null;
 			hostname = null;
